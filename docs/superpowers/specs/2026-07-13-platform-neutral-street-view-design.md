@@ -120,13 +120,13 @@ Dependencies continue to point inward:
 interfaces / AI SDK / browser UI
               |
               v
-     application/street-view
+     services/street-view
               |
               v
        domain/street-view
               ^
               |
-infrastructure/street-view/mapillary
+integrations/street-view/mapillary
 ```
 
 ### Domain
@@ -154,7 +154,7 @@ The normalized image contains:
 
 ### Application
 
-`apps/api/src/application/street-view/` owns `StreetViewService` and public
+`apps/api/src/services/street-view/` owns `StreetViewService` and public
 DTOs. It validates coordinates, clamps radius and result limits, invokes the
 provider, orders search results by distance, and creates same-origin,
 trip-scoped preview URLs.
@@ -171,7 +171,7 @@ maximum radius, five default results, and ten maximum results.
 
 ### Infrastructure
 
-`apps/api/src/infrastructure/street-view/mapillary/` implements the driven
+`apps/api/src/integrations/street-view/mapillary/` implements the driven
 port. It owns Graph API URLs, authorization, field selection, response parsing,
 distance calculation inputs, thumbnail retrieval, timeouts, and conversion of
 provider failures into application errors.

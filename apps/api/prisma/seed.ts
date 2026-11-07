@@ -2,10 +2,10 @@
  * Dialect-agnostic seed. Works with DATABASE_PROVIDER=postgres|mysql
  * (or inferred from DATABASE_URL).
  */
-import { resolveDatabaseProvider } from "../src/infrastructure/persistence/sql/provider";
-import { createSqlClient } from "../src/infrastructure/persistence/sql/create-sql-client";
-import { createDialect } from "../src/infrastructure/persistence/sql/dialect";
-import { seedTrips } from "../src/infrastructure/persistence/seed-data";
+import { resolveDatabaseProvider } from "../src/repositories/sql/provider";
+import { createSqlClient } from "../src/repositories/sql/create-sql-client";
+import { createDialect } from "../src/repositories/sql/dialect";
+import { seedTrips } from "../src/repositories/seed-data";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) throw new Error("DATABASE_URL is required");

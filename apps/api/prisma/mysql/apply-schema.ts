@@ -7,8 +7,8 @@
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { resolveDatabaseProvider } from "../../src/infrastructure/persistence/sql/provider";
-import { createSqlClient } from "../../src/infrastructure/persistence/sql/create-sql-client";
+import { resolveDatabaseProvider } from "../../src/repositories/sql/provider";
+import { createSqlClient } from "../../src/repositories/sql/create-sql-client";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const schemaPath = resolve(__dirname, "schema.sql");

@@ -6,7 +6,7 @@ title: "Authentication and session"
 
 
 Auth is **Better Auth** mounted at `/api/auth/*`. See [auth.md](../auth.md) for
-server config, captcha, Google/WeChat OAuth, and `defaultCurrency`.
+server config, captcha, Google OAuth, and `defaultCurrency`.
 
 ### Session model for non-browser clients
 
@@ -26,12 +26,6 @@ server config, captcha, Google/WeChat OAuth, and `defaultCurrency`.
    - Prefer the official Better Auth client for the platform when available so
      sign-in, sign-up, session refresh, and sign-out stay compatible.
 
-The native WeChat Mini Program client is bearer end-to-end. It exchanges
-`wx.login()` for a session token, stores it in Mini Program storage, and sends
-`Authorization: Bearer …` on every business request. There is no cookie handoff
-and no WebView bridge. See
-[../../frontend/miniapp.md](../../frontend/miniapp.md).
-
 ### Client-relevant Better Auth surfaces
 
 Not every Better Auth plugin path is listed here. Clients need at least:
@@ -42,8 +36,7 @@ Not every Better Auth plugin path is listed here. Clients need at least:
 | Verify email OTP | `POST …/email-otp/verify-email` | Marks verified + auto sign-in |
 | Resend email OTP | `POST …/email-otp/send-verification-otp` | Captcha when enabled |
 | Email sign-in | `POST …/sign-in/email` | Unverified → `EMAIL_NOT_VERIFIED` + OTP resent |
-| Social sign-in | `POST …/sign-in/social` | Google or WeChat web QR when configured |
-| Mini Program WeChat sign-in | `POST …/wechat-mini-program/sign-in` | Body `{ code }` from `wx.login()`; returns the normal Better Auth session token |
+| Social sign-in | `POST …/sign-in/social` | Google when configured |
 | Session | `GET …/get-session` | Current user + session |
 | Sign-out | `POST …/sign-out` | Clears session |
 | Update user | Better Auth `updateUser` | e.g. `name`, `defaultCurrency` |

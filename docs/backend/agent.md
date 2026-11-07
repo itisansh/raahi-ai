@@ -223,12 +223,12 @@ dismiss). `POST …/apply` and `…/dismiss` remain as aliases.
 
 - Domain: `apps/api/src/domain/agent/` — types plus the
   `AgentSessionRepository` and `AgentModel` ports.
-- Application: `apps/api/src/application/agent/agent-service.ts` — use cases,
+- Application: `apps/api/src/services/agent/agent-service.ts` — use cases,
   permission checks mirroring `TripService`, and the apply/conflict rules.
-- Infrastructure: `apps/api/src/infrastructure/ai/agent-model.ai-sdk.ts`
+- Infrastructure: `apps/api/src/integrations/ai/agent-model.ai-sdk.ts`
   (Vercel AI SDK adapter; OpenAI, OpenAI-compatible via `AI_BASE_URL`, or
   MiniMax via Anthropic-compatible API when `AI_PROVIDER=minimax`) and
-  `apps/api/src/infrastructure/persistence/agent-repository.pg.ts` (raw `pg`).
+  `apps/api/src/repositories/agent-repository.pg.ts` (raw `pg`).
 - Interfaces: agent sub-router in `apps/api/src/interfaces/http/app.ts`;
   routes return `404` when AI is not configured. Post-response work
   (evaluations, ambient replies, stream persistence) uses

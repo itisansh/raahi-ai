@@ -36,7 +36,7 @@
       "label": "Here and now",
       "emptyTitle": "Where are you today?",
       "emptyDescription": "Add a city or region and Today will remember it and show the current weather.",
-      "placeholder": "Shanghai, Tokyo, Ho Chi Minh City…",
+      "placeholder": "Lucknow, Rishikesh, Jaipur…",
       "inputLabel": "Your city or region today",
       "search": "Find location",
       "change": "Change location",
@@ -203,7 +203,7 @@
       "destination": {
         "title": "Where to?",
         "description": "Pick a city or region for this trip.",
-        "placeholder": "Tokyo, Kyoto…"
+        "placeholder": "Rishikesh, Chopta…"
       },
       "duration": {
         "title": "How many days?",

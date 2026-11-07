@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/shared/api";
 import {
   authClient,
   setTwoFactorRequiredHandler,
@@ -16,6 +18,7 @@ import {
 import { toastManager } from "@/shared/ui/toast";
 import { config } from "@/shared/config";
 import { CaptchaField, type CaptchaFieldRef } from "./ui/CaptchaField";
+import { credentialErrorKey } from "./auth-error";
 
 type Mode = "signIn" | "signUp";
 type Step =
@@ -53,21 +56,6 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
     );
 }
 
-function WechatIcon(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
-            <path
-                fill="#07C160"
-                d="M9.3 3.5C4.72 3.5 1 6.58 1 10.38c0 2.12 1.17 4.03 3 5.29l-.74 2.22 2.62-1.3c1.08.43 2.23.66 3.42.66.28 0 .55-.01.82-.04a6.33 6.33 0 0 1-.33-2.01c0-3.68 3.37-6.67 7.55-6.67h.2C16.56 5.63 13.27 3.5 9.3 3.5Zm-2.77 5.7a1.04 1.04 0 1 1 0-2.08 1.04 1.04 0 0 1 0 2.08Zm5.54 0a1.04 1.04 0 1 1 0-2.08 1.04 1.04 0 0 1 0 2.08Z"
-            />
-            <path
-                fill="#07C160"
-                d="M23 15.2c0-3.14-3.08-5.69-6.88-5.69s-6.88 2.55-6.88 5.69 3.08 5.68 6.88 5.68c.98 0 1.92-.17 2.79-.5l2.18 1.08-.62-1.84C22.03 18.56 23 16.97 23 15.2Zm-9.17-1.05a.86.86 0 1 1 0-1.72.86.86 0 0 1 0 1.72Zm4.58 0a.86.86 0 1 1 0-1.72.86.86 0 0 1 0 1.72Z"
-            />
-        </svg>
-    );
-}
-
 function isEmailNotVerified(error: { code?: string; message?: string } | null | undefined) {
     if (!error) return false;
     const code = error.code?.toUpperCase() ?? "";
@@ -88,6 +76,14 @@ const linkButtonClassName =
 
 export function AuthForm() {
     const { t } = useTranslation("auth");
+    const capabilities = useQuery({
+        queryKey: ["auth", "capabilities"],
+        queryFn: () => apiFetch<{
+            socialProviders: Array<"google">;
+            emailDelivery: "console" | "email";
+        }>("/api/auth/capabilities"),
+    });
+    const socialProviders = capabilities.data?.socialProviders ?? [];
     const [mode, setMode] = useState<Mode>("signIn");
     const [step, setStep] = useState<Step>("credentials");
     const [name, setName] = useState("");
@@ -213,6 +209,10 @@ export function AuthForm() {
     async function submitCredentials(e: React.FormEvent) {
         e.preventDefault();
         if (captchaEnabled && !captchaToken) return;
+        if (isSignUp && password.length < MIN_PASSWORD_LENGTH) {
+            showAuthError(t("errors.passwordTooShort"));
+            return;
+        }
 
         setPending(true);
         try {
@@ -226,7 +226,7 @@ export function AuthForm() {
                     },
                 });
                 if (result.error) {
-                    showAuthError();
+                    showAuthError(t(`errors.${credentialErrorKey(result.error)}`, { origin: config.baseUrl }));
                     captchaRef.current?.reset();
                     return;
                 }
@@ -249,11 +249,11 @@ export function AuthForm() {
                     enterOtpStep();
                     return;
                 }
-                showAuthError();
+                showAuthError(t(`errors.${credentialErrorKey(result.error)}`, { origin: config.baseUrl }));
                 captchaRef.current?.reset();
             }
-        } catch {
-            showAuthError();
+        } catch (error) {
+            showAuthError(t(error instanceof TypeError ? "errors.connection" : "errors.generic", { origin: config.baseUrl }));
             captchaRef.current?.reset();
         } finally {
             setPending(false);
@@ -363,7 +363,7 @@ export function AuthForm() {
         }
     }
 
-    async function signInWithSocial(provider: "google" | "wechat") {
+    async function signInWithSocial(provider: "google") {
         setPending(true);
         try {
             // Better Auth defaults callbackURL to the API baseURL when omitted,
@@ -376,9 +376,9 @@ export function AuthForm() {
                 callbackURL: returnTo,
                 errorCallbackURL: returnTo,
             });
-            if (result.error) showAuthError();
-        } catch {
-            showAuthError();
+            if (result.error) showAuthError(t(`errors.${credentialErrorKey(result.error)}`, { origin: config.baseUrl }));
+        } catch (error) {
+            showAuthError(t(error instanceof TypeError ? "errors.connection" : "errors.generic", { origin: config.baseUrl }));
         } finally {
             setPending(false);
         }
@@ -555,7 +555,7 @@ export function AuthForm() {
                         {t("forgotPassword.otpTitle")}
                     </h1>
                     <p className="text-sm text-pretty text-muted-foreground">
-                        {t("forgotPassword.otpSubtitle", { email })}
+                        {t(capabilities.data?.emailDelivery === "console" ? "otp.localSubtitle" : "forgotPassword.otpSubtitle", { email })}
                     </p>
                 </div>
 
@@ -649,7 +649,7 @@ export function AuthForm() {
                         {t("otp.title")}
                     </h1>
                     <p className="text-sm text-pretty text-muted-foreground">
-                        {t("otp.subtitle", { email })}
+                        {t(capabilities.data?.emailDelivery === "console" ? "otp.localSubtitle" : "otp.subtitle", { email })}
                     </p>
                 </div>
 
@@ -771,6 +771,7 @@ export function AuthForm() {
                 <Input
                     id="auth-password"
                     type="password"
+                    minLength={isSignUp ? MIN_PASSWORD_LENGTH : undefined}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete={
@@ -785,6 +786,7 @@ export function AuthForm() {
                 ref={captchaRef}
                 onTokenChange={setCaptchaToken}
             />
+            {captchaEnabled && !captchaToken && <p role="status" className="text-sm text-muted-foreground">{t("captcha.waiting")}</p>}
 
             <Button
                 type="submit"
@@ -794,15 +796,15 @@ export function AuthForm() {
                 {t(`${ns}.submit`)}
             </Button>
 
-            <div className="relative flex items-center gap-3">
+            {socialProviders.length > 0 && <div className="relative flex items-center gap-3">
                 <span className="h-px flex-1 bg-border" />
                 <span className="text-xs text-muted-foreground">
                     {t("social.divider")}
                 </span>
                 <span className="h-px flex-1 bg-border" />
-            </div>
+            </div>}
 
-            <Button
+            {socialProviders.includes("google") && <Button
                 type="button"
                 variant="outline"
                 size="lg"
@@ -811,18 +813,8 @@ export function AuthForm() {
             >
                 <GoogleIcon className="size-5" />
                 {t("social.google")}
-            </Button>
+            </Button>}
 
-            <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                disabled={pending}
-                onClick={() => void signInWithSocial("wechat")}
-            >
-                <WechatIcon className="size-5" />
-                {t("social.wechat")}
-            </Button>
 
             <button
                 type="button"

@@ -161,6 +161,8 @@ export function addComment(
 }
 
 export interface AddExpenseInput {
+  requestId?: string;
+  allocations?: Record<string, number>;
   description: string;
   amount: number;
   currency?: string;

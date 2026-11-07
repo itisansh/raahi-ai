@@ -23,7 +23,7 @@ tests before moving to the next task.
 
 ### Task 3: Implement the Cloudflare Durable Object
 
-- Add `infrastructure/realtime/trip-realtime-object.ts`.
+- Add `realtime/trip-realtime-object.ts`.
 - Use Hibernation APIs, signed internal grants, socket attachments, tags,
   presence snapshots, bounded SQLite event history, replay, and resync.
 - Reject public business-event publication; accept it only on an internal

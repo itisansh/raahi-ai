@@ -1,24 +1,24 @@
-import type { Context } from "hono";
+import type { HttpContext } from "./transport";
 import { ZodError } from "zod";
-import { WeatherError } from "../../application/weather/weather-error";
-import { FxError } from "../../application/fx/fx-error";
-import { GeoError } from "../../application/geo/geo-error";
+import { WeatherError } from "../../services/weather/weather-error";
+import { FxError } from "../../services/fx/fx-error";
+import { GeoError } from "../../services/geo/geo-error";
 import { DomainError, NotFoundError } from "../../domain/shared/errors";
 import {
   ConflictError,
   ForbiddenError,
   ReservationConflictError,
-} from "../../application";
-import { AvatarError } from "../../application/avatar";
-import { TripMediaError } from "../../application/media";
-import { StreetViewError } from "../../application/street-view";
+} from "../../services";
+import { AvatarError } from "../../services/avatar";
+import { TripMediaError } from "../../services/media";
+import { StreetViewError } from "../../services/street-view";
 import { fail } from "./response";
-import { captureException, logger } from "../../infrastructure/observability";
-import type { RuntimeName } from "../../application/observability";
+import { captureException, logger } from "../../integrations/observability";
+import type { RuntimeName } from "../../services/observability";
 
 function reportServerError(
   err: Error,
-  c: Context,
+  c: HttpContext,
   runtime: RuntimeName,
   status: number,
 ): void {
@@ -36,7 +36,7 @@ function reportServerError(
 }
 
 /** Translate thrown errors into the error envelope. Registered via app.onError. */
-export function handleError(err: Error, c: Context, runtime: RuntimeName = "node") {
+export function handleError(err: Error, c: HttpContext, runtime: RuntimeName = "node") {
   if (err instanceof ZodError) {
     return fail(c, "validation_error", err.issues[0]?.message ?? "Invalid input", 400);
   }
@@ -59,11 +59,12 @@ export function handleError(err: Error, c: Context, runtime: RuntimeName = "node
     );
   }
   if (err instanceof DomainError) {
+    if (["travel_rate_limited", "medical_rate_limited"].includes(err.code)) c.header("Retry-After", "60");
     return fail(
       c,
       err.code,
       err.message,
-      err.code === "reservation_conflict" ? 409 : 400,
+      ["travel_rate_limited", "medical_rate_limited"].includes(err.code) ? 429 : err.code === "budget_forbidden" ? 403 : ["budget_unavailable", "travel_unavailable", "medical_unavailable"].includes(err.code) ? 503 : ["trip_write_conflict", "reservation_conflict", "expense_request_reused", "expense_write_conflict", "budget_stale"].includes(err.code) ? 409 : 400,
     );
   }
   if (err instanceof AvatarError) {

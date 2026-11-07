@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { TripMediaError } from "../src/application/media";
-import { TripMediaService } from "../src/application/media";
-import type { FileStorage, StoredFile } from "../src/application/storage";
-import type { TripService } from "../src/application/use-cases";
+import type { TripMediaError } from "../src/services/media";
+import { TripMediaService } from "../src/services/media";
+import type { FileStorage, StoredFile } from "../src/services/storage";
+import type { TripService } from "../src/services/use-cases";
 
 class MemoryStorage implements FileStorage {
   readonly files = new Map<string, StoredFile>();

@@ -20,11 +20,12 @@
 
 - Monorepo: `pnpm` workspaces, TypeScript strict everywhere.
 - Frontend: React + TypeScript + Vite, Feature-Sliced Design (FSD v2.1).
-- WeChat: native Taro (React) Mini Program client (apps/miniapp).
+- Mobile: React browser app / PWA (WeChat client retired during I0).
 - UI: cossUI primitives (Base UI + CVA style), cossUI design tokens.
 - Map: mapcn-style MapLibre GL wrapper.
-- Backend: Hono + TypeScript, Domain-Driven Design + Hexagonal architecture.
-- Database: PostgreSQL.
+- Backend: Express 5 on Node; retained Hono Worker transport during migration.
+  TypeScript, Domain-Driven Design + Hexagonal architecture.
+- Database: MongoDB/Mongoose on Node; SQL retained for Worker and migration tooling.
 - Auth: Better Auth (email + password).
 - Deploy: Cloudflare (Pages + Workers + Hyperdrive) and Docker Compose.
 
@@ -109,13 +110,27 @@ See [`docs/frontend/README.md`](docs/frontend/README.md).
 
 ## Backend: Domain-Driven Design
 
-- Dependencies point inward: `interfaces` -> `application` -> `domain`;
-  `infrastructure` implements `domain` ports.
+- Dependencies point inward: `interfaces` -> `services` -> `domain`;
+  `repositories` and `integrations` implement inward-facing ports.
+- `config` assembles dependencies and parses environment configuration.
 - Keep controllers thin: parse input, call a use case, format output.
 
 See [`docs/backend/README.md`](docs/backend/README.md).
 
-## Database: Prisma
+## Database: MongoDB on Node
+
+- The Node runtime requires `MONGO_URI`; never require restarting PostgreSQL to
+  develop or test Mongo persistence.
+- Business schemas/indexes live in `apps/api/src/models/mongo.ts`. Version Mongo
+  schema/index/data changes under `apps/api/src/config/migrations/`.
+- Use replica-set transactions and preserve public IDs, revisions, idempotency,
+  exact expense conversions and existing service permission checks.
+- Better Auth owns its auth collections through its pinned Mongo adapter.
+- Run the disposable Mongo integration tests; never reset a supplied database.
+- Prisma rules below apply only to retained SQL artifacts. Mongo changes do not
+  require regenerating a SQL schema from an unavailable database.
+
+## Database: retained SQL / Prisma
 
 - **Every database schema change must ship its snapshot.** `apps/api/prisma/schema.prisma`
   is the committed snapshot of the database structure. If a change touches the
@@ -136,7 +151,7 @@ See [`docs/backend/README.md`](docs/backend/README.md).
   for reset/seed scripts).
 - **SQL backend is env-selected.** `DATABASE_PROVIDER=postgres|mysql` (or
   inferred from `DATABASE_URL`). Runtime code uses `SqlClient`
-  (`infrastructure/persistence/sql`); Postgres remains the Prisma Migrate source
+  (`repositories/sql`); Postgres remains the Prisma Migrate source
   of truth, MySQL uses `prisma/mysql/schema.sql`.
 - **Seed via `prisma/seed.ts`.** Run `make db-seed` or
   `pnpm --filter @opentrip/api db:seed`.
@@ -161,3 +176,21 @@ See [`docs/backend/database.md`](docs/backend/database.md).
 
 After completing a task, update the relevant docs in the same change set when
 product behavior, architecture, configuration, or conventions change.
+
+## Raahi AI Development
+
+This repository is being extended into Raahi AI.
+
+Read these documents before implementation:
+
+- RAAHI_PLAN.md
+- BUILD_PROGRESS.md
+- docs/raahi/RAAHI_AI_BUILD_v1.2.md
+- docs/raahi/RAAHI_AI_REPOSITORY_AUDIT_AND_VOICE_PLAN.md
+- docs/raahi/RAAHI_AGENT_RULES.md
+- docs/raahi/RAAHI_API_ACCOUNTS_AND_KEYS.md
+
+Preserve the existing OpenTrip architecture.
+Implement one phase at a time.
+Voice-first trip planning is the highest priority.
+Run tests and update BUILD_PROGRESS.md after each phase.

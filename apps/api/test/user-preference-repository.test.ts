@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { SqlUserPreferenceRepository } from "../src/infrastructure/persistence/user-preference-repository.db";
-import type { SqlClient } from "../src/infrastructure/persistence/sql";
+import { SqlUserPreferenceRepository } from "../src/repositories/user-preference-repository.db";
+import type { SqlClient } from "../src/repositories/sql";
 
 /**
  * Preference updates must return the written snapshot without a post-write

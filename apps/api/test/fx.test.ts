@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { FxService } from "../src/application/fx/fx-service";
+import { FxService } from "../src/services/fx/fx-service";
 import type { FxClient, FxRatesSnapshot } from "../src/domain/fx";
-import { CachedFxClient } from "../src/infrastructure/fx/cached-fx-client";
+import { CachedFxClient } from "../src/integrations/fx/cached-fx-client";
 
 function snapshot(
   overrides: Partial<FxRatesSnapshot> = {},

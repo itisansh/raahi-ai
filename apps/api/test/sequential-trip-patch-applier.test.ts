@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import type { PendingPatch } from "../src/domain/agent";
 import { Trip } from "../src/domain/trip";
-import { seedTrips } from "../src/infrastructure/persistence/seed-data";
-import { applyTripOp } from "../src/application/trip/ops";
-import { createSequentialTripPatchApplier } from "../src/application/agent/sequential-trip-patch-applier";
+import { seedTrips } from "../src/repositories/seed-data";
+import { applyTripOp } from "../src/services/trip/ops";
+import { createSequentialTripPatchApplier } from "../src/services/agent/sequential-trip-patch-applier";
 
 function freshTrip(): Trip {
   return Trip.fromSnapshot(structuredClone(seedTrips()[0]!.snapshot));

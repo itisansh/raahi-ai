@@ -122,7 +122,7 @@ Defined in `domain/trip/ports`:
   `findSummaries` returns trips the user belongs to plus legacy/demo trips with
   no user-backed members.
 
-`application/user/profile-projection-service` defines the
+`services/user/profile-projection-service` defines the
 `MemberProfileProjection` driven port used by Better Auth hooks. The SQL trip
 repository implements it without expanding the aggregate repository contract.
 
@@ -137,7 +137,7 @@ repository implements it without expanding the aggregate repository contract.
   `updatePlannerSidebar(userId, width, collapsed)`,
   `updateAgentPanel(userId, collapsed)`.
 
-One repository per aggregate/model. Adapters live in `infrastructure/persistence`.
+One repository per aggregate/model. Adapters live in `repositories`.
 
 The composition root binds Trip, invite, preference, auth, and agent repositories
 to the cache-disabled SQL client. This is an infrastructure consistency policy;

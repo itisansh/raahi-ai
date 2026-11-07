@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { AuthRateLimitObject } from "../src/infrastructure/auth";
-import type { AuthRateLimitDecision } from "../src/infrastructure/auth";
+import { AuthRateLimitObject } from "../src/integrations/auth";
+import type { AuthRateLimitDecision } from "../src/integrations/auth";
 
 interface StoredCounter {
   count: number;

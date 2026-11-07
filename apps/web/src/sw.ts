@@ -16,6 +16,9 @@ declare let self: ServiceWorkerGlobalScope;
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 clientsClaim();
+self.addEventListener("activate", (event) => {
+    event.waitUntil(caches.delete("public-images-v1"));
+});
 
 // Serve every SPA navigation from the precached index.html. Without this,
 // navigations hit the network stack, where a stale HTML response (browser or
@@ -43,7 +46,7 @@ registerRoute(
         request.destination === "image" &&
         url.origin !== self.location.origin,
     new StaleWhileRevalidate({
-        cacheName: "public-images-v1",
+        cacheName: "public-images-v2-india",
         plugins: [
             new CacheableResponsePlugin({ statuses: [0, 200] }),
             new ExpirationPlugin({ maxEntries: 80, maxAgeSeconds: 7 * 86_400 }),
@@ -66,4 +69,5 @@ registerRoute(
 );
 
 // Business data, authentication, mutations, uploads, streams, and realtime
-// traffic deliberately remain network-only. IndexedDB owns offline trip data.
+// traffic deliberately remain network-only. Offline itineraries are explicit
+// downloaded snapshots; no authenticated API responses are cached here.

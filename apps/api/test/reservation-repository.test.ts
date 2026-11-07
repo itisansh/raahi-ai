@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { Reservation } from "../src/domain/reservation";
-import { SqlReservationRepository } from "../src/infrastructure/persistence/reservation-repository.db";
+import { SqlReservationRepository } from "../src/repositories/reservation-repository.db";
 import type {
   QueryResult,
   SqlClient,
   SqlConnection,
-} from "../src/infrastructure/persistence/sql";
+} from "../src/repositories/sql";
 
 const row = {
   id: "r1", trip_id: "t1", type: "flight", status: "confirmed",

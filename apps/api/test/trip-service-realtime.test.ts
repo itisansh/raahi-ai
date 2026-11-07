@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { TripService } from "../src/application";
+import { TripService } from "../src/services";
 import type { TripChangePublisher } from "../src/domain/realtime";
 import { Trip, type TripRepository } from "../src/domain/trip";
 

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { TripInviteService, type InviteActor } from "../src/application/invite-service";
+import { TripInviteService, type InviteActor } from "../src/services/invite-service";
 import { Trip } from "../src/domain/trip";
 import type { TripRepository, TripSummary } from "../src/domain/trip";
 import type {

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { ReservationConflictError } from "../src/application";
-import type { Container } from "../src/infrastructure/composition/container";
-import { createApp } from "../src/interfaces/http/app";
+import { ReservationConflictError } from "../src/services";
+import type { Container } from "../src/config/container";
+import { createApp } from "./http-app";
 
 const current = {
   id: "r1",

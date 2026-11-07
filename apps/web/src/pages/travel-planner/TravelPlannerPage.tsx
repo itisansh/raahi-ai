@@ -1,3 +1,8 @@
+import { Button } from "@/shared/ui/button";
+import { MedicalHelp } from "@/features/medical-help";
+import { OfflineItinerary, offlineCopy } from "@/features/offline-itinerary";
+import { useNetworkStatus } from "@/shared/lib";
+import { IndiaTravelPanel } from "./ui/IndiaTravelPanel";
 import {
   useCallback,
   useEffect,
@@ -10,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  ApiError,
   fetchTrip,
   renameTrip,
   reversePlace,
@@ -18,7 +24,6 @@ import {
   updateAgentPanelPreference,
   fetchAgentStatus,
   approveAgentSuggestion,
-  ApiError,
   type AgentSuggestion,
   type UpdateStopInput,
 } from "@/shared/api";
@@ -63,6 +68,7 @@ const DEFAULT_SIDEBAR_WIDTH = 30;
 const SIDEBAR_STEP = 1;
 
 export function TravelPlannerPage({ tripId }: { tripId: string }) {
+  const online = useNetworkStatus();
   const { t } = useTranslation("planner");
   const { t: tc } = useTranslation("common");
   const { t: ta } = useTranslation("agent");
@@ -84,7 +90,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
   const [locateSignal, setLocateSignal] = useState(0);
 
   const queryClient = useQueryClient();
-  const { data: trip, isPending, isError, refetch } = useQuery({
+  const { data: trip, isPending, isError, error: tripError, refetch } = useQuery({
     queryKey: queryKeys.trip(tripId),
     queryFn: () => fetchTrip(tripId),
   });
@@ -453,7 +459,8 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
     );
   }
 
-  if (isError || !trip) {
+  const accessDenied = tripError instanceof ApiError && [401, 403, 404].includes(tripError.status);
+  if (!trip || accessDenied || (isError && online && !(tripError instanceof TypeError))) {
     // Non-members get the same 404 as missing trips (no existence leak).
     // Direct /trips/:id links without joining via /invite/:token hit this.
     return (
@@ -564,7 +571,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
     onSelectStop: selectStop,
     onCloseDetail: () => setSelectedStopId(null),
     currentUserId,
-    canEdit: trip.permissions.canEdit,
+    canEdit: trip.permissions.canEdit && online,
     onToggleVote: (stopId) => actions.vote.mutate(stopId),
     onComment: (stopId, text) => actions.comment.mutate({ stopId, text }),
     commentPending: actions.comment.isPending,
@@ -590,6 +597,8 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
   // is visible. The note editor overlays them all while open.
   const panes = (
     <div className="relative min-h-0 flex-1 overflow-hidden">
+      <div className="absolute left-3 top-3 z-20"><MedicalHelp tripId={trip.id} stops={trip.stops} selectedStopId={selectedStopId} /></div>
+      {(!online || tripError instanceof TypeError) && <div role="status" className="absolute bottom-3 left-3 right-3 z-20 rounded-lg border border-border bg-background p-3 text-sm">{offlineCopy.offline}<Button type="button" variant="outline" size="sm" onClick={() => void refetch()}>{offlineCopy.retry}</Button></div>}
       <PlannerPane active={!noteEditingStop && tab === "map"}>
         <TripMapView
           trip={trip}
@@ -645,17 +654,19 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
         />
       </PlannerPane>
       <PlannerPane active={!noteEditingStop && tab === "reservations"} scroll>
-        <ReservationsBoard trip={trip} canEdit={trip.permissions.canEdit} />
+        <OfflineItinerary trip={trip} />
+        <IndiaTravelPanel trip={trip} />
+        <ReservationsBoard trip={trip} canEdit={trip.permissions.canEdit && online} />
       </PlannerPane>
       <PlannerPane active={!noteEditingStop && tab === "budget"} scroll>
         <BudgetBoard
           trip={trip}
           currentUserId={currentUserId}
           defaultCurrency={preferredCurrency || trip.currency}
-          canEdit={trip.permissions.canEdit}
-          onAddExpense={(input) => actions.expense.mutate(input)}
+          canEdit={trip.permissions.canEdit && online}
+          onAddExpense={(input) => actions.expense.mutateAsync(input)}
           onUpdateExpense={(expenseId, input) =>
-            actions.expenseUpdate.mutate({ expenseId, input })
+            actions.expenseUpdate.mutateAsync({ expenseId, input })
           }
         />
       </PlannerPane>
@@ -722,7 +733,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
           trip={trip}
           stop={!noteEditingStop && tab === "map" ? selectedStop : undefined}
           currentUserId={currentUserId}
-          canEdit={trip.permissions.canEdit}
+          canEdit={trip.permissions.canEdit && online}
           onClose={() => setSelectedStopId(null)}
           onToggleVote={sidebarProps.onToggleVote}
           onComment={sidebarProps.onComment}
@@ -740,7 +751,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
             open={!agentCollapsed}
             tripId={trip.id}
             trip={trip}
-            canEdit={trip.permissions.canEdit}
+            canEdit={trip.permissions.canEdit && online}
             applyingId={applyingSuggestionId}
             onApproveSuggestion={handleApproveSuggestion}
             onDenySuggestion={handleDenySuggestion}
@@ -752,7 +763,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
         {agentEnabled ? (
           <AgentInterventionToasts
             suggestions={pendingSuggestions}
-            canEdit={trip.permissions.canEdit}
+            canEdit={trip.permissions.canEdit && online}
             applyingId={applyingSuggestionId}
             onApprove={handleApproveSuggestion}
             onDiscuss={handleDiscussSuggestion}
@@ -827,7 +838,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
               open={!agentCollapsed}
               tripId={trip.id}
               trip={trip}
-              canEdit={trip.permissions.canEdit}
+              canEdit={trip.permissions.canEdit && online}
               applyingId={applyingSuggestionId}
               onApproveSuggestion={handleApproveSuggestion}
               onDenySuggestion={handleDenySuggestion}
@@ -846,7 +857,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
       {agentEnabled ? (
         <AgentInterventionToasts
           suggestions={pendingSuggestions}
-          canEdit={trip.permissions.canEdit}
+          canEdit={trip.permissions.canEdit && online}
           applyingId={applyingSuggestionId}
           onApprove={handleApproveSuggestion}
           onDiscuss={handleDiscussSuggestion}

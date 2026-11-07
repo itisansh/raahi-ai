@@ -5,14 +5,14 @@ import type {
   LodgingProvider,
   LodgingSearchResult,
 } from "../src/domain/lodging";
-import { LodgingService } from "../src/application/lodging/lodging-service";
-import { loadConfig, type RawEnv } from "../src/infrastructure/config";
+import { LodgingService } from "../src/services/lodging/lodging-service";
+import { loadConfig, type RawEnv } from "../src/config/env";
 import {
   decodeListingId,
   extractDeferredStateJson,
   isAllowedByRobots,
-} from "../src/infrastructure/lodging/airbnb-provider";
-import { buildLodgingReadTools } from "../src/infrastructure/ai/agent-model.ai-sdk";
+} from "../src/integrations/lodging/airbnb-provider";
+import { buildLodgingReadTools } from "../src/integrations/ai/agent-model.ai-sdk";
 
 function searchResult(
   overrides: Partial<LodgingSearchResult> = {},

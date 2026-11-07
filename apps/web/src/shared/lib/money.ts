@@ -179,11 +179,11 @@ const ZERO_DECIMAL = new Set([
 
 export function formatMoney(
   amount: number,
-  currency = "JPY",
+  currency = "INR",
   locale = "en-US",
 ): string {
   const symbol = SYMBOLS[currency] ?? "";
-  const grouped = Math.round(amount).toLocaleString(locale);
+  const grouped = (currency === "INR" ? amount : Math.round(amount)).toLocaleString(locale, { maximumFractionDigits: currency === "INR" ? 2 : 0 });
   return `${symbol}${grouped}`;
 }
 
@@ -199,7 +199,7 @@ export function convertMinorAmount(
 ): number | null {
   const from = fromCurrency.toUpperCase();
   const to = toCurrency.toUpperCase();
-  if (from === to) return Math.round(amount);
+  if (from === to) return from === "INR" ? Math.round(amount * 100) / 100 : Math.round(amount);
 
   const fromRate = from === base.toUpperCase() ? 1 : rates[from];
   const toRate = to === base.toUpperCase() ? 1 : rates[to];

@@ -1,14 +1,14 @@
 {
   "pwa": {
-    "offlineReady": "OpenTrip is ready for offline use",
-    "updateReady": "An OpenTrip update is ready",
+    "offlineReady": "Raahi AI is ready for offline use",
+    "updateReady": "An Raahi AI update is ready",
     "updateDescription": "Refresh when you are ready to use the latest version.",
     "updateAction": "Update"
   },
   "mobileOnboarding": {
     "later": "Not now",
     "install": {
-      "title": "Add OpenTrip to your home screen",
+      "title": "Add Raahi AI to your home screen",
       "description": "Install the app for a full-screen experience and offline access.",
       "action": "Install",
       "iosHint": "Open your browser's share menu and choose \"Add to Home Screen\".",
@@ -16,7 +16,7 @@
     },
     "notifications": {
       "title": "Allow notifications",
-      "description": "Trip updates arrive as system notifications while OpenTrip is in the background.",
+      "description": "Trip updates arrive as system notifications while Raahi AI is in the background.",
       "action": "Allow"
     },
     "location": {
@@ -25,7 +25,7 @@
       "action": "Allow"
     }
   },
-    "appName": "OpenTrip",
+    "appName": "Raahi AI",
     "tagline": "Every great trip starts as a group chat.",
     "language": "Language",
     "languageName": {
@@ -208,7 +208,27 @@
         "about": {
             "title": "About",
             "version": "Version {{version}}",
-            "description": "OpenTrip is a collaborative trip planner for friends and families."
+            "description": "Raahi AI is a collaborative trip planner for friends exploring India, built on the open-source OpenTrip foundation."
         }
-    }
+    },
+  "voice": {
+  "start": "Use microphone",
+  "stop": "Stop recording",
+  "cancel": "Cancel",
+  "use": "Use this text",
+  "transcript": "Review and edit transcript",
+  "privacy": "Audio is sent to ElevenLabs. Raahi does not store recordings. Review the text before using it.",
+  "destinationHint": "Dictate a destination here; full trip requests belong in the trip assistant for now. Audio is sent to ElevenLabs; Raahi does not store recordings.",
+  "connecting": "Connecting — allow microphone access when prompted.",
+  "recording": "Recording · stop when finished (90 seconds maximum).",
+  "finalizing": "Finalizing your transcript…",
+  "errors": {
+    "unavailable": "Voice input is unavailable. Try again or type your request.",
+    "permission": "Microphone access was denied. Allow it in your browser settings or keep typing.",
+    "unsupported": "Voice needs HTTPS (or localhost) and a browser with microphone support. You can still type.",
+    "timeout": "Recording timed out. Try again or type your request.",
+    "empty": "No final speech was received. Try again or type your request.",
+    "rateLimited": "Too many recording attempts. Wait a minute, or type your request."
+  }
+}
 }

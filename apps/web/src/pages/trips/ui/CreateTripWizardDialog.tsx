@@ -6,6 +6,9 @@ import { toTripSummary, type TripSummary } from "@/entities/trip";
 import { createTrip, type CreateTripInput } from "@/shared/api";
 import { queryKeys } from "@/shared/config";
 import { useSession } from "@/shared/auth";
+import { VoiceInput } from "@/features/voice-input";
+import { TripProposalPanel } from "./TripProposalPanel";
+import { proposalCopy } from "../model/proposal-copy";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Spinner } from "@/shared/ui/spinner";
@@ -129,9 +132,10 @@ export function CreateTripWizardDialog({
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const { navigate } = useRouter();
-  const preferredCurrency = session?.user?.defaultCurrency?.trim() || "JPY";
+  const preferredCurrency = session?.user?.defaultCurrency?.trim() || "INR";
 
   const [step, setStep] = useState<WizardStep>("destination");
+  const [planning, setPlanning] = useState(true);
   const [answers, setAnswers] = useState<WizardAnswers>(() =>
     emptyAnswers(preferredCurrency),
   );
@@ -159,6 +163,7 @@ export function CreateTripWizardDialog({
   });
 
   function reset() {
+    setPlanning(true);
     setStep("destination");
     setAnswers(emptyAnswers(preferredCurrency));
     setDraftText("");
@@ -296,18 +301,18 @@ export function CreateTripWizardDialog({
             <DialogHeader>
               <div className="flex items-center justify-between gap-3">
                 <DialogTitle className="text-lg font-semibold tracking-tight text-balance">
-                  {t(`wizard.steps.${step}.title`)}
+                  {planning ? proposalCopy.title : t(`wizard.steps.${step}.title`)}
                 </DialogTitle>
-                <span className="tabular-nums text-xs text-muted-foreground">
+                {!planning && <span className="tabular-nums text-xs text-muted-foreground">
                   {step === "review"
                     ? `${STEPS.length - 1} / ${STEPS.length - 1}`
                     : `${stepIndex + 1} / ${STEPS.length - 1}`}
-                </span>
+                </span>}
               </div>
               <DialogDescription className="text-sm text-pretty text-muted-foreground">
-                {t(`wizard.steps.${step}.description`)}
+                {planning ? proposalCopy.description : t(`wizard.steps.${step}.description`)}
               </DialogDescription>
-              <div className="mt-3 flex gap-1.5" aria-hidden="true">
+              {!planning && <div className="mt-3 flex gap-1.5" aria-hidden="true">
                 {STEPS.filter((s) => s !== "review").map((s, i) => (
                   <span
                     key={s}
@@ -317,12 +322,13 @@ export function CreateTripWizardDialog({
                     )}
                   />
                 ))}
-              </div>
+              </div>}
             </DialogHeader>
 
             <DialogPanel>
-              <div key={stepKey} className="wf-enter flex flex-col gap-3">
+              {planning ? (open && <TripProposalPanel />) : <div key={stepKey} className="wf-enter flex flex-col gap-3">
                 {step === "destination" ? (
+                  <>
                   <Input
                     autoFocus
                     value={draftText}
@@ -332,6 +338,8 @@ export function CreateTripWizardDialog({
                       if (e.key === "Enter" && canContinue) commitAndAdvance();
                     }}
                   />
+                  {open && <VoiceInput destinationOnly onUse={setDraftText} />}
+                  </>
                 ) : null}
 
                 {step === "duration" ? (
@@ -517,11 +525,14 @@ export function CreateTripWizardDialog({
                     ))}
                   </dl>
                 ) : null}
-              </div>
+              </div>}
             </DialogPanel>
 
             <DialogFooter className="flex flex-wrap items-center justify-between gap-2 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-6">
-              <div className="flex gap-2">
+              {planning ? <>
+                <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>{tc("actions.cancel")}</Button>
+                <Button type="button" variant="outline" onClick={() => setPlanning(false)}>{proposalCopy.manual}</Button>
+              </> : <><div className="flex gap-2">
                 {stepIndex > 0 ? (
                   <Button
                     type="button"
@@ -543,6 +554,7 @@ export function CreateTripWizardDialog({
                 )}
               </div>
               <div className="flex gap-2">
+                {step === "destination" && <Button type="button" variant="ghost" onClick={() => setPlanning(true)}>{proposalCopy.ai}</Button>}
                 {step !== "review" ? (
                   <Button
                     type="button"
@@ -564,7 +576,7 @@ export function CreateTripWizardDialog({
                   ) : null}
                   {step === "review" ? t("wizard.create") : t("wizard.next")}
                 </Button>
-              </div>
+              </div></>}
             </DialogFooter>
           </DialogSheetPopup>
         </DialogSheetViewport>

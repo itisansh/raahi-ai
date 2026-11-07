@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { TripChange } from "../src/domain/realtime";
-import { CloudflareTripChangePublisher } from "../src/infrastructure/realtime";
+import { CloudflareTripChangePublisher } from "../src/realtime";
 
 const change: TripChange = {
   eventId: "event-1",

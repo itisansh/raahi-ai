@@ -4,14 +4,14 @@ import {
   registerAiTelemetry,
   sanitizeSpan,
   sanitizeTelemetryValue,
-} from "../src/infrastructure/observability";
+} from "../src/integrations/observability";
 import {
   buildAgentTelemetryOptions,
   safeAgentErrorFields,
-} from "../src/infrastructure/ai/agent-model.ai-sdk";
-import { GeoError } from "../src/application/geo/geo-error";
-import { StreetViewError } from "../src/application/street-view";
-import { initiatingAgentTurnId } from "../src/application/agent/agent-service";
+} from "../src/integrations/ai/agent-model.ai-sdk";
+import { GeoError } from "../src/services/geo/geo-error";
+import { StreetViewError } from "../src/services/street-view";
+import { initiatingAgentTurnId } from "../src/services/agent/agent-service";
 
 afterEach(() => vi.restoreAllMocks());
 

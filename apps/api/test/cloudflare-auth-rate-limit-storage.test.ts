@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createCloudflareAuthRateLimitStorage } from "../src/infrastructure/auth";
+import { createCloudflareAuthRateLimitStorage } from "../src/integrations/auth";
 
 describe("Cloudflare Better Auth rate-limit storage", () => {
   it("routes an atomic consume to a hashed Durable Object name", async () => {

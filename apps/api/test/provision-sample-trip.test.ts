@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 import {
   provisionSampleTripForUser,
   SAMPLE_TRIP_ID,
-} from "../src/application/user/provision-sample-trip";
+} from "../src/services/user/provision-sample-trip";
 import { Trip, type TripRepository } from "../src/domain/trip";
-import { seedTrips } from "../src/infrastructure/persistence/seed-data";
+import { seedTrips } from "../src/repositories/seed-data";
 
 function templateTrip(): Trip {
   return Trip.fromSnapshot(structuredClone(seedTrips()[0]!.snapshot));
@@ -40,7 +40,7 @@ function memoryRepo(): TripRepository & {
 
 describe("provisionSampleTripForUser", () => {
   it("exposes the canonical sample trip id", () => {
-    expect(SAMPLE_TRIP_ID).toBe("japan-2025");
+    expect(SAMPLE_TRIP_ID).toBe("india-north-v1");
   });
 
   it("persists a cloned sample trip for the new user", async () => {

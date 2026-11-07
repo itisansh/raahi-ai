@@ -1,0 +1,42 @@
+# Optional paid single-instance service with persistent upload storage.
+# Review the plan/disk charges in Render before creating the service.
+services:
+  - type: web
+    name: raahi
+    runtime: node
+    plan: starter
+    numInstances: 1
+    autoDeployTrigger: off
+    buildCommand: bash deploy/render/build.sh
+    startCommand: corepack pnpm --filter @opentrip/api start
+    healthCheckPath: /api/health
+    maxShutdownDelaySeconds: 45
+    disk:
+      name: uploads
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      - key: BASE_URL
+        sync: false
+      - key: TRUSTED_ORIGINS
+        sync: false
+      - key: WEB_DIST_PATH
+        value: ../web/dist
+      - key: STORAGE_BACKEND
+        value: fs
+      - key: STORAGE_ROOT
+        value: /var/data/uploads
+      - key: EMAIL_PROVIDER
+        value: resend
+      - key: EMAIL_FROM
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false

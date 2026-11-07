@@ -1,15 +1,14 @@
-import type { Context } from "hono";
-import type { ContentfulStatusCode } from "hono/utils/http-status";
+import type { HttpContext } from "./transport";
 
-export function ok<T>(c: Context, data: T, status: ContentfulStatusCode = 200) {
+export function ok<T>(c: HttpContext, data: T, status: number = 200) {
   return c.json({ data }, status);
 }
 
 export function fail(
-  c: Context,
+  c: HttpContext,
   code: string,
   message: string,
-  status: ContentfulStatusCode,
+  status: number,
 ) {
   return c.json({ error: { code, message } }, status);
 }

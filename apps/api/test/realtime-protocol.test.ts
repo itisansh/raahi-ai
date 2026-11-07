@@ -5,7 +5,7 @@ import {
   parseRealtimeClientMessage,
   signRealtimeGrant,
   verifyRealtimeGrant,
-} from "../src/infrastructure/realtime";
+} from "../src/realtime";
 
 const secret = "test-realtime-secret-at-least-32-bytes-long";
 

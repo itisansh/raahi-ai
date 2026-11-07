@@ -10,7 +10,7 @@ title: "Architecture"
 flowchart TD
   browser[Browser] --> web[apps/web React SPA]
   wechat[WeChat] --> miniapp[apps/miniapp Taro client]
-  web -->|"/api/*"| api[apps/api Hono]
+  web -->|"/api/*"| api[apps/api Express / Worker Hono]
   web -->|"/api/auth/*"| api
   miniapp -->|"wx.login + Bearer"| api
   api --> app[Application use cases]
@@ -35,15 +35,9 @@ flowchart TD
 
 - **apps/web** — React SPA (FSD). Renders Trips and the Planner, talks to the
   API over `fetch`, and delegates auth to the Better Auth client.
-- **apps/miniapp** — native WeChat Mini Program client (Taro 4 + React, FSD).
-  It exchanges `wx.login` for a Better Auth token and calls the same API with a
-  bearer header; the product UI is rebuilt with Mini Program components because
-  personal WeChat accounts cannot use `<web-view>`. See
-  [../frontend/miniapp.md](../frontend/miniapp.md) and
-  [../decisions/0011-native-taro-mini-program.md](../decisions/0011-native-taro-mini-program.md).
-- **apps/api** — Hono app (DDD + Hexagonal). `interfaces/http` routes call
-  `application` use cases, which operate on `domain` aggregates through
-  repository ports implemented in `infrastructure`.
+- **apps/api** — Express Node app with a retained Hono Worker transport (DDD + Hexagonal). `interfaces/http` routes call
+  `services` use cases, which operate on `domain` aggregates through
+  repository ports implemented in `repositories` and `integrations`.
 - **packages/agent-ui-catalog** — framework-neutral json-render catalog,
   prompt, streaming-part compiler, and runtime safety boundary shared by the
   AI adapter and planner renderer. Its Zod 4 dependency is isolated from the
@@ -52,7 +46,7 @@ flowchart TD
 ## Request flow
 
 1. The SPA calls `GET /api/trips` (credentials included).
-2. Hono middleware resolves the Better Auth session; unauthenticated requests
+2. Shared HTTP middleware resolves the Better Auth session; unauthenticated requests
    get `401`.
 3. The route handler invokes a use case; the use case loads the aggregate via a
    repository port and returns a DTO.
@@ -81,13 +75,13 @@ flowchart TD
 | Concern | Cloudflare | Docker |
 | --- | --- | --- |
 | Frontend | Pages (`apps/web/dist`) | static container |
-| API | Workers (`fetch` entry) | Node (`@hono/node-server`) |
+| API | Workers (`fetch` entry) | Node (Express 5) |
 | DB connection | Hyperdrive binding `connectionString` | `DATABASE_URL` |
 | Realtime | Trip Durable Object WebSocket | HTTP-only; use Workers for full realtime |
 | Secrets | `wrangler secret` / vars | env file |
 | Avatar storage | S3-compatible API configured by env (R2) | persistent filesystem volume or S3-compatible API |
 
-Both runtimes import the same `application`/`domain`/`infrastructure` code; only
+Both runtimes import the same `services`/`domain`/`repositories` and `integrations` code; only
 the entry point and the connection-string source differ. See
 [../operations/cloudflare.md](../operations/cloudflare.md) and
 [../operations/docker.md](../operations/docker.md).

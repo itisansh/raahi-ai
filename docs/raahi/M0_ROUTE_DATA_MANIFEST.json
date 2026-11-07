@@ -1,0 +1,954 @@
+{
+  "sourceSha256": "11fabf89142b086af5bcf7e52600e9454b946ea07da6f7dadfe0cf1c838e97f3",
+  "schemaSha256": "092b80317df94be6a56a2b9ceec6805804185628977b57aac532c424eea8f70d",
+  "scope": "Static HTTP registrations and committed Prisma snapshot; auth wildcard delegates to Better Auth. Live catalog and SQL-only constraints require separate inspection.",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/api/auth/capabilities",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 360,
+      "authentication": "handler-specific"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/*",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 373,
+      "authentication": "handler-specific"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/*",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 373,
+      "authentication": "handler-specific"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 384,
+      "authentication": "handler-specific"
+    },
+    {
+      "method": "GET",
+      "path": "/api/mobile-auth/oauth/start",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 401,
+      "authentication": "handler-specific"
+    },
+    {
+      "method": "GET",
+      "path": "/api/mobile-auth/oauth/complete",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 425,
+      "authentication": "handler-specific"
+    },
+    {
+      "method": "POST",
+      "path": "/api/mobile-auth/oauth/exchange",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 438,
+      "authentication": "handler-specific"
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 444,
+      "authentication": "handler-specific"
+    },
+    {
+      "method": "GET",
+      "path": "/api/trip-invites/:token",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 448,
+      "authentication": "handler-specific"
+    },
+    {
+      "method": "GET",
+      "path": "/api/uploads/*",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 460,
+      "authentication": "handler-specific"
+    },
+    {
+      "method": "GET",
+      "path": "/api/trips",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 484,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/voice/token",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 488,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:id/medical",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 503,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:id/travel",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 509,
+      "authentication": "session-required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/trips/:id/budget",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 516,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:id/budget/:action",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 520,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:tripId/expenses/preview",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 535,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/voice/summary/:action",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 547,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/planning/preview",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 568,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/planning/proposals/:id/approve",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 584,
+      "authentication": "session-required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/weather",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 595,
+      "authentication": "session-required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fx/rates",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 608,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 618,
+      "authentication": "session-required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/trips/:id",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 629,
+      "authentication": "session-required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/trips/:tripId/street-view/images",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 633,
+      "authentication": "session-required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/trips/:tripId/street-view/images/:imageId",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 653,
+      "authentication": "session-required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/trips/:tripId/street-view/images/:imageId/preview",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 669,
+      "authentication": "session-required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/trips/:tripId/street-view/viewer-config",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 689,
+      "authentication": "session-required"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/trips/:id",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 697,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:id/days",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 707,
+      "authentication": "session-required"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/trips/:id/days/order",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 711,
+      "authentication": "session-required"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/trips/:id/days/:day",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 727,
+      "authentication": "session-required"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/trips/:id/days/:day",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 743,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:id/stops",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 761,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:id/media",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 777,
+      "authentication": "session-required"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/trips/:id/stops/:stopId",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 802,
+      "authentication": "session-required"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/trips/:id/stops/:stopId/position",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 821,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:id/stops/:stopId/vote",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 839,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:id/stops/:stopId/comments",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 850,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:id/expenses",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 879,
+      "authentication": "session-required"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/trips/:id/expenses/:expenseId",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 895,
+      "authentication": "session-required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/trips/:id/reservations",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 913,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:id/reservations",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 923,
+      "authentication": "session-required"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/trips/:id/reservations/:reservationId",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 946,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:id/reservations/:reservationId/cancel",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 964,
+      "authentication": "session-required"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/trips/:id/reservations/:reservationId",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 980,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:id/invites",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 994,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trip-invites/:token/accept",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 1013,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/users/avatar",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 1022,
+      "authentication": "session-required"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/users/avatar",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 1049,
+      "authentication": "session-required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/users/preferences",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 1056,
+      "authentication": "session-required"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/users/preferences",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 1060,
+      "authentication": "session-required"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/users/preferences/agent-panel",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 1073,
+      "authentication": "session-required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/status",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 1080,
+      "authentication": "session-required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/trips/:tripId/agent/messages",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 1089,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:tripId/agent/messages",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 1096,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:tripId/agent/chat",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 1116,
+      "authentication": "session-required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/trips/:tripId/agent/events",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 1183,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:tripId/agent/suggestions/:suggestionId/approve",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 1196,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:tripId/agent/suggestions/:suggestionId/apply",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 1214,
+      "authentication": "session-required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/trips/:tripId/agent/suggestions/:suggestionId/dismiss",
+      "source": "apps/api/src/interfaces/http/app.ts",
+      "line": 1232,
+      "authentication": "session-required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/trips/:tripId/realtime",
+      "source": "apps/api/src/worker.ts",
+      "authentication": "origin/session/membership on WebSocket upgrade",
+      "runtime": "Cloudflare only"
+    }
+  ],
+  "models": [
+    {
+      "name": "account",
+      "definitions": [
+        "id                    String    @id",
+        "accountId             String",
+        "providerId            String",
+        "userId                String",
+        "accessToken           String?",
+        "refreshToken          String?",
+        "idToken               String?",
+        "accessTokenExpiresAt  DateTime? @db.Timestamptz(6)",
+        "refreshTokenExpiresAt DateTime? @db.Timestamptz(6)",
+        "scope                 String?",
+        "password              String?",
+        "createdAt             DateTime  @default(now()) @db.Timestamptz(6)",
+        "updatedAt             DateTime  @default(now()) @db.Timestamptz(6)",
+        "user                  user      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@unique([accountId, providerId], map: \"account_provider_account_unique\")",
+        "@@index([userId], map: \"account_user_id_idx\")"
+      ]
+    },
+    {
+      "name": "agent_messages",
+      "definitions": [
+        "id            String   @id",
+        "seq           BigInt   @unique(map: \"agent_messages_seq_unique\") @default(autoincrement())",
+        "trip_id       String",
+        "role          String",
+        "parts         Json",
+        "actor_user_id String?",
+        "source        String   @default(\"chat\")",
+        "trip_version  Int      @default(0)",
+        "created_at    DateTime @default(now()) @db.Timestamptz(6)",
+        "trips         trips    @relation(fields: [trip_id], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@index([trip_id, seq], map: \"agent_messages_trip_seq_idx\")"
+      ]
+    },
+    {
+      "name": "agent_suggestion_dismissals",
+      "definitions": [
+        "suggestion_id     String",
+        "user_id           String",
+        "dismissed_at      DateTime          @default(now()) @db.Timestamptz(6)",
+        "agent_suggestions agent_suggestions @relation(fields: [suggestion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@id([suggestion_id, user_id])"
+      ]
+    },
+    {
+      "name": "agent_suggestions",
+      "definitions": [
+        "id                          String                        @id",
+        "trip_id                     String",
+        "message_id                  String?",
+        "status                      String                        @default(\"pending\")",
+        "severity                    String",
+        "confidence                  Float",
+        "reason                      String",
+        "suggestion_text             String",
+        "patch                       Json",
+        "trip_version                Int",
+        "expires_at                  DateTime?                     @db.Timestamptz(6)",
+        "applied_by                  String?",
+        "applied_at                  DateTime?                     @db.Timestamptz(6)",
+        "created_at                  DateTime                      @default(now()) @db.Timestamptz(6)",
+        "updated_at                  DateTime                      @default(now()) @db.Timestamptz(6)",
+        "agent_suggestion_dismissals agent_suggestion_dismissals[]",
+        "trips                       trips                         @relation(fields: [trip_id], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@index([trip_id, status], map: \"agent_suggestions_trip_status_idx\")"
+      ]
+    },
+    {
+      "name": "expense_participants",
+      "definitions": [
+        "expense_id String",
+        "member_id  String",
+        "expenses   expenses @relation(fields: [expense_id], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@id([expense_id, member_id])"
+      ]
+    },
+    {
+      "name": "expenses",
+      "definitions": [
+        "id                   String                 @id",
+        "trip_id              String",
+        "description          String",
+        "payer_id             String",
+        "amount               Decimal                @db.Decimal(12, 2)",
+        "when_label           String",
+        "sort_order           Int                    @default(0)",
+        "currency             String                 @default(\"\")",
+        "category             String                 @default(\"Plan\")",
+        "allocations          Json?",
+        "expense_participants expense_participants[]",
+        "trips                trips                  @relation(fields: [trip_id], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "reservations         reservations[]",
+        "@@index([trip_id], map: \"expenses_trip_idx\")"
+      ]
+    },
+    {
+      "name": "reservations",
+      "definitions": [
+        "id                  String    @id",
+        "trip_id             String",
+        "type                String",
+        "status              String    @default(\"tentative\")",
+        "title               String",
+        "provider            String    @default(\"\")",
+        "confirmation_number String    @default(\"\")",
+        "start_at            DateTime  @db.Timestamptz(6)",
+        "end_at              DateTime? @db.Timestamptz(6)",
+        "timezone            String",
+        "location_name       String    @default(\"\")",
+        "address             String    @default(\"\")",
+        "latitude            Float?",
+        "longitude           Float?",
+        "day_number          Int?",
+        "stop_id             String?",
+        "expense_id          String?",
+        "amount_minor        BigInt?",
+        "currency            String?   @db.Char(3)",
+        "notes               String",
+        "created_by          String",
+        "idempotency_key     String",
+        "created_at          DateTime  @default(now()) @db.Timestamptz(6)",
+        "updated_at          DateTime  @default(now()) @db.Timestamptz(6)",
+        "revision            Int       @default(0)",
+        "expenses            expenses? @relation(fields: [expense_id], references: [id], onUpdate: NoAction)",
+        "stops               stops?    @relation(fields: [stop_id], references: [id], onUpdate: NoAction)",
+        "trips               trips     @relation(fields: [trip_id], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@unique([trip_id, created_by, idempotency_key], map: \"reservations_idempotency_key\")",
+        "@@index([expense_id], map: \"reservations_expense_idx\")",
+        "@@index([stop_id], map: \"reservations_stop_idx\")",
+        "@@index([trip_id, start_at], map: \"reservations_trip_start_idx\")"
+      ]
+    },
+    {
+      "name": "schema_migrations",
+      "definitions": [
+        "name       String   @id",
+        "applied_at DateTime @default(now()) @db.Timestamptz(6)"
+      ]
+    },
+    {
+      "name": "session",
+      "definitions": [
+        "id        String   @id",
+        "expiresAt DateTime @db.Timestamptz(6)",
+        "token     String   @unique",
+        "createdAt DateTime @default(now()) @db.Timestamptz(6)",
+        "updatedAt DateTime @default(now()) @db.Timestamptz(6)",
+        "ipAddress String?",
+        "userAgent String?",
+        "userId    String",
+        "user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@index([userId], map: \"session_user_id_idx\")"
+      ]
+    },
+    {
+      "name": "stop_comments",
+      "definitions": [
+        "id         BigInt   @id @default(autoincrement())",
+        "stop_id    String",
+        "author_id  String",
+        "text       String",
+        "time_label String",
+        "created_at DateTime @default(now()) @db.Timestamptz(6)",
+        "stops      stops    @relation(fields: [stop_id], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@index([stop_id], map: \"stop_comments_stop_idx\")"
+      ]
+    },
+    {
+      "name": "stop_votes",
+      "definitions": [
+        "stop_id   String",
+        "member_id String",
+        "stops     stops  @relation(fields: [stop_id], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@id([stop_id, member_id])"
+      ]
+    },
+    {
+      "name": "stops",
+      "definitions": [
+        "id            String          @id",
+        "trip_id       String",
+        "day           Int",
+        "time          String",
+        "duration      String",
+        "name          String",
+        "area          String",
+        "category      String",
+        "lat           Float",
+        "lng           Float",
+        "cost          Int             @default(0)",
+        "created_by    String",
+        "transit       Boolean         @default(false)",
+        "note          String          @default(\"\")",
+        "sort_order    Int             @default(0)",
+        "cost_currency String          @default(\"\")",
+        "reservations  reservations[]",
+        "stop_comments stop_comments[]",
+        "stop_votes    stop_votes[]",
+        "trips         trips           @relation(fields: [trip_id], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@index([trip_id], map: \"stops_trip_idx\")"
+      ]
+    },
+    {
+      "name": "trip_days",
+      "definitions": [
+        "trip_id    String",
+        "number     Int",
+        "date_label String",
+        "city       String",
+        "color      String",
+        "date       String @default(\"\")",
+        "trips      trips  @relation(fields: [trip_id], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@id([trip_id, number])"
+      ]
+    },
+    {
+      "name": "trip_invite_acceptances",
+      "definitions": [
+        "invite_id    String",
+        "user_id      String",
+        "accepted_at  DateTime     @default(now()) @db.Timestamptz(6)",
+        "trip_invites trip_invites @relation(fields: [invite_id], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@id([invite_id, user_id])"
+      ]
+    },
+    {
+      "name": "trip_invite_allowed_emails",
+      "definitions": [
+        "invite_id    String",
+        "email        String",
+        "trip_invites trip_invites @relation(fields: [invite_id], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@id([invite_id, email])"
+      ]
+    },
+    {
+      "name": "trip_invites",
+      "definitions": [
+        "id                         String                       @id",
+        "trip_id                    String",
+        "token_hash                 String                       @unique",
+        "created_by                 String",
+        "access_scope               String                       @default(\"anyone\")",
+        "role                       String                       @default(\"editor\")",
+        "can_invite                 Boolean                      @default(false)",
+        "status                     String                       @default(\"active\")",
+        "expires_at                 DateTime?                    @db.Timestamptz(6)",
+        "created_at                 DateTime                     @default(now()) @db.Timestamptz(6)",
+        "trip_invite_acceptances    trip_invite_acceptances[]",
+        "trip_invite_allowed_emails trip_invite_allowed_emails[]",
+        "trips                      trips                        @relation(fields: [trip_id], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@index([trip_id], map: \"trip_invites_trip_idx\")"
+      ]
+    },
+    {
+      "name": "trip_members",
+      "definitions": [
+        "id              String  @id",
+        "trip_id         String",
+        "name            String",
+        "short_name      String",
+        "initials        String",
+        "avatar_bg       String",
+        "avatar_fg       String",
+        "is_current_user Boolean @default(false)",
+        "sort_order      Int     @default(0)",
+        "image           String?",
+        "can_invite      Boolean @default(true)",
+        "role            String  @default(\"editor\")",
+        "user_id         String?",
+        "trips           trips   @relation(fields: [trip_id], references: [id], onDelete: Cascade, onUpdate: NoAction)",
+        "@@unique([trip_id, user_id], map: \"trip_members_trip_user_unique\")",
+        "@@index([trip_id], map: \"trip_members_trip_idx\")"
+      ]
+    },
+    {
+      "name": "trips",
+      "definitions": [
+        "id                 String              @id",
+        "title              String",
+        "start_date         String",
+        "end_date           String",
+        "status             String",
+        "currency           String              @default(\"JPY\")",
+        "cover_color        String              @default(\"#3f6fc9\")",
+        "owner_id           String?",
+        "created_at         DateTime            @default(now()) @db.Timestamptz(6)",
+        "version            Int                 @default(0)",
+        "agent_seed_pending Boolean             @default(false)",
+        "cover_url          String?",
+        "intake             Json?",
+        "agent_messages     agent_messages[]",
+        "agent_suggestions  agent_suggestions[]",
+        "expenses           expenses[]",
+        "reservations       reservations[]",
+        "stops              stops[]",
+        "trip_days          trip_days[]",
+        "trip_invites       trip_invites[]",
+        "trip_members       trip_members[]"
+      ]
+    },
+    {
+      "name": "twoFactor",
+      "definitions": [
+        "id                      String    @id",
+        "secret                  String",
+        "backupCodes             String",
+        "userId                  String",
+        "verified                Boolean?  @default(true)",
+        "failedVerificationCount Int?      @default(0)",
+        "lockedUntil             DateTime? @db.Timestamptz(6)",
+        "user                    user      @relation(fields: [userId], references: [id], onDelete: Cascade)",
+        "@@index([secret])",
+        "@@index([userId])"
+      ]
+    },
+    {
+      "name": "user",
+      "definitions": [
+        "id               String            @id",
+        "name             String",
+        "email            String            @unique",
+        "emailVerified    Boolean           @default(false)",
+        "image            String?",
+        "createdAt        DateTime          @default(now()) @db.Timestamptz(6)",
+        "updatedAt        DateTime          @default(now()) @db.Timestamptz(6)",
+        "defaultCurrency  String            @default(\"JPY\")",
+        "twoFactorEnabled Boolean           @default(false)",
+        "account          account[]",
+        "session          session[]",
+        "twoFactor        twoFactor[]",
+        "user_preferences user_preferences?"
+      ]
+    },
+    {
+      "name": "user_preferences",
+      "definitions": [
+        "user_id                   String   @id",
+        "planner_sidebar_width     Decimal  @default(30) @db.Decimal",
+        "planner_sidebar_collapsed Boolean  @default(false)",
+        "updated_at                DateTime @default(now()) @db.Timestamptz(6)",
+        "agent_panel_collapsed     Boolean  @default(true)",
+        "user                      user     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)"
+      ]
+    },
+    {
+      "name": "verification",
+      "definitions": [
+        "id         String   @id",
+        "identifier String",
+        "value      String",
+        "expiresAt  DateTime @db.Timestamptz(6)",
+        "createdAt  DateTime @default(now()) @db.Timestamptz(6)",
+        "updatedAt  DateTime @default(now()) @db.Timestamptz(6)",
+        "@@index([identifier])"
+      ]
+    },
+    {
+      "name": "planning_proposals",
+      "definitions": [
+        "id              String    @id",
+        "owner_id        String",
+        "payload         Json",
+        "context_trip_id String?",
+        "base_revision   Int?",
+        "result_trip_id  String?",
+        "created_at      DateTime  @default(now()) @db.Timestamptz(6)",
+        "expires_at      DateTime  @db.Timestamptz(6)",
+        "approved_at     DateTime? @db.Timestamptz(6)",
+        "@@index([owner_id, created_at])"
+      ]
+    }
+  ],
+  "migrations": [
+    {
+      "path": "apps/api/prisma/migrations/000000000000_baseline/migration.sql",
+      "sha256": "ebcece690b2671e2cb76dc6ca6b608bd53d8ef4590e9aaaaeafbf55883f03984",
+      "statements": [
+        "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "CREATE TABLE \"public\".\"account\" (\n    \"id\" TEXT NOT NULL,\n    \"accountId\" TEXT NOT NULL,\n    \"providerId\" TEXT NOT NULL,\n    \"userId\" TEXT NOT NULL,\n    \"accessToken\" TEXT,\n    \"refreshToken\" TEXT,\n    \"idToken\" TEXT,\n    \"accessTokenExpiresAt\" TIMESTAMPTZ(6),\n    \"refreshTokenExpiresAt\" TIMESTAMPTZ(6),\n    \"scope\" TEXT,\n    \"password\" TEXT,\n    \"createdAt\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    \"updatedAt\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n\n    CONSTRAINT \"account_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE TABLE \"public\".\"expense_participants\" (\n    \"expense_id\" TEXT NOT NULL,\n    \"member_id\" TEXT NOT NULL,\n\n    CONSTRAINT \"expense_participants_pkey\" PRIMARY KEY (\"expense_id\",\"member_id\")\n)",
+        "CREATE TABLE \"public\".\"expenses\" (\n    \"id\" TEXT NOT NULL,\n    \"trip_id\" TEXT NOT NULL,\n    \"description\" TEXT NOT NULL,\n    \"payer_id\" TEXT NOT NULL,\n    \"amount\" INTEGER NOT NULL,\n    \"when_label\" TEXT NOT NULL,\n    \"sort_order\" INTEGER NOT NULL DEFAULT 0,\n    \"currency\" TEXT NOT NULL DEFAULT '',\n\n    CONSTRAINT \"expenses_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE TABLE \"public\".\"schema_migrations\" (\n    \"name\" TEXT NOT NULL,\n    \"applied_at\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n\n    CONSTRAINT \"schema_migrations_pkey\" PRIMARY KEY (\"name\")\n)",
+        "CREATE TABLE \"public\".\"session\" (\n    \"id\" TEXT NOT NULL,\n    \"expiresAt\" TIMESTAMPTZ(6) NOT NULL,\n    \"token\" TEXT NOT NULL,\n    \"createdAt\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    \"updatedAt\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    \"ipAddress\" TEXT,\n    \"userAgent\" TEXT,\n    \"userId\" TEXT NOT NULL,\n\n    CONSTRAINT \"session_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE TABLE \"public\".\"stop_comments\" (\n    \"id\" BIGSERIAL NOT NULL,\n    \"stop_id\" TEXT NOT NULL,\n    \"author_id\" TEXT NOT NULL,\n    \"text\" TEXT NOT NULL,\n    \"time_label\" TEXT NOT NULL,\n    \"created_at\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n\n    CONSTRAINT \"stop_comments_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE TABLE \"public\".\"stop_votes\" (\n    \"stop_id\" TEXT NOT NULL,\n    \"member_id\" TEXT NOT NULL,\n\n    CONSTRAINT \"stop_votes_pkey\" PRIMARY KEY (\"stop_id\",\"member_id\")\n)",
+        "CREATE TABLE \"public\".\"stops\" (\n    \"id\" TEXT NOT NULL,\n    \"trip_id\" TEXT NOT NULL,\n    \"day\" INTEGER NOT NULL,\n    \"time\" TEXT NOT NULL,\n    \"duration\" TEXT NOT NULL,\n    \"name\" TEXT NOT NULL,\n    \"area\" TEXT NOT NULL,\n    \"category\" TEXT NOT NULL,\n    \"lat\" DOUBLE PRECISION NOT NULL,\n    \"lng\" DOUBLE PRECISION NOT NULL,\n    \"cost\" INTEGER NOT NULL DEFAULT 0,\n    \"created_by\" TEXT NOT NULL,\n    \"transit\" BOOLEAN NOT NULL DEFAULT false,\n    \"note\" TEXT NOT NULL DEFAULT '',\n    \"sort_order\" INTEGER NOT NULL DEFAULT 0,\n    \"cost_currency\" TEXT NOT NULL DEFAULT '',\n\n    CONSTRAINT \"stops_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE TABLE \"public\".\"trip_days\" (\n    \"trip_id\" TEXT NOT NULL,\n    \"number\" INTEGER NOT NULL,\n    \"date_label\" TEXT NOT NULL,\n    \"city\" TEXT NOT NULL,\n    \"color\" TEXT NOT NULL,\n\n    CONSTRAINT \"trip_days_pkey\" PRIMARY KEY (\"trip_id\",\"number\")\n)",
+        "CREATE TABLE \"public\".\"trip_members\" (\n    \"id\" TEXT NOT NULL,\n    \"trip_id\" TEXT NOT NULL,\n    \"name\" TEXT NOT NULL,\n    \"short_name\" TEXT NOT NULL,\n    \"initials\" TEXT NOT NULL,\n    \"avatar_bg\" TEXT NOT NULL,\n    \"avatar_fg\" TEXT NOT NULL,\n    \"is_current_user\" BOOLEAN NOT NULL DEFAULT false,\n    \"sort_order\" INTEGER NOT NULL DEFAULT 0,\n    \"image\" TEXT,\n\n    CONSTRAINT \"trip_members_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE TABLE \"public\".\"trips\" (\n    \"id\" TEXT NOT NULL,\n    \"title\" TEXT NOT NULL,\n    \"start_date\" TEXT NOT NULL,\n    \"end_date\" TEXT NOT NULL,\n    \"status\" TEXT NOT NULL,\n    \"currency\" TEXT NOT NULL DEFAULT 'JPY',\n    \"cover_color\" TEXT NOT NULL DEFAULT '#3f6fc9',\n    \"owner_id\" TEXT,\n    \"created_at\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n\n    CONSTRAINT \"trips_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE TABLE \"public\".\"user\" (\n    \"id\" TEXT NOT NULL,\n    \"name\" TEXT NOT NULL,\n    \"email\" TEXT NOT NULL,\n    \"emailVerified\" BOOLEAN NOT NULL DEFAULT false,\n    \"image\" TEXT,\n    \"createdAt\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    \"updatedAt\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    \"defaultCurrency\" TEXT NOT NULL DEFAULT 'JPY',\n\n    CONSTRAINT \"user_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE TABLE \"public\".\"user_preferences\" (\n    \"user_id\" TEXT NOT NULL,\n    \"planner_sidebar_width\" DECIMAL NOT NULL DEFAULT 30,\n    \"planner_sidebar_collapsed\" BOOLEAN NOT NULL DEFAULT false,\n    \"updated_at\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n\n    CONSTRAINT \"user_preferences_pkey\" PRIMARY KEY (\"user_id\")\n)",
+        "CREATE TABLE \"public\".\"verification\" (\n    \"id\" TEXT NOT NULL,\n    \"identifier\" TEXT NOT NULL,\n    \"value\" TEXT NOT NULL,\n    \"expiresAt\" TIMESTAMPTZ(6) NOT NULL,\n    \"createdAt\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    \"updatedAt\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n\n    CONSTRAINT \"verification_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE UNIQUE INDEX \"account_provider_account_unique\" ON \"public\".\"account\"(\"accountId\" ASC, \"providerId\" ASC)",
+        "CREATE INDEX \"account_user_id_idx\" ON \"public\".\"account\"(\"userId\" ASC)",
+        "CREATE INDEX \"expenses_trip_idx\" ON \"public\".\"expenses\"(\"trip_id\" ASC)",
+        "CREATE UNIQUE INDEX \"session_token_key\" ON \"public\".\"session\"(\"token\" ASC)",
+        "CREATE INDEX \"session_user_id_idx\" ON \"public\".\"session\"(\"userId\" ASC)",
+        "CREATE INDEX \"stop_comments_stop_idx\" ON \"public\".\"stop_comments\"(\"stop_id\" ASC)",
+        "CREATE INDEX \"stops_trip_idx\" ON \"public\".\"stops\"(\"trip_id\" ASC)",
+        "CREATE INDEX \"trip_members_trip_idx\" ON \"public\".\"trip_members\"(\"trip_id\" ASC)",
+        "CREATE UNIQUE INDEX \"user_email_key\" ON \"public\".\"user\"(\"email\" ASC)",
+        "CREATE INDEX \"verification_identifier_idx\" ON \"public\".\"verification\"(\"identifier\" ASC)",
+        "ALTER TABLE \"public\".\"account\" ADD CONSTRAINT \"account_userId_fkey\" FOREIGN KEY (\"userId\") REFERENCES \"public\".\"user\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION",
+        "ALTER TABLE \"public\".\"expense_participants\" ADD CONSTRAINT \"expense_participants_expense_id_fkey\" FOREIGN KEY (\"expense_id\") REFERENCES \"public\".\"expenses\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION",
+        "ALTER TABLE \"public\".\"expenses\" ADD CONSTRAINT \"expenses_trip_id_fkey\" FOREIGN KEY (\"trip_id\") REFERENCES \"public\".\"trips\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION",
+        "ALTER TABLE \"public\".\"session\" ADD CONSTRAINT \"session_userId_fkey\" FOREIGN KEY (\"userId\") REFERENCES \"public\".\"user\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION",
+        "ALTER TABLE \"public\".\"stop_comments\" ADD CONSTRAINT \"stop_comments_stop_id_fkey\" FOREIGN KEY (\"stop_id\") REFERENCES \"public\".\"stops\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION",
+        "ALTER TABLE \"public\".\"stop_votes\" ADD CONSTRAINT \"stop_votes_stop_id_fkey\" FOREIGN KEY (\"stop_id\") REFERENCES \"public\".\"stops\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION",
+        "ALTER TABLE \"public\".\"stops\" ADD CONSTRAINT \"stops_trip_id_fkey\" FOREIGN KEY (\"trip_id\") REFERENCES \"public\".\"trips\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION",
+        "ALTER TABLE \"public\".\"trip_days\" ADD CONSTRAINT \"trip_days_trip_id_fkey\" FOREIGN KEY (\"trip_id\") REFERENCES \"public\".\"trips\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION",
+        "ALTER TABLE \"public\".\"trip_members\" ADD CONSTRAINT \"trip_members_trip_id_fkey\" FOREIGN KEY (\"trip_id\") REFERENCES \"public\".\"trips\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION",
+        "ALTER TABLE \"public\".\"user_preferences\" ADD CONSTRAINT \"user_preferences_user_id_fkey\" FOREIGN KEY (\"user_id\") REFERENCES \"public\".\"user\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION"
+      ]
+    },
+    {
+      "path": "apps/api/prisma/migrations/20250706153200_day_date/migration.sql",
+      "sha256": "921d95e588ab4d1f2669770cbe6779c53c641f787b83722ac0def191e2186c10",
+      "statements": [
+        "ALTER TABLE \"public\".\"trip_days\" ADD COLUMN \"date\" TEXT NOT NULL DEFAULT ''"
+      ]
+    },
+    {
+      "path": "apps/api/prisma/migrations/20260707220633_trip_invites/migration.sql",
+      "sha256": "448bf2a5ed14a18f210a5387c6fa7a6090eb1b4469d5bb5bf17159a9037b18f5",
+      "statements": [
+        "ALTER TABLE \"trip_members\" ADD COLUMN     \"can_invite\" BOOLEAN NOT NULL DEFAULT true,\nADD COLUMN     \"role\" TEXT NOT NULL DEFAULT 'editor',\nADD COLUMN     \"user_id\" TEXT",
+        "CREATE TABLE \"trip_invites\" (\n    \"id\" TEXT NOT NULL,\n    \"trip_id\" TEXT NOT NULL,\n    \"token_hash\" TEXT NOT NULL,\n    \"created_by\" TEXT NOT NULL,\n    \"access_scope\" TEXT NOT NULL DEFAULT 'anyone',\n    \"role\" TEXT NOT NULL DEFAULT 'editor',\n    \"can_invite\" BOOLEAN NOT NULL DEFAULT false,\n    \"status\" TEXT NOT NULL DEFAULT 'active',\n    \"expires_at\" TIMESTAMPTZ(6),\n    \"created_at\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n\n    CONSTRAINT \"trip_invites_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE TABLE \"trip_invite_allowed_emails\" (\n    \"invite_id\" TEXT NOT NULL,\n    \"email\" TEXT NOT NULL,\n\n    CONSTRAINT \"trip_invite_allowed_emails_pkey\" PRIMARY KEY (\"invite_id\",\"email\")\n)",
+        "CREATE TABLE \"trip_invite_acceptances\" (\n    \"invite_id\" TEXT NOT NULL,\n    \"user_id\" TEXT NOT NULL,\n    \"accepted_at\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n\n    CONSTRAINT \"trip_invite_acceptances_pkey\" PRIMARY KEY (\"invite_id\",\"user_id\")\n)",
+        "CREATE UNIQUE INDEX \"trip_invites_token_hash_key\" ON \"trip_invites\"(\"token_hash\")",
+        "CREATE INDEX \"trip_invites_trip_idx\" ON \"trip_invites\"(\"trip_id\")",
+        "CREATE UNIQUE INDEX \"trip_members_trip_user_unique\" ON \"trip_members\"(\"trip_id\", \"user_id\")",
+        "ALTER TABLE \"trip_invites\" ADD CONSTRAINT \"trip_invites_trip_id_fkey\" FOREIGN KEY (\"trip_id\") REFERENCES \"trips\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION",
+        "ALTER TABLE \"trip_invite_allowed_emails\" ADD CONSTRAINT \"trip_invite_allowed_emails_invite_id_fkey\" FOREIGN KEY (\"invite_id\") REFERENCES \"trip_invites\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION",
+        "ALTER TABLE \"trip_invite_acceptances\" ADD CONSTRAINT \"trip_invite_acceptances_invite_id_fkey\" FOREIGN KEY (\"invite_id\") REFERENCES \"trip_invites\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION"
+      ]
+    },
+    {
+      "path": "apps/api/prisma/migrations/20260708080012_expense_category/migration.sql",
+      "sha256": "a4344948ddda2e60b4c4b3d82b9a41daca90909b887edec032507b91587610a4",
+      "statements": [
+        "ALTER TABLE \"expenses\" ADD COLUMN     \"category\" TEXT NOT NULL DEFAULT 'Plan'"
+      ]
+    },
+    {
+      "path": "apps/api/prisma/migrations/20260708170046_trip_agent/migration.sql",
+      "sha256": "ef19aa230043a54cd2e2a8248bd8847a4c7682189fdee4eb345d1d914c184a11",
+      "statements": [
+        "ALTER TABLE \"trips\" ADD COLUMN     \"version\" INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE \"user_preferences\" ADD COLUMN     \"agent_panel_collapsed\" BOOLEAN NOT NULL DEFAULT true",
+        "CREATE TABLE \"agent_messages\" (\n    \"id\" TEXT NOT NULL,\n    \"seq\" BIGSERIAL NOT NULL,\n    \"trip_id\" TEXT NOT NULL,\n    \"role\" TEXT NOT NULL,\n    \"parts\" JSONB NOT NULL,\n    \"actor_user_id\" TEXT,\n    \"source\" TEXT NOT NULL DEFAULT 'chat',\n    \"trip_version\" INTEGER NOT NULL DEFAULT 0,\n    \"created_at\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n\n    CONSTRAINT \"agent_messages_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE TABLE \"agent_suggestions\" (\n    \"id\" TEXT NOT NULL,\n    \"trip_id\" TEXT NOT NULL,\n    \"message_id\" TEXT,\n    \"status\" TEXT NOT NULL DEFAULT 'pending',\n    \"severity\" TEXT NOT NULL,\n    \"confidence\" DOUBLE PRECISION NOT NULL,\n    \"reason\" TEXT NOT NULL,\n    \"suggestion_text\" TEXT NOT NULL,\n    \"patch\" JSONB NOT NULL,\n    \"trip_version\" INTEGER NOT NULL,\n    \"expires_at\" TIMESTAMPTZ(6),\n    \"applied_by\" TEXT,\n    \"applied_at\" TIMESTAMPTZ(6),\n    \"created_at\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    \"updated_at\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n\n    CONSTRAINT \"agent_suggestions_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE TABLE \"agent_suggestion_dismissals\" (\n    \"suggestion_id\" TEXT NOT NULL,\n    \"user_id\" TEXT NOT NULL,\n    \"dismissed_at\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n\n    CONSTRAINT \"agent_suggestion_dismissals_pkey\" PRIMARY KEY (\"suggestion_id\",\"user_id\")\n)",
+        "CREATE UNIQUE INDEX \"agent_messages_seq_unique\" ON \"agent_messages\"(\"seq\")",
+        "CREATE INDEX \"agent_messages_trip_seq_idx\" ON \"agent_messages\"(\"trip_id\", \"seq\")",
+        "CREATE INDEX \"agent_suggestions_trip_status_idx\" ON \"agent_suggestions\"(\"trip_id\", \"status\")",
+        "ALTER TABLE \"agent_messages\" ADD CONSTRAINT \"agent_messages_trip_id_fkey\" FOREIGN KEY (\"trip_id\") REFERENCES \"trips\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION",
+        "ALTER TABLE \"agent_suggestions\" ADD CONSTRAINT \"agent_suggestions_trip_id_fkey\" FOREIGN KEY (\"trip_id\") REFERENCES \"trips\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION",
+        "ALTER TABLE \"agent_suggestion_dismissals\" ADD CONSTRAINT \"agent_suggestion_dismissals_suggestion_id_fkey\" FOREIGN KEY (\"suggestion_id\") REFERENCES \"agent_suggestions\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION"
+      ]
+    },
+    {
+      "path": "apps/api/prisma/migrations/20260710173953_trip_intake_cover/migration.sql",
+      "sha256": "e5188822c55e53603a952ad3e82077f8fdfaa3a7f90d4d481f3da23dac296c8a",
+      "statements": [
+        "ALTER TABLE \"trips\" ADD COLUMN     \"agent_seed_pending\" BOOLEAN NOT NULL DEFAULT false,\nADD COLUMN     \"cover_url\" TEXT,\nADD COLUMN     \"intake\" JSONB"
+      ]
+    },
+    {
+      "path": "apps/api/prisma/migrations/20260710190707_two_factor/migration.sql",
+      "sha256": "4ce90e9ea0a50cdfa1e5c02b2a34c8e883f512edb0ff8e8f9f2ac25ee799e2dd",
+      "statements": [
+        "ALTER TABLE \"user\" ADD COLUMN \"twoFactorEnabled\" BOOLEAN NOT NULL DEFAULT false",
+        "CREATE TABLE \"twoFactor\" (\n    \"id\" TEXT NOT NULL,\n    \"secret\" TEXT NOT NULL,\n    \"backupCodes\" TEXT NOT NULL,\n    \"userId\" TEXT NOT NULL,\n    \"verified\" BOOLEAN DEFAULT true,\n    \"failedVerificationCount\" INTEGER DEFAULT 0,\n    \"lockedUntil\" TIMESTAMPTZ(6),\n\n    CONSTRAINT \"twoFactor_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE INDEX \"twoFactor_secret_idx\" ON \"twoFactor\"(\"secret\")",
+        "CREATE INDEX \"twoFactor_userId_idx\" ON \"twoFactor\"(\"userId\")",
+        "ALTER TABLE \"twoFactor\" ADD CONSTRAINT \"twoFactor_userId_fkey\" FOREIGN KEY (\"userId\") REFERENCES \"user\"(\"id\") ON DELETE CASCADE ON UPDATE CASCADE"
+      ]
+    },
+    {
+      "path": "apps/api/prisma/migrations/20260712161711_reservations/migration.sql",
+      "sha256": "53b4b5a64208f0a4151335efe7658fe4df6493e2e4eb1a24db4b49b246b77250",
+      "statements": [
+        "CREATE TABLE \"reservations\" (\n    \"id\" TEXT NOT NULL,\n    \"trip_id\" TEXT NOT NULL,\n    \"type\" TEXT NOT NULL,\n    \"status\" TEXT NOT NULL DEFAULT 'tentative',\n    \"title\" TEXT NOT NULL,\n    \"provider\" TEXT NOT NULL DEFAULT '',\n    \"confirmation_number\" TEXT NOT NULL DEFAULT '',\n    \"start_at\" TIMESTAMPTZ(6) NOT NULL,\n    \"end_at\" TIMESTAMPTZ(6),\n    \"timezone\" TEXT NOT NULL,\n    \"location_name\" TEXT NOT NULL DEFAULT '',\n    \"address\" TEXT NOT NULL DEFAULT '',\n    \"latitude\" DOUBLE PRECISION,\n    \"longitude\" DOUBLE PRECISION,\n    \"day_number\" INTEGER,\n    \"stop_id\" TEXT,\n    \"expense_id\" TEXT,\n    \"amount_minor\" BIGINT,\n    \"currency\" CHAR(3),\n    \"notes\" TEXT NOT NULL,\n    \"created_by\" TEXT NOT NULL,\n    \"idempotency_key\" TEXT NOT NULL,\n    \"created_at\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    \"updated_at\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    \"revision\" INTEGER NOT NULL DEFAULT 0,\n\n    CONSTRAINT \"reservations_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE INDEX \"reservations_trip_start_idx\" ON \"reservations\"(\"trip_id\", \"start_at\")",
+        "CREATE INDEX \"reservations_stop_idx\" ON \"reservations\"(\"stop_id\")",
+        "CREATE INDEX \"reservations_expense_idx\" ON \"reservations\"(\"expense_id\")",
+        "CREATE UNIQUE INDEX \"reservations_idempotency_key\" ON \"reservations\"(\"trip_id\", \"created_by\", \"idempotency_key\")",
+        "ALTER TABLE \"reservations\" ADD CONSTRAINT \"reservations_expense_id_fkey\" FOREIGN KEY (\"expense_id\") REFERENCES \"expenses\"(\"id\") ON DELETE SET NULL ON UPDATE NO ACTION",
+        "ALTER TABLE \"reservations\" ADD CONSTRAINT \"reservations_stop_id_fkey\" FOREIGN KEY (\"stop_id\") REFERENCES \"stops\"(\"id\") ON DELETE SET NULL ON UPDATE NO ACTION",
+        "ALTER TABLE \"reservations\" ADD CONSTRAINT \"reservations_trip_id_fkey\" FOREIGN KEY (\"trip_id\") REFERENCES \"trips\"(\"id\") ON DELETE CASCADE ON UPDATE NO ACTION"
+      ]
+    },
+    {
+      "path": "apps/api/prisma/migrations/20261101171519_planning_proposals/migration.sql",
+      "sha256": "dac657ed8da4785fde8e66437ba74d575ba6b6db46215282308e0a3ede513e30",
+      "statements": [
+        "CREATE TABLE \"planning_proposals\" (\n    \"id\" TEXT NOT NULL,\n    \"owner_id\" TEXT NOT NULL,\n    \"payload\" JSONB NOT NULL,\n    \"context_trip_id\" TEXT,\n    \"base_revision\" INTEGER,\n    \"result_trip_id\" TEXT,\n    \"created_at\" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    \"expires_at\" TIMESTAMPTZ(6) NOT NULL,\n    \"approved_at\" TIMESTAMPTZ(6),\n\n    CONSTRAINT \"planning_proposals_pkey\" PRIMARY KEY (\"id\")\n)",
+        "CREATE INDEX \"planning_proposals_owner_id_created_at_idx\" ON \"planning_proposals\"(\"owner_id\", \"created_at\")"
+      ]
+    },
+    {
+      "path": "apps/api/prisma/migrations/20261101182311_expense_precision/migration.sql",
+      "sha256": "300fee55389b7c35484d972765a4cbf2b79fa4ef1194e317b04a9488439a1177",
+      "statements": [
+        "ALTER TABLE \"expenses\" ADD COLUMN     \"allocations\" JSONB,\nALTER COLUMN \"amount\" SET DATA TYPE DECIMAL(12,2)"
+      ]
+    }
+  ]
+}

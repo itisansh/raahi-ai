@@ -8,7 +8,7 @@ Reference: [../reference/backend-sources.md](../reference/backend-sources.md).
 
 ## Configuration
 
-`apps/api/src/infrastructure/auth/auth.ts` builds Better Auth with the shared
+`apps/api/src/integrations/auth/auth.ts` builds Better Auth with the shared
 `pg.Pool`:
 
 ```ts
@@ -27,7 +27,7 @@ export const auth = betterAuth({
     sendOnSignIn: true,
     autoSignInAfterVerification: true,
   },
-  socialProviders: config.googleOAuth || config.wechatOAuth
+  socialProviders: config.googleOAuth
     ? {
         google: {
           clientId: config.googleOAuth.clientId,
@@ -42,10 +42,6 @@ export const auth = betterAuth({
             };
           },
         },
-        wechat: {
-          clientId: config.wechatOAuth.clientId,
-          clientSecret: config.wechatOAuth.clientSecret,
-        },
       }
     : undefined,
   trustedOrigins: config.trustedOrigins,
@@ -58,7 +54,7 @@ export const auth = betterAuth({
     },
     additionalFields: {
       // User preference: default currency for new stop costs.
-      defaultCurrency: { type: "string", required: false, defaultValue: "JPY", input: true },
+      defaultCurrency: { type: "string", required: false, defaultValue: "INR", input: true },
     },
   },
   plugins: [
@@ -72,8 +68,7 @@ export const auth = betterAuth({
         // Dispatched via EMAIL_PROVIDER (console | resend)
       },
     }),
-    twoFactor({ issuer: "OpenTrip", allowPasswordless: true }),
-    wechatMiniProgram({ identityPort: new WechatCode2SessionClient(/* … */) }),
+    twoFactor({ issuer: "Raahi AI", allowPasswordless: true }),
     // optional captcha…
   ],
   // baseURL/secret come from env (BASE_URL / BETTER_AUTH_SECRET)
@@ -162,7 +157,7 @@ Sign-in: after a successful password sign-in, `twoFactorClient` invokes
 
 ### Email provider
 
-Outbound mail is selected by env (see `infrastructure/email/`):
+Outbound mail is selected by env (see `integrations/email/`):
 
 | `EMAIL_PROVIDER` | Behavior |
 | --- | --- |
@@ -211,6 +206,13 @@ via `fetchOptions.onRequest`.
 
 ### Social providers
 
+The web form reads `GET /api/auth/capabilities` before showing social login
+buttons. This public, uncached endpoint returns only configured provider names
+and an email delivery mode (`console` or `email`); it exposes no credentials.
+Unconfigured providers are hidden. With console email delivery, verification
+and password-reset screens direct local developers to the terminal running
+`pnpm dev` instead of claiming an email was sent.
+
 Google OAuth is enabled when both `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
 are set. The redirect URI registered in Google Cloud Console must be
 `{BASE_URL}/api/auth/callback/google` (API origin — Google posts the code here).
@@ -221,39 +223,15 @@ current SPA location (`origin + pathname + search`, see `AuthForm`) so invite
 pages (`/invite/:token`) resume after Google sign-in. If omitted, Better Auth
 defaults to API `baseURL` and the user lands on `api.*` instead of the frontend.
 
-WeChat web QR login is enabled when `WECHAT_WEB_APP_ID` and
-`WECHAT_WEB_APP_SECRET` are both set. These must belong to a WeChat Open
-Platform **Website Application**. Configure its authorization callback domain
-for `{BASE_URL}/api/auth/callback/wechat`. The web form places this action below
-Google and uses Better Auth's built-in `wechat` social provider.
-
-Mini Programs use a separate protocol and credential pair:
-`WECHAT_MINI_PROGRAM_APP_ID` + `WECHAT_MINI_PROGRAM_APP_SECRET`.
-`POST /api/auth/wechat-mini-program/sign-in` accepts the short-lived code from
-`wx.login()`. The infrastructure adapter exchanges it with WeChat's
-`jscode2session` endpoint, discards `session_key`, and creates the normal Better
-Auth session. The Mini Program AppSecret is never shipped to the client.
-
-The native Mini Program client keeps that session token in Mini Program storage
-and sends it as a bearer on every request, including profile edits and avatar
-upload. The token is never placed in a URL, and the WebView bridge endpoints it
-used to need are gone
-([0011](../decisions/0011-native-taro-mini-program.md)).
-
-Bind the Website Application and Mini Program to the same WeChat Open Platform
-account when cross-surface account continuity is required. The adapter prefers
-`unionid` as the Better Auth `wechat` account id (falling back to Mini Program
-`openid`), matching the built-in web provider's identity selection.
-
 Google profiles are normalized through the shared `OAuthProfileDto`
-(`apps/api/src/application/user/oauth-profile.ts`) so future OAuth providers
+(`apps/api/src/services/user/oauth-profile.ts`) so future OAuth providers
 use the same mapping path. The provider's avatar URL is written to `user.image`
 during sign-up. Email sign-ups (and OAuth profiles without a picture) get a
 deterministic vercel-style gradient avatar (github.com/vercel/avatar) baked into
 a small static SVG data URI and stored on `user.image` (a `create.before`
 database hook seeds it from the user id). The avatar is therefore static in the
 database and rendered as a plain image everywhere. The generator lives in
-`apps/api/src/application/user/avatar.ts` and mirrors the frontend copy in
+`apps/api/src/services/user/avatar.ts` and mirrors the frontend copy in
 `apps/web/src/shared/lib/avatar.ts`; the AI agent uses the same generator with
 an extra dither layer (`agentAvatarUrl`).
 
@@ -268,7 +246,7 @@ composing a stop cost.
 ### Sample trip on sign-up
 
 After Better Auth creates a user row, `databaseHooks.user.create.after` clones
-the sample Japan trip (`japan-2025`) into a personal copy owned by that user
+the sample Indian trip (`india-north-v1`) into a personal copy owned by that user
 (`provisionSampleTripForUser`). The template is loaded from the live DB row when
 present, otherwise from the in-memory seed snapshot. Cosmetic demo members stay
 on the clone; the seed owner slot is replaced by the real user. Provisioning
@@ -282,7 +260,7 @@ whenever `CAPTCHA_PROVIDER` is set; the local `.env.example` ships with
 Cloudflare Turnstile test keys.
 
 ```ts
-// apps/api/src/infrastructure/auth/auth.ts
+// apps/api/src/integrations/auth/auth.ts
 plugins: [
   bearer(),
   oneTimeToken({
@@ -291,7 +269,7 @@ plugins: [
     storeToken: "hashed",
   }),
   emailOTP({ /* … */, changeEmail: { enabled: true, verifyCurrentEmail: true } }),
-  twoFactor({ issuer: "OpenTrip", allowPasswordless: true }),
+  twoFactor({ issuer: "Raahi AI", allowPasswordless: true }),
   ...(config.captcha
     ? [
         captcha({

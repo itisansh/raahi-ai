@@ -24,7 +24,7 @@
 
 ## 2. What requires no account or API key for the initial local demo?
 
-- **OpenTrip's local PostgreSQL** runs with Docker; no online database account is necessary initially.
+- **MongoDB** can run as a local replica set without an online account; Atlas is an optional hosted provider. Node requires `MONGO_URI`.
 - **Better Auth** works with OpenTrip's account flow; generate strong local secrets. Google OAuth is optional.
 - **OpenTrip default OSM geolocation** (`GEO_PROVIDER=osm`) works without a Google Maps key, but respect Nominatim/Overpass/OSRM public usage policies and rate limits.
 - **Open-Meteo noncommercial weather** requires neither an account nor API key (an adapter is needed because OpenTrip currently references OpenWeatherMap).
@@ -32,10 +32,12 @@
 
 ## 3. Configure your cloned OpenTrip repository
 
-Use `make setup` to generate its project `.env`, then edit the existing `.env` rather than replacing it wholesale. Some keys below are **new Raahi-specific variable names**; they do nothing until Codex implements their adapters.
+Copy `.env.example` only if `.env` does not exist; otherwise edit the existing ignored `.env`. The Node API uses MongoDB. Legacy setup/reset commands target SQL. Some keys below are **new Raahi-specific variable names**; they do nothing until Codex implements their adapters.
 
 ```dotenv
-# EXISTING OpenTrip keys — keep existing BASE_URL, DATABASE_URL, etc.
+# Node database: private replica-set/Atlas URI, only in ignored .env.
+MONGO_URI=<your-development-mongodb-uri>
+# Keep existing BASE_URL and storage/provider settings.
 BETTER_AUTH_SECRET=<generated-local-secret-at-least-32-characters>
 REALTIME_GRANT_SECRET=<different-generated-local-secret>
 
@@ -94,3 +96,53 @@ No Render or Geoapify registration is needed until the baseline and initial voic
 - Geoapify pricing: https://www.geoapify.com/pricing/
 - Render environment secrets: https://render.com/docs/configure-environment-variables
 - Open-Meteo free data API: https://open-meteo.com/
+
+## Implemented spoken proposal summaries (Phase 4)
+
+Set `ELEVENLABS_VOICE_ID_EN` and `ELEVENLABS_VOICE_ID_HI` in the ignored root
+`.env`; both are voice-library IDs, not API keys. A multilingual voice may be
+used for both. Keep `ELEVENLABS_API_KEY` server-side and grant Text to Speech
+access. Voices Read is useful to list available voices; it is not needed when
+you already know a valid voice ID. Restart development processes after env edits.
+The HTTP adapter requires no additional server SDK. See the summary endpoints
+in `docs/backend/api/platform.md`. Browser listening/pronunciation verification
+is separate from a successful provider response.
+
+## Phase 7 daily travel forecast configuration
+
+`TRAVEL_WEATHER_PROVIDER=open-meteo` enables the daily forecast shown in India
+travel checks, for non-commercial use of its free API with CC BY 4.0 attribution.
+No API key is required. Empty disables it. The committed example defaults off;
+local testing may opt in through ignored `.env`. Restart dev after env edits.
+Commercial deployment needs a licensed provider/account adapter, not the free
+endpoint: https://open-meteo.com/en/terms.
+
+This daily adapter does not replace the existing `OPENWEATHERMAP_API_KEY` hourly
+weather feature. Existing OSM/Google geo configuration supplies road estimates and
+nearby stay listings. Geoapify and openrouteservice remain optional, unimplemented
+reserved adapters; no new keys are required for this Phase 7 implementation.
+Rail/bus entries are official search links, not authorized inventory integrations.
+
+## Through-Phase-8 key requirements
+
+- Required for voice planning: `AI_API_KEY`, `ELEVENLABS_API_KEY`, and configured
+  English/Hindi voice IDs. Voice IDs are configuration, not additional API keys.
+- No extra API key is needed for the database, deterministic expense/budget
+  calculations, offline export, or emergency contact references.
+- Optional existing alternative for nearby places and routing:
+  `GOOGLE_MAPS_API_KEY` with `GEO_PROVIDER=google`. Enable **Places API (New)**
+  and **Routes API** in the same billing-enabled Google Cloud project. Restrict
+  the key to these APIs and use server-compatible application restrictions;
+  browser-referrer restrictions do not suit this backend adapter. Keep it in
+  ignored server environment configuration. Setup references:
+  [Places](https://developers.google.com/maps/documentation/places/web-service/get-api-key)
+  and [Routes](https://developers.google.com/maps/documentation/routes/get-api-key).
+  Public OSM needs no key but can return unavailable; a key does not guarantee
+  medical coverage or operational facilities.
+- `RESEND_API_KEY` and production CAPTCHA credentials are deployment setup,
+  not prerequisites for local console-email authentication.
+- `OPENWEATHERMAP_API_KEY` is optional for the existing hourly weather feature;
+  the opted-in noncommercial Open-Meteo daily adapter needs no key.
+- Do not obtain Geoapify/openrouteservice/vendor keys just for the placeholders:
+  those adapters are not implemented. Live rail/bus inventory would need a
+  separately selected, authorized provider and implementation.

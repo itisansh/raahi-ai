@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import type {
   SqlClient,
   SqlConnection,
-} from "../src/infrastructure/persistence/sql";
-import { SqlTripRepository } from "../src/infrastructure/persistence/trip-repository.db";
+} from "../src/repositories/sql";
+import { SqlTripRepository } from "../src/repositories/trip-repository.db";
 
 describe("SqlTripRepository.syncMemberProfile", () => {
   it("updates member display fields and bumps affected trip revisions atomically", async () => {

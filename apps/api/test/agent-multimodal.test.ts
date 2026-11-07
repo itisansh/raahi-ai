@@ -4,8 +4,8 @@ import {
   storageNamespaceOf,
   storagePathFromPublicUrl,
   detectTripMediaMimeType,
-} from "../src/application/storage";
-import { sanitizeAgentFileParts } from "../src/application/agent/file-parts";
+} from "../src/services/storage";
+import { sanitizeAgentFileParts } from "../src/services/agent/file-parts";
 
 describe("trip media multimodal helpers", () => {
   const tripId = "trip-demo";

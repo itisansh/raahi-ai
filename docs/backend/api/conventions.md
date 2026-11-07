@@ -9,7 +9,7 @@ title: "Conventions"
 | --- | --- |
 | Base path | `/api` |
 | Auth mount | `/api/auth/*` (Better Auth handler; `GET` and `POST`) |
-| Content type | JSON (`Content-Type: application/json`) unless noted (multipart, streams, file bytes) |
+| Content type | JSON (`Content-Type: services/json`) unless noted (multipart, streams, file bytes) |
 | Success envelope | `{ "data": <payload> }` |
 | Error envelope | `{ "error": { "code": string, "message": string } }` |
 | Validation | Zod at the HTTP edge before use cases; first issue message becomes `error.message` with code `validation_error` |

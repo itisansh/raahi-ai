@@ -1,0 +1,1 @@
+export { SpokenSummary } from "./SpokenSummary";

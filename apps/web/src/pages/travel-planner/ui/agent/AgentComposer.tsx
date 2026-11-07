@@ -9,6 +9,7 @@ import { ArrowUpIcon, FileIcon, PaperclipIcon, XIcon } from "lucide-react";
 import type { Trip } from "@/entities/trip";
 import { TRIP_MEDIA_ACCEPT } from "@/shared/api";
 import { Spinner } from "@/shared/ui/spinner";
+import { VoiceInput } from "@/features/voice-input";
 import { MentionListbox, useMentionInput } from "../mention";
 import {
   composeWithQuote,
@@ -156,6 +157,10 @@ export function AgentComposer({
 
   return (
     <div className="relative flex flex-none flex-col gap-1.5 px-3 py-2.5">
+      <VoiceInput disabled={sending} onUse={(text) => {
+        setDraft((current) => current.trim() ? `${current}\n${text}` : text);
+        textareaRef.current?.focus();
+      }} />
       {mention.open ? (
         <MentionListbox
           listId={mention.listId}

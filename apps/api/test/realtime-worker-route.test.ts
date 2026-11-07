@@ -61,7 +61,7 @@ describe("Cloudflare realtime upgrade route", () => {
     ).resolves.toMatchObject({ status: 403 });
   });
 
-  it("accepts Origin-less upgrades (WeChat) and still enforces the session", async () => {
+  it("accepts Origin-less bearer upgrades and still enforces the session", async () => {
     const { env, container, fetch } = fixture();
     const response = await handleRealtimeUpgrade(
       request(null),

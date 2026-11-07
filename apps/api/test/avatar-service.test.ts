@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { AvatarService, MAX_AVATAR_BYTES } from "../src/application/avatar";
+import { AvatarService, MAX_AVATAR_BYTES } from "../src/services/avatar";
 import type {
   AvatarError,
   CurrentUserProfile,
   FileStorage,
   StoredFile,
-} from "../src/application/avatar";
+} from "../src/services/avatar";
 
 class MemoryStorage implements FileStorage {
   readonly files = new Map<string, StoredFile>();

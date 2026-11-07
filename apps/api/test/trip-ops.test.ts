@@ -3,7 +3,7 @@ import type { PendingPatch } from "../src/domain/agent";
 import { Trip } from "../src/domain/trip";
 import type { TripRepository } from "../src/domain/trip";
 import type { TripChangePublisher } from "../src/domain/realtime";
-import { seedTrips } from "../src/infrastructure/persistence/seed-data";
+import { seedTrips } from "../src/repositories/seed-data";
 import {
   applyTripOp,
   getTripOp,
@@ -12,7 +12,7 @@ import {
   pendingPatchSchema,
   writeToolNames,
   type TripOpContext,
-} from "../src/application/trip/ops";
+} from "../src/services/trip/ops";
 
 function freshTrip(): Trip {
   return Trip.fromSnapshot(structuredClone(seedTrips()[0]!.snapshot));

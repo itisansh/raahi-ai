@@ -31,6 +31,24 @@ This is a real software workflow, not a speech-demo glued to an unrelated chat r
 
 ## 2. Preserve OpenTrip's architecture
 
+**User-requested future exception (2026-11-02):** Plan migration to Express,
+MongoDB/Mongoose and familiar backend folders using the
+[migration module](EXPRESS_MONGODB_MIGRATION_PLAN.md). This explicitly changes
+the future stack preference. M0 was subsequently authorized and completed on
+2026-11-03; see [the evidence](M0_BASELINE_AND_COMPATIBILITY.md). The user will
+provide `MONGO_URI` and explicitly does not want PostgreSQL restarted.
+M2 moves the application layer to `services`, persistence to `repositories`,
+external adapters to `integrations`, composition/environment parsing to `config`,
+and collaboration transport to `realtime`. See [the current folder map](M2_BACKEND_LAYOUT.md)
+when following older source-path examples below.
+Do not interpret the older MongoDB prohibition below as rejecting that request.
+Preserve business rules and contracts. Node uses Express after M1 and MongoDB/Mongoose
+after M3; see [the persistence report](M3_MONGODB_PERSISTENCE.md). Worker SQL
+and historical tooling remain until M4–M6 are implemented and verified.
+The follow-up I0 module explicitly removes WeChat and replaces inherited
+Japan-themed demo content/images with Indian trips and map/currency defaults.
+Do not preserve the WeChat miniapp merely because older architecture docs list it.
+
 Expected existing technology (confirm in cloned code before changing):
 
 - Monorepo: `pnpm` workspaces, strict TypeScript.

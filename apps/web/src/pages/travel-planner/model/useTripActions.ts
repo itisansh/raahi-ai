@@ -74,10 +74,12 @@ export function useTripActions(tripId: string) {
     onSuccess,
   });
   const expense = useMutation({
+    networkMode: "always",
     mutationFn: (input: AddExpenseInput) => addExpense(tripId, input),
     onSuccess,
   });
   const expenseUpdate = useMutation({
+    networkMode: "always",
     mutationFn: (v: { expenseId: string; input: AddExpenseInput }) =>
       updateExpense(tripId, v.expenseId, v.input),
     onSuccess,

@@ -4,14 +4,14 @@
     "getStarted": "Start planning"
   },
   "hero": {
-    "title": "Every great trip starts as a group chat.",
-    "subtitle": "OpenTrip turns the chaos into one shared plan: the route, the days, the money — and an AI co-planner that knows every stop.",
+    "title": "Good trips start with a shared plan.",
+    "subtitle": "Plan your next India trip with friends. Keep the route, daily plans and shared expenses together, with an AI assistant to help you explore the options.",
     "primary": "Start planning",
     "secondary": "See how it works",
-    "imageAlt": "OpenTrip desktop map of the five-day Japan demo trip"
+    "imageAlt": "Legacy OpenTrip example: a five-day Japan itinerary"
   },
   "facts": {
-    "label": "The demo trip",
+    "label": "Legacy example · illustrative data",
     "days": "5 days",
     "stops": "25 stops",
     "route": "Tokyo → Kyoto → Osaka"
@@ -24,12 +24,12 @@
     },
     "schedule": {
       "title": "Every day, at a glance.",
-      "body": "One column per day — what time, which train, where you're staying. The plan practically reads itself.",
+      "body": "Keep your stops, travel notes and stays in a day-by-day plan. Check transport times and availability with the provider before you travel.",
       "imageAlt": "Day-by-day schedule with stop cards"
     },
     "budget": {
       "title": "No more awkward math.",
-      "body": "Log expenses as they happen. OpenTrip keeps the balance and works out the fewest transfers to settle up — in any currency.",
+      "body": "Record who paid and who shared each expense. Review balances and suggested transfers together. Use one currency per trip while currency-safe accounting is being developed.",
       "imageAlt": "Shared expenses with balances and settle-up transfers"
     },
     "agent": {
@@ -39,24 +39,25 @@
     },
     "collaborate": {
       "title": "Everyone gets a say.",
-      "body": "Vote on stops, leave comments, share one invite link. The plan stays in sync, so no one has to dig through the group chat.",
+      "body": "Invite friends, vote on stops and leave comments. Everyone in the group can return to the same saved itinerary.",
       "imageAlt": "Stop detail with votes, comments, and costs"
     }
   },
   "mobile": {
     "title": "The trip goes where you go.",
-    "body": "Install it as an app, or open it in WeChat — same plan, live in everyone's pocket.",
-    "mapAlt": "OpenTrip mobile map",
-    "scheduleAlt": "OpenTrip mobile schedule",
-    "agentAlt": "OpenTrip mobile trip agent"
+    "body": "Open your trip on your phone or install the web app. Your itinerary stays close at hand.",
+    "mapAlt": "Raahi AI mobile map",
+    "scheduleAlt": "Raahi AI mobile schedule",
+    "agentAlt": "Raahi AI mobile trip agent"
   },
   "cta": {
     "title": "Your crew is ready when you are.",
-    "subtitle": "Sign in and pick up the demo trip, or drop the first pin on your own.",
+    "subtitle": "Create a trip with your friends. The current sample is illustrative; Indian demo itineraries and voice planning are in development.",
     "button": "Start planning"
   },
   "footer": {
-    "tagline": "Made for people who travel together.",
-    "license": "Open source · Apache 2.0"
-  }
+    "tagline": "For friends exploring India together.",
+    "license": "Built on OpenTrip · Apache 2.0"
+  },
+  "legacyPreview": "These captures show the original OpenTrip example. Raahi AI’s India demo and voice workflow are in development."
 }

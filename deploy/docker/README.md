@@ -18,7 +18,7 @@ proxying `/api` to the API). Walkthrough:
 ```bash
 cd deploy/docker
 cp .env.example .env      # set BETTER_AUTH_SECRET etc.
-# Optional: set Google and/or WeChat credential pairs from .env.example.
+# Optional: set Google credentials from .env.example.
 docker compose up -d --build
 ```
 

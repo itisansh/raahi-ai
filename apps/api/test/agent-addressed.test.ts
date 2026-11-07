@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AgentMessage } from "../src/domain/agent";
-import { looksLikeAgentThreadFollowUp } from "../src/application/agent/addressed";
+import { looksLikeAgentThreadFollowUp } from "../src/services/agent/addressed";
 
 function msg(
   role: AgentMessage["role"],

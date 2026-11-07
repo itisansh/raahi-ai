@@ -1,3 +1,4 @@
+import { expenseMinor, expenseAllocations } from "./expense-money";
 import { DomainError } from "../shared/errors";
 import { computeBudget } from "./settlement";
 import {
@@ -68,6 +69,8 @@ export interface UpdateStopDraft {
 }
 
 export interface AddExpenseDraft {
+  requestId?: string;
+  allocations?: Record<string, number>;
   description: string;
   amount: number;
   /** ISO currency code for the amount. Defaults to the trip currency. */
@@ -263,7 +266,7 @@ function resolveCreateSchedule(draft: CreateTripDraft): {
   if (endOk) intake.endDate = endOk;
   if (budgetAmount != null) {
     intake.budgetAmount = budgetAmount;
-    intake.budgetCurrency = draft.currency?.trim() || "JPY";
+    intake.budgetCurrency = draft.currency?.trim() || "INR";
   }
   if (partySize != null) intake.partySize = partySize;
 
@@ -304,7 +307,7 @@ export class Trip {
     const tripId = `t${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const schedule = resolveCreateSchedule(draft);
     const destination = draft.destination?.trim() ?? "";
-    const currency = draft.currency?.trim() || "JPY";
+    const currency = draft.currency?.trim() || "INR";
 
     const days: DaySnapshot[] = [];
     for (let n = 1; n <= schedule.dayCount; n++) {
@@ -462,7 +465,7 @@ export class Trip {
   }
 
   budget(): Budget {
-    return computeBudget(this.snapshot.members, this.snapshot.expenses);
+    return computeBudget(this.snapshot.members, this.snapshot.expenses, this.snapshot.currency);
   }
 
   private requireStop(stopId: string): StopSnapshot {
@@ -696,7 +699,9 @@ export class Trip {
   addExpense(draft: AddExpenseDraft): ExpenseSnapshot {
     const description = draft.description.trim();
     if (!description) throw new DomainError("empty_expense", "Description is required");
-    if (!(draft.amount > 0)) throw new DomainError("invalid_amount", "Amount must be positive");
+    expenseMinor(draft.amount, draft.currency?.trim() || this.snapshot.currency);
+    expenseAllocations(draft.amount, draft.currency?.trim() || this.snapshot.currency, draft.participants, draft.allocations);
+    if (new Set(draft.participants).size !== draft.participants.length) throw new DomainError("duplicate_participants", "Each participant must appear once");
     if (draft.participants.length === 0) {
       throw new DomainError("no_participants", "At least one participant is required");
     }
@@ -707,7 +712,8 @@ export class Trip {
       id: `e${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       description,
       payer: draft.payer,
-      amount: Math.round(draft.amount),
+      amount: draft.amount,
+      allocations: draft.allocations ? { ...draft.allocations } : undefined,
       currency: draft.currency?.trim() || this.snapshot.currency,
       category: draft.category ?? "Plan",
       participants: [...draft.participants],
@@ -725,7 +731,9 @@ export class Trip {
     const expense = this.requireExpense(expenseId);
     const description = draft.description.trim();
     if (!description) throw new DomainError("empty_expense", "Description is required");
-    if (!(draft.amount > 0)) throw new DomainError("invalid_amount", "Amount must be positive");
+    expenseMinor(draft.amount, draft.currency?.trim() || this.snapshot.currency);
+    expenseAllocations(draft.amount, draft.currency?.trim() || this.snapshot.currency, draft.participants, draft.allocations);
+    if (new Set(draft.participants).size !== draft.participants.length) throw new DomainError("duplicate_participants", "Each participant must appear once");
     if (draft.participants.length === 0) {
       throw new DomainError("no_participants", "At least one participant is required");
     }
@@ -734,7 +742,8 @@ export class Trip {
 
     expense.description = description;
     expense.payer = draft.payer;
-    expense.amount = Math.round(draft.amount);
+    expense.amount = draft.amount;
+    expense.allocations = draft.allocations ? { ...draft.allocations } : undefined;
     expense.currency = draft.currency?.trim() || this.snapshot.currency;
     expense.category = draft.category ?? "Plan";
     expense.participants = [...draft.participants];

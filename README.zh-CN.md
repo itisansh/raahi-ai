@@ -1,3 +1,5 @@
+> Raahi AI development status and setup are maintained in [README.md](README.md). The upstream OpenTrip guide below is retained as historical reference; it does not describe completed Raahi voice features.
+
 <p align="center">
   <img src="docs/assets/logo.png" width="96" height="96" alt="OpenTrip logo" />
 </p>
@@ -185,7 +187,6 @@ make deploy         # 部署说明入口（Cloudflare / Docker）
 apps/
   web/          React SPA + PWA
   api/          Hono API（DDD / 六边形）
-  miniapp/      微信原生壳（托管 PWA）
 packages/       共享库（Agent UI catalog、可观测性）
 deploy/         Cloudflare + Docker 部署配置
 docs/           架构与运维说明

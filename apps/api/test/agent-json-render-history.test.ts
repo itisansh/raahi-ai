@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { FileStorage } from "../src/application/storage";
+import type { FileStorage } from "../src/services/storage";
 import type {
   AgentMessage,
   AgentMessagePart,
@@ -8,7 +8,7 @@ import {
   agentUiRefinementFromHistory,
   removeUnchangedRefinementUi,
   toModelMessages,
-} from "../src/infrastructure/ai/agent-model.ai-sdk";
+} from "../src/integrations/ai/agent-model.ai-sdk";
 
 const tripId = "trip-1";
 const storage: FileStorage = {

@@ -31,7 +31,7 @@ pnpm-debug.log*
 
 # generated
 worker-configuration.d.ts
-apps/api/src/infrastructure/cloudflare/worker-configuration.d.ts
+apps/api/src/integrations/cloudflare/worker-configuration.d.ts
 .workspace/
 .pnpm-store/
 apps/api/uploads

@@ -1,12 +1,15 @@
-import { Hono, type Context } from "hono";
-import { cors } from "hono/cors";
-import { bodyLimit } from "hono/body-limit";
+import { Hono } from "hono";
+import { RouteTable, cors, bodyLimit, dispatch, type HttpContext } from "./transport";
+import { VoiceError } from "../../services/voice/voice-token-service";
+import { ExpenseVoiceError } from "../../services/expenses/voice-expense";
+import { SpeechError } from "../../services/voice/spoken-summary";
+import { PlanningError, planningRequestSchema } from "../../services/planning/contracts";
 import { z } from "zod";
-import { initiatingAgentTurnId, type Defer } from "../../application";
+import { initiatingAgentTurnId, type Defer } from "../../services";
 import type { OperationEvent } from "../../domain/agent";
-import { MAX_AVATAR_BYTES } from "../../application/avatar";
-import { MAX_TRIP_MEDIA_BYTES } from "../../application/media";
-import { isManagedUploadPath } from "../../application/storage";
+import { MAX_AVATAR_BYTES } from "../../services/avatar";
+import { MAX_TRIP_MEDIA_BYTES } from "../../services/media";
+import { isManagedUploadPath } from "../../services/storage";
 import {
   dayNumberParamSchema,
   expenseDraftSchema,
@@ -15,9 +18,9 @@ import {
   reorderDaysSchema,
   updateDaySchema,
   updateStopChangesSchema,
-} from "../../application/trip/ops";
-import { BetterAuthCurrentUserProfile } from "../../infrastructure/auth/current-user-profile";
-import type { Container } from "../../infrastructure/composition/container";
+} from "../../services/trip/ops";
+import { BetterAuthCurrentUserProfile } from "../../integrations/auth/current-user-profile";
+import type { Container } from "../../config/container";
 import { handleError } from "./errors";
 import { ok, fail } from "./response";
 import {
@@ -25,8 +28,8 @@ import {
   getTraceIds,
   logger,
   setActiveSpanAttributes,
-} from "../../infrastructure/observability";
-import type { RuntimeName } from "../../application/observability";
+} from "../../integrations/observability";
+import type { RuntimeName } from "../../services/observability";
 
 type Session = Container["auth"]["$Infer"]["Session"];
 
@@ -39,7 +42,7 @@ export interface AppEnv {
   };
 }
 
-interface CreateAppOptions {
+export interface CreateAppOptions {
   runtime: RuntimeName;
   instrument?: (app: Hono<AppEnv>) => void;
   setRequestContext?: (fields: { requestId: string }) => void;
@@ -210,7 +213,7 @@ const streetViewSearchQuerySchema = z.object({
 });
 const streetViewImageIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,160}$/);
 
-export function createApp(
+export function createRouteTable(
   container: Container,
   options: CreateAppOptions = { runtime: "node" },
 ) {
@@ -233,7 +236,7 @@ export function createApp(
   /** Schedule work past the response: waitUntil on Workers, floating on Node.
    * Also track on the container so Workers disposeAfterDeferred waits for it
    * before pool.end(). */
-  const deferOf = (c: Context<AppEnv>): Defer => (task) => {
+  const deferOf = (c: HttpContext): Defer => (task) => {
     const guarded = task.catch((err) =>
       {
         logger.error("agent.deferred_task_failed", {
@@ -258,7 +261,7 @@ export function createApp(
   /** Record a whitelisted write operation in the agent session without
    * blocking or failing the originating request. */
   const notifyAgent = (
-    c: Context<AppEnv>,
+    c: HttpContext,
     event: Omit<OperationEvent, "actorUserId" | "actorName">,
   ) => {
     if (!agentService) return;
@@ -280,8 +283,7 @@ export function createApp(
     email: u.email,
     image: u.image ?? null,
   });
-  const app = new Hono<AppEnv>();
-  options.instrument?.(app);
+  const app = new RouteTable();
 
   app.use("*", async (c, next) => {
     const incoming = c.req.header("x-request-id")?.trim();
@@ -350,6 +352,17 @@ export function createApp(
     c.set("user", session?.user ?? null);
     c.set("session", session?.session ?? null);
     await next();
+  });
+
+  // Public capabilities only; never expose provider credentials or account data.
+  app.get("/api/auth/capabilities", (c) => {
+    c.header("Cache-Control", "no-store");
+    return ok(c, {
+      socialProviders: [
+        ...(config.googleOAuth ? ["google"] : []),
+      ],
+      emailDelivery: config.email.provider === "console" ? "console" : "email",
+    });
   });
 
   // Better Auth handler. Surface driver errors as JSON (Better Auth sometimes
@@ -459,7 +472,7 @@ export function createApp(
   });
 
   // Everything below requires a session.
-  const guard = new Hono<AppEnv>();
+  const guard = new RouteTable();
   guard.use("*", async (c, next) => {
     if (!c.get("session")) return fail(c, "unauthenticated", "Sign in required", 401);
     await next();
@@ -468,6 +481,112 @@ export function createApp(
   guard.get("/trips", async (c) =>
     ok(c, await tripService.listTrips(c.get("user")!.id)),
   );
+
+  guard.post("/voice/token", async (c) => {
+    // CORS alone does not prevent cross-site POSTs to this browser-only endpoint.
+    const origin = c.req.header("origin");
+    if (!origin || !config.trustedOrigins.includes(origin)) {
+      return fail(c, "forbidden_origin", "Origin is not allowed", 403);
+    }
+    try {
+      return ok(c, await container.voiceTokenService.createToken(c.get("user")!.id));
+    } catch (error) {
+      if (!(error instanceof VoiceError)) throw error;
+      if (error.code === "voice_rate_limited") c.header("Retry-After", "60");
+      return fail(c, error.code, error.message, error.code === "voice_rate_limited" ? 429 : 503);
+    }
+  });
+
+  guard.post("/trips/:id/medical", bodyLimit({ maxSize: 1500, onError: (c) => fail(c, "request_too_large", "Medical search request too large", 413) }), async (c) => {
+    if (!config.trustedOrigins.includes(c.req.header("origin") ?? "")) return fail(c, "forbidden_origin", "Origin is not allowed", 403);
+    if (!container.medicalService) return fail(c, "medical_unavailable", "Medical place search unavailable", 503);
+    return ok(c, await container.medicalService.search(c.req.param("id"), c.get("user")!.id, await c.req.json().catch(() => null)));
+  });
+
+  guard.post("/trips/:id/travel", bodyLimit({ maxSize: 2000, onError: (c) => fail(c, "request_too_large", "Travel request too large", 413) }), async (c) => {
+    if (!config.trustedOrigins.includes(c.req.header("origin") ?? "")) return fail(c, "forbidden_origin", "Origin is not allowed", 403);
+    const { stopIds } = z.object({ stopIds: z.array(z.string().min(1).max(150)).min(1).max(6) }).strict().parse(await c.req.json().catch(() => null));
+    if (!container.indiaTravelService) return fail(c, "travel_unavailable", "Travel services unavailable", 503);
+    return ok(c, await container.indiaTravelService.inspect(c.req.param("id"), c.get("user")!.id, stopIds));
+  });
+
+  guard.get("/trips/:id/budget", async (c) => {
+    if (!container.budgetService) return fail(c, "budget_unavailable", "Budget intelligence unavailable", 503);
+    return ok(c, await container.budgetService.status(c.req.param("id"), c.get("user")!.id));
+  });
+  guard.post("/trips/:id/budget/:action", bodyLimit({ maxSize: 12000, onError: (c) => fail(c, "request_too_large", "Budget request too large", 413) }), async (c) => {
+    if (!config.trustedOrigins.includes(c.req.header("origin") ?? "")) return fail(c, "forbidden_origin", "Origin is not allowed", 403);
+    if (!container.budgetService) return fail(c, "budget_unavailable", "Budget intelligence unavailable", 503);
+    const action = z.enum(["forecast", "propose", "approve"]).parse(c.req.param("action"));
+    const body = await c.req.json().catch(() => null);
+    const actor = c.get("user")!.id;
+    if (action === "forecast") return ok(c, await container.budgetService.setForecast(c.req.param("id"), actor, body));
+    if (action === "propose") {
+      z.object({}).strict().parse(body);
+      return ok(c, await container.budgetService.propose(c.req.param("id"), actor));
+    }
+    const { proposalId } = z.object({ proposalId: z.string().uuid(), confirm: z.literal(true) }).strict().parse(body);
+    return ok(c, await container.budgetService.approve(proposalId, actor, c.req.param("id")));
+  });
+
+  guard.post("/trips/:tripId/expenses/preview", bodyLimit({ maxSize: 8000, onError: (c) => fail(c, "request_too_large", "Expense request is too large", 413) }), async (c) => {
+    const origin = c.req.header("origin");
+    if (!origin || !config.trustedOrigins.includes(origin)) return fail(c, "forbidden_origin", "Origin is not allowed", 403);
+    const { prompt } = z.object({ prompt: z.string().trim().min(3).max(2000) }).strict().parse(await c.req.json().catch(() => null));
+    if (!container.voiceExpenseService) return fail(c, "expense_voice_unavailable", "Expense interpretation unavailable", 503);
+    try { return ok(c, await container.voiceExpenseService.preview(c.req.param("tripId"), c.get("user")!.id, prompt)); }
+    catch (error) {
+      if (!(error instanceof ExpenseVoiceError)) throw error;
+      return fail(c, error.code, "Expense draft could not be interpreted; enter it manually", error.code === "expense_voice_rate_limited" ? 429 : 503);
+    }
+  });
+
+  guard.post("/voice/summary/:action", bodyLimit({ maxSize: 1000, onError: (c) => fail(c, "request_too_large", "Speech request is too large", 413) }), async (c) => {
+    c.header("Cache-Control", "no-store");
+    const origin = c.req.header("origin");
+    if (!origin || !config.trustedOrigins.includes(origin)) return fail(c, "forbidden_origin", "Origin is not allowed", 403);
+    const action = z.enum(["text", "audio"]).parse(c.req.param("action"));
+    const { proposalId, language } = z.object({ proposalId: z.string().uuid(), language: z.enum(["en", "hi"]) }).strict().parse(await c.req.json().catch(() => null));
+    const service = container.spokenSummaryService;
+    if (!service) return fail(c, "speech_unavailable", "Spoken summaries are unavailable", 503);
+    try {
+      if (action === "text") return ok(c, await service.describe(proposalId, c.get("user")!.id, language));
+      const audio = await service.speak(proposalId, c.get("user")!.id, language, c.req.raw.signal);
+      c.header("Content-Type", "audio/mpeg");
+      c.header("X-Content-Type-Options", "nosniff");
+      return c.body(new Uint8Array(audio).buffer);
+    } catch (error) {
+      if (!(error instanceof SpeechError)) throw error;
+      if (error.code === "speech_rate_limited") c.header("Retry-After", "60");
+      return fail(c, error.code, "Spoken summary unavailable; your itinerary is still available as text", error.code === "speech_rate_limited" ? 429 : 503);
+    }
+  });
+
+  guard.post("/planning/preview", bodyLimit({ maxSize: 20_000, onError: (c) => fail(c, "request_too_large", "Planning request is too large", 413) }), async (c) => {
+    const origin = c.req.header("origin");
+    if (!origin || !config.trustedOrigins.includes(origin)) {
+      return fail(c, "forbidden_origin", "Origin is not allowed", 403);
+    }
+    const body = await c.req.json().catch(() => null);
+    const request = planningRequestSchema.parse(body);
+    try {
+      return ok(c, await container.planningService.preview(c.get("user")!.id, request));
+    } catch (error) {
+      if (!(error instanceof PlanningError)) throw error;
+      if (error.code === "planning_rate_limited") c.header("Retry-After", "60");
+      return fail(c, error.code, "Trip preview could not be generated. Please retry.", error.code === "planning_rate_limited" ? 429 : error.code === "planning_invalid_output" ? 502 : 503);
+    }
+  });
+
+  guard.post("/planning/proposals/:id/approve", bodyLimit({ maxSize: 1000, onError: (c) => fail(c, "request_too_large", "Approval request is too large", 413) }), async (c) => {
+    const origin = c.req.header("origin");
+    if (!origin || !config.trustedOrigins.includes(origin)) return fail(c, "forbidden_origin", "Origin is not allowed", 403);
+    if (!container.proposalApprovalService) return fail(c, "approval_unavailable", "Proposal saving requires PostgreSQL", 503);
+    z.object({ confirm: z.literal(true) }).strict().parse(await c.req.json().catch(() => null));
+    const id = z.string().uuid().parse(c.req.param("id"));
+    const user = c.get("user")!;
+    return ok(c, await container.proposalApprovalService.approve(id, { id: user.id, name: user.name, image: user.image }));
+  });
 
   // Weather proxy: UI and agent both use WeatherService (never a vendor client).
   guard.get("/weather", async (c) => {
@@ -958,7 +1077,7 @@ export function createApp(
   guard.get("/agent/status", (c) => ok(c, { enabled: agentService !== null }));
 
   // Trip agent session routes. All 404 when AI is not configured.
-  const agent = new Hono<AppEnv>();
+  const agent = new RouteTable();
   agent.use("*", async (c, next) => {
     if (!agentService) return fail(c, "agent_disabled", "Agent is not enabled", 404);
     await next();
@@ -1149,4 +1268,19 @@ function parseRevisionHeader(value: string | undefined): number | null {
   if (!/^\d+$/.test(normalized)) return null;
   const revision = Number(normalized);
   return Number.isSafeInteger(revision) ? revision : null;
+}
+
+/** Worker transport retained until Node platform parity (M5). */
+export function createApp(container: Container, options: CreateAppOptions = { runtime: "node" }) {
+  const table = createRouteTable(container, options);
+  const app = new Hono<AppEnv>();
+  options.instrument?.(app);
+  // Hono supplies the same Web request/response context contract at this boundary.
+  for (const endpoint of table.endpoints) {
+    app.on([endpoint.method], endpoint.path, context =>
+      dispatch(table, [...table.middleware, ...endpoint.handlers], context as unknown as HttpContext));
+  }
+  app.use("*", context => dispatch(table, table.middleware, context as unknown as HttpContext));
+  app.onError((error, context) => table.errorHandler(error, context as unknown as HttpContext));
+  return app;
 }

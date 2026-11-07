@@ -8,10 +8,10 @@ export default function HomePage() {
       <nav className="home-nav" aria-label="Primary navigation">
         <Link href="/" className="home-brand">
           <span className="home-brand-mark">O</span>
-          <span>OpenTrip Docs</span>
+          <span>Raahi AI Docs</span>
         </Link>
         <a href={site.product} className="home-product-link">
-          Open OpenTrip <ExternalLink size={14} aria-hidden="true" />
+          Set up Raahi AI <ExternalLink size={14} aria-hidden="true" />
         </a>
       </nav>
 
@@ -20,8 +20,8 @@ export default function HomePage() {
         <h1>Start with what you want to do.</h1>
         <p>
           Find practical guidance for planning a trip — including Today,
-          reservations, map and street view, WeChat, and the AI companion — or
-          go behind the scenes to understand and build OpenTrip.
+          reservations, map and street view, mobile access, and the AI companion — or
+          go behind the scenes to understand and build Raahi AI.
         </p>
       </section>
 

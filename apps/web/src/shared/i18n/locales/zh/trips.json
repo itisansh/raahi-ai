@@ -36,7 +36,7 @@
       "label": "此时此地",
       "emptyTitle": "你今天在哪里？",
       "emptyDescription": "填写城市或地区，今天页会记住这里并显示当前天气。",
-      "placeholder": "上海、东京、胡志明市…",
+      "placeholder": "勒克瑙、瑞诗凯诗、斋浦尔…",
       "inputLabel": "今天所在的城市或地区",
       "search": "查找地点",
       "change": "更换地点",
@@ -202,7 +202,7 @@
       "destination": {
         "title": "想去哪里？",
         "description": "填写城市或地区。",
-        "placeholder": "东京、京都…"
+        "placeholder": "瑞诗凯诗、乔普塔…"
       },
       "duration": {
         "title": "几天？",

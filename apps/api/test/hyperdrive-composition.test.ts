@@ -8,7 +8,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 describe("Hyperdrive consistency composition", () => {
   it("binds consistency-critical repositories to the fresh client", () => {
     const source = readFileSync(
-      resolve(root, "apps/api/src/infrastructure/composition/container.ts"),
+      resolve(root, "apps/api/src/config/container.ts"),
       "utf8",
     );
 

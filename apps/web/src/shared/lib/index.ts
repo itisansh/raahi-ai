@@ -39,3 +39,4 @@ export {
   installVisualViewportCssVars,
   type VisualViewportBox,
 } from "./visual-viewport";
+export { useNetworkStatus } from "./network";

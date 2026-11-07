@@ -37,6 +37,9 @@ export function Hero({ onGetStarted }: { onGetStarted: () => void }) {
 
         <div className="wf-enter mx-auto mt-14 max-w-5xl">
           <BrowserFrame src={heroShot} alt={t("hero.imageAlt")} priority />
+          <p className="mt-3 text-center text-sm text-muted-foreground">
+            {t("legacyPreview")}
+          </p>
         </div>
       </div>
     </section>

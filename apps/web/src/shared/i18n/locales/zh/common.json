@@ -1,14 +1,14 @@
 {
   "pwa": {
-    "offlineReady": "OpenTrip 已可离线使用",
-    "updateReady": "OpenTrip 更新已就绪",
+    "offlineReady": "Raahi AI 已可离线使用",
+    "updateReady": "Raahi AI 更新已就绪",
     "updateDescription": "准备好后刷新，即可使用最新版本。",
     "updateAction": "更新"
   },
   "mobileOnboarding": {
     "later": "暂不",
     "install": {
-      "title": "将 OpenTrip 添加到主屏幕",
+      "title": "将 Raahi AI 添加到主屏幕",
       "description": "安装应用，获得全屏体验和离线访问。",
       "action": "安装",
       "iosHint": "打开浏览器的分享菜单，选择“添加到主屏幕”。",
@@ -16,7 +16,7 @@
     },
     "notifications": {
       "title": "允许消息通知",
-      "description": "OpenTrip 在后台时，行程提醒会以系统通知推送。",
+      "description": "Raahi AI 在后台时，行程提醒会以系统通知推送。",
       "action": "允许"
     },
     "location": {
@@ -25,7 +25,7 @@
       "action": "允许"
     }
   },
-    "appName": "OpenTrip",
+    "appName": "Raahi AI",
     "tagline": "每一场难忘的旅行，都始于群聊。",
     "language": "语言",
     "languageName": {
@@ -208,7 +208,27 @@
         "about": {
             "title": "关于",
             "version": "版本 {{version}}",
-            "description": "OpenTrip是一款供亲友一起规划旅行的协作工具。"
+            "description": "Raahi AI是一款供亲友一起规划旅行的协作工具。"
         }
-    }
+    },
+  "voice": {
+  "start": "Use microphone",
+  "stop": "Stop recording",
+  "cancel": "Cancel",
+  "use": "Use this text",
+  "transcript": "Review and edit transcript",
+  "privacy": "Audio is sent to ElevenLabs. Raahi does not store recordings. Review the text before using it.",
+  "destinationHint": "Dictate a destination here; full trip requests belong in the trip assistant for now. Audio is sent to ElevenLabs; Raahi does not store recordings.",
+  "connecting": "Connecting — allow microphone access when prompted.",
+  "recording": "Recording · stop when finished (90 seconds maximum).",
+  "finalizing": "Finalizing your transcript…",
+  "errors": {
+    "unavailable": "Voice input is unavailable. Try again or type your request.",
+    "permission": "Microphone access was denied. Allow it in your browser settings or keep typing.",
+    "unsupported": "Voice needs HTTPS (or localhost) and a browser with microphone support. You can still type.",
+    "timeout": "Recording timed out. Try again or type your request.",
+    "empty": "No final speech was received. Try again or type your request.",
+    "rateLimited": "Too many recording attempts. Wait a minute, or type your request."
+  }
+}
 }

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { Trip } from "../src/domain/trip";
-import { seedTrips } from "../src/infrastructure/persistence/seed-data";
+import { seedTrips } from "../src/repositories/seed-data";
 import {
   buildUserMessageParts,
   containsAgentMention,
   mentionedUserIdsFromParts,
   parseMemberMentions,
-} from "../src/application/agent/mentions";
+} from "../src/services/agent/mentions";
 
 function tripWithUsers(): Trip {
   const snap = structuredClone(seedTrips()[0]!.snapshot);
@@ -29,7 +29,7 @@ describe("agent mentions", () => {
     const lynn = trip.toSnapshot().members.find((m) => m.id === "lynn")!;
 
     const ids = parseMemberMentions(
-      "@Aiko Tanaka can you review this? cc @Marco Bailey",
+      "@Ananya Rao can you review this? cc @Kabir Singh",
       trip,
       lynn.userId!,
     );
@@ -42,7 +42,7 @@ describe("agent mentions", () => {
   it("does not match partial name prefixes", () => {
     const trip = tripWithUsers();
     const author = trip.toSnapshot().members[0]!;
-    const ids = parseMemberMentions("@Lynn", trip, author.userId!);
+    const ids = parseMemberMentions("@Aarav", trip, author.userId!);
     expect(ids).toHaveLength(0);
   });
 
@@ -50,11 +50,11 @@ describe("agent mentions", () => {
     const trip = tripWithUsers();
     const author = trip.toSnapshot().members.find((m) => m.id === "lynn")!;
     const parts = buildUserMessageParts(
-      "@Aiko Tanaka ping",
+      "@Ananya Rao ping",
       trip,
       author.userId!,
     );
-    expect(parts[0]).toEqual({ type: "text", text: "@Aiko Tanaka ping" });
+    expect(parts[0]).toEqual({ type: "text", text: "@Ananya Rao ping" });
     expect(mentionedUserIdsFromParts(parts)).toEqual(["user-aiko"]);
   });
 });

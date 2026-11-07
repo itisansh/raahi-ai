@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assistantPartsHaveContent } from "../src/application/agent/agent-service";
+import { assistantPartsHaveContent } from "../src/services/agent/agent-service";
 
 describe("agent json-render persistence", () => {
   it("persists replies that contain only a generated UI part", () => {

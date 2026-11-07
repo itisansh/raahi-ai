@@ -5,9 +5,7 @@ title: "Frontend (Feature-Sliced Design)"
 # Frontend (Feature-Sliced Design)
 
 The browser frontend (`apps/web`) is a React + TypeScript + Vite PWA organized
-with Feature-Sliced Design v2.1. WeChat is served by a separate native Mini
-Program client (`apps/miniapp`, Taro + React, also FSD) that reuses the API but
-not this code. Reference:
+with Feature-Sliced Design v2.1. The mobile client is the browser PWA. Reference:
 [../reference/frontend-sources.md](../reference/frontend-sources.md).
 
 ## Layers
@@ -72,8 +70,7 @@ routes:
 - `/invite/:token` — invite accept surface (`matchInviteToken`).
 - `/signin` — auth form.
 
-The web app has no embedded/WebView host mode; WeChat runs the native client in
-[miniapp.md](miniapp.md).
+The web app supports mobile browsers and PWA installation.
 
 ## Today and travelogues (hub)
 
@@ -120,7 +117,7 @@ import { Button } from "@/shared/ui/button/button";
 ## Related
 
 - [ui-system.md](ui-system.md) — cossUI tokens, primitives, polish.
-- [miniapp.md](miniapp.md) — native Taro Mini Program client, bearer auth, setup.
+
 - [map.md](map.md) — MapLibre wrapper.
 - [i18n.md](i18n.md) — internationalization.
 - [data-caching.md](data-caching.md) — React Query write-echo vs Hyperdrive

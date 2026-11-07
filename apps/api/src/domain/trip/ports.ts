@@ -36,6 +36,7 @@ export interface TripSummary {
 
 /** Repository port for the Trip aggregate. Implemented in infrastructure. */
 export interface TripRepository {
+  mutateExpense?(tripId: string, mutate: (trip: Trip) => void): Promise<Trip>;
   /** Trips the user may see: ones they are a member of, plus legacy/demo trips
    * that have no real members yet. */
   findSummaries(userId: string): Promise<TripSummary[]>;
@@ -55,8 +56,8 @@ export interface TripRepository {
   /** Update display metadata for an existing itinerary day. */
   updateDay(tripId: string, day: DaySnapshot): Promise<void>;
   /** Rewrite all itinerary days and stops after a reorder, in one transaction. */
-  reorderDays(trip: Trip): Promise<void>;
+  reorderDays(trip: Trip, expectedVersion: number): Promise<void>;
   /** Rewrite all itinerary days and stops after a day deletion, in one transaction. */
-  deleteDay(trip: Trip): Promise<void>;
-  save(trip: Trip): Promise<void>;
+  deleteDay(trip: Trip, expectedVersion: number): Promise<void>;
+  save(trip: Trip, expectedVersion: number): Promise<void>;
 }

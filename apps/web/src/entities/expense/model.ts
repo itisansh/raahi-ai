@@ -1,6 +1,8 @@
 import type { StopCategory } from "@/entities/stop";
 
 export interface Expense {
+  shares?: Record<string, number>;
+  allocations?: Record<string, number>;
   id: string;
   description: string;
   payer: string;
@@ -27,6 +29,7 @@ export interface Settlement {
 }
 
 export interface Budget {
+  excludedCurrencies?: string[];
   total: number;
   perPerson: number;
   balances: Balance[];

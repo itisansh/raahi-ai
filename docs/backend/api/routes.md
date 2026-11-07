@@ -21,12 +21,15 @@ API origin. **Auth**: `public` | `session` | `session + member` | `session + edi
 | GET | `/api/weather` | session | Forecast/observed weather |
 | GET | `/api/fx/rates` | session | FX rate table for settle-up display |
 | GET | `/api/agent/status` | session | Whether trip agent is enabled |
+| POST | `/api/voice/token` | session + trusted Origin | Scoped Scribe transcription token |
+| POST | `/api/planning/preview` | session + trusted Origin (+ member when tripId supplied) | Read-only structured trip proposal |
+| POST | `/api/planning/proposals/:id/approve` | session + trusted Origin + proposal owner | Atomically create an approved new itinerary |
 
 ### Worker-only (not in `createApp`)
 
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
-| GET | `/api/trips/:tripId/realtime` | session + member | WebSocket upgrade for trip changes + presence; intercepted by `handleRealtimeUpgrade` in `worker.ts`, so the Node dev server has no realtime route. Browsers always send `Origin` (checked against trusted origins); Origin-less clients such as WeChat `wx.connectSocket` authenticate via Bearer token. |
+| GET | `/api/trips/:tripId/realtime` | session + member | WebSocket upgrade for trip changes + presence; intercepted by `handleRealtimeUpgrade` in `worker.ts`, so the Node dev server has no realtime route. Browsers always send `Origin` (checked against trusted origins); Origin-less native clients authenticate via Bearer token. |
 
 ### Trips
 

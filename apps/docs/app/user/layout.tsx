@@ -9,13 +9,13 @@ export default function UserLayout({ children }: { children: ReactNode }) {
     <DocsLayout
       tree={userSource.pageTree}
       nav={{
-        title: "OpenTrip Docs",
+        title: "Raahi AI Docs",
         url: "/",
         children: <PerspectiveSwitcher perspective="user" />,
       }}
       links={[
         {
-          text: "Open OpenTrip",
+          text: "Set up Raahi AI",
           url: site.product,
           external: true,
         },

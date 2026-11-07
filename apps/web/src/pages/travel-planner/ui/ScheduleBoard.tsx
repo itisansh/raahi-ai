@@ -1263,8 +1263,8 @@ function buildLocationOptions(trip: Trip): string[] {
     ...trip.days.map((day) =>
       inferDayLocation(trip.stops.filter((stop) => stop.day === day.number)),
     ),
-    ...trip.stops.map((stop) => cityFromCoordinates(stop.lat, stop.lng) ?? ""),
-    ...trip.stops.map((stop) => normalizeKnownPlace(stop.area) ?? ""),
+
+    ...trip.stops.map((stop) => normalizeAreaLabel(stop.area)),
   ];
   return uniqueOptions(values);
 }
@@ -1286,7 +1286,7 @@ function inferDayLocation(stops: readonly Stop[]): string {
   const dominantCity = mostFrequent(
     stops
       .filter((stop) => !stop.transit)
-      .map((stop) => cityFromCoordinates(stop.lat, stop.lng))
+      .map((stop) => normalizeAreaLabel(stop.area))
       .filter((city): city is string => city != null),
   );
 
@@ -1296,7 +1296,7 @@ function inferDayLocation(stops: readonly Stop[]): string {
   if (routeParts) {
     const [origin, destination] = routeParts;
     const routeDestination =
-      dominantCity || normalizeKnownPlace(destination) || destination;
+      dominantCity || destination;
     if (origin && routeDestination && origin !== routeDestination) {
       return `${origin} → ${routeDestination}`;
     }
@@ -1313,36 +1313,13 @@ function inferDayLocation(stops: readonly Stop[]): string {
   );
 }
 
-function cityFromCoordinates(lat: number, lng: number): string | null {
-  if (lat >= 35.5 && lat <= 35.85 && lng >= 139.45 && lng <= 140.0) {
-    return "Tokyo";
-  }
-  if (lat >= 34.85 && lat <= 35.15 && lng >= 135.55 && lng <= 135.9) {
-    return "Kyoto";
-  }
-  if (lat >= 34.55 && lat <= 34.85 && lng >= 135.35 && lng <= 135.65) {
-    return "Osaka";
-  }
-  return null;
-}
-
 function splitRouteArea(area: string): [string, string] | null {
   const [rawOrigin, rawDestination] = area.split(/\s*(?:→|->)\s*/);
   if (!rawOrigin || !rawDestination) return null;
-  const origin = normalizeKnownPlace(rawOrigin) || normalizeAreaLabel(rawOrigin);
+  const origin = normalizeAreaLabel(rawOrigin);
   const destination =
-    normalizeKnownPlace(rawDestination) || normalizeAreaLabel(rawDestination);
+    normalizeAreaLabel(rawDestination);
   return origin && destination ? [origin, destination] : null;
-}
-
-function normalizeKnownPlace(value: string): string | null {
-  const normalized = value.toLowerCase();
-  if (normalized.includes("tokyo")) return "Tokyo";
-  if (normalized.includes("kyoto")) return "Kyoto";
-  if (normalized.includes("osaka") || normalized.includes("umeda")) {
-    return "Osaka";
-  }
-  return null;
 }
 
 function normalizeAreaLabel(value: string): string {

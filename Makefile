@@ -5,11 +5,8 @@ COMPOSE_FILE ?= deploy/docker/compose.yaml
 POSTGRES_PORT ?= 5430
 POSTGRES_USER ?= opentrip
 POSTGRES_DB ?= opentrip
-MINIAPP_DIR ?= apps/miniapp
-WECHAT_DEVTOOLS_CLI ?= /Applications/wechatwebdevtools.app/Contents/MacOS/cli
 
 .PHONY: help install env setup postgres-up postgres-down dev dev-nodb dev-web dev-api dev-docs
-.PHONY: miniapp-env miniapp-sync-config miniapp-build miniapp-watch miniapp-clear-cache miniapp miniapp-open dev-miniapp-api
 .PHONY: db-init db-reset db-migrate db-seed db-generate db-pull db-push db-studio db-snapshot
 .PHONY: deploy-up deploy-down deploy-logs
 .PHONY: build test lint typecheck check docs clean deploy
@@ -38,39 +35,6 @@ help:
 	@echo "  make dev-api         Start API only (http://localhost:8780)"
 	@echo "  make dev-docs        Start Fumadocs only (http://localhost:5171)"
 	@echo ""
-	@echo "WeChat Mini Program (native Taro client):"
-	@echo "  make miniapp              Build the client and open DevTools"
-	@echo "  make miniapp-build        Compile apps/miniapp into apps/miniapp/dist"
-	@echo "  make miniapp-watch        Rebuild on change while DevTools stays open"
-	@echo "  make miniapp-open         Open apps/miniapp in WeChat Developer Tools"
-	@echo "  make miniapp-sync-config  Generate the gitignored DevTools AppID config"
-	@echo "  make miniapp-clear-cache  Clear DevTools file/compile cache and rebuild watcher"
-	@echo "  make dev-miniapp-api      Start Postgres + API for native client development"
-	@echo ""
-	@echo "Database (Prisma):"
-	@echo "  make db-generate     Generate Prisma Client from schema.prisma"
-	@echo "  make db-pull         Regenerate prisma/schema.prisma from the live database"
-	@echo "  make db-snapshot     Alias for db-pull; snapshot the current DB schema"
-	@echo "  make db-push         Push schema changes to the database (dev/hack only)"
-	@echo "  make db-migrate      Apply pending Prisma migrations"
-	@echo "  make db-migrate-dev  Create a new Prisma migration from schema changes"
-	@echo "  make db-seed         Seed demo data via Prisma"
-	@echo "  make db-reset        Drop public schema, generate client, re-migrate, and re-seed"
-	@echo "  make db-init         Run migrations then seed demo data"
-	@echo "  make db-studio       Open Prisma Studio"
-	@echo ""
-	@echo "Build & QA:"
-	@echo "  make build           Build all packages"
-	@echo "  make test            Run tests"
-	@echo "  make lint            Run ESLint"
-	@echo "  make typecheck       Run TypeScript"
-	@echo "  make check           typecheck + lint + test + ui:check + build"
-	@echo "  make docs            Validate documentation links"
-	@echo "  make ui              Validate UI conventions"
-	@echo "  make clean           Remove build artifacts"
-	@echo ""
-	@echo "Deploy info:"
-	@echo "  make deploy          Print Cloudflare / Docker deployment pointers"
 
 install:
 	pnpm install
@@ -128,59 +92,6 @@ dev-api: env postgres-up db-migrate
 
 dev-docs:
 	pnpm --filter @opentrip/docs dev
-
-miniapp-sync-config:
-	@node "$(MINIAPP_DIR)/scripts/sync-config.mjs"
-
-miniapp-env:
-	@if [ ! -f $(MINIAPP_DIR)/.env ]; then \
-		cp $(MINIAPP_DIR)/.env.example $(MINIAPP_DIR)/.env; \
-		echo "Created $(MINIAPP_DIR)/.env from .env.example"; \
-	else \
-		echo "$(MINIAPP_DIR)/.env already exists"; \
-	fi
-	@$(MAKE) miniapp-sync-config
-
-miniapp-build: miniapp-env
-	pnpm --filter @opentrip/miniapp build
-
-miniapp-watch: miniapp-env
-	pnpm --filter @opentrip/miniapp dev
-
-miniapp-clear-cache: miniapp-build
-	@node -e 'const fs=require("fs");const p="$(MINIAPP_DIR)/project.private.config.json";let id="";try{id=JSON.parse(fs.readFileSync(p,"utf8")).appid||""}catch{}if(!String(id).trim()){console.error("Mini Program AppID missing. Set MINIAPP_APP_ID in apps/miniapp/.env, then run: make miniapp-sync-config");process.exit(1)}console.log("Mini Program config synced ("+String(id).trim().slice(0,4)+"…).")'
-	@if [ ! -x "$(WECHAT_DEVTOOLS_CLI)" ]; then \
-		echo "WeChat Developer Tools CLI not found: $(WECHAT_DEVTOOLS_CLI)"; \
-		echo "Set WECHAT_DEVTOOLS_CLI to the installed CLI path."; \
-		exit 1; \
-	fi
-	@echo "Opening project before DevTools cache cleanup…"
-	@printf 'n\n' | "$(WECHAT_DEVTOOLS_CLI)" open --project "$(CURDIR)/$(MINIAPP_DIR)" || { \
-		echo "DevTools CLI unavailable. Manually enable 设置 → 安全设置 → 服务端口, then retry."; \
-		exit 1; \
-	}
-	@echo "Clearing DevTools file and compile caches…"
-	@"$(WECHAT_DEVTOOLS_CLI)" cache --clean file --project "$(CURDIR)/$(MINIAPP_DIR)"
-	@"$(WECHAT_DEVTOOLS_CLI)" cache --clean compile --project "$(CURDIR)/$(MINIAPP_DIR)"
-	@echo "Rebuilding DevTools file watcher…"
-	@"$(WECHAT_DEVTOOLS_CLI)" reset-fileutils --project "$(CURDIR)/$(MINIAPP_DIR)"
-
-miniapp-open: miniapp-clear-cache
-	@echo "Project directory: $(CURDIR)/$(MINIAPP_DIR)"
-	@echo "(project.config.json loads the Taro build output from dist/.)"
-	@echo "Restarting project after cache cleanup…"
-	@"$(WECHAT_DEVTOOLS_CLI)" close --project "$(CURDIR)/$(MINIAPP_DIR)" || true
-	@"$(WECHAT_DEVTOOLS_CLI)" open --project "$(CURDIR)/$(MINIAPP_DIR)"
-	@echo "Production requires the API origin on the WeChat request-domain allowlist."
-
-miniapp: miniapp-open
-
-# API for native client development. The API origin must be reachable from the
-# device or simulator and listed as a WeChat request domain in production.
-dev-miniapp-api: env postgres-up db-migrate miniapp-env
-	@echo "API → http://localhost:8780"
-	@echo "Set MINIAPP_API_BASE_URL when the client must reach another origin."
-	pnpm --filter @opentrip/api dev
 
 db-generate:
 	pnpm --filter @opentrip/api db:generate

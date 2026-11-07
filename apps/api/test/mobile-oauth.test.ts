@@ -1,7 +1,8 @@
+import { VoiceTokenService } from "../src/services/voice/voice-token-service";
 import { describe, expect, it, vi } from "vitest";
-import type { Container } from "../src/infrastructure/composition/container";
-import type { AppConfig } from "../src/infrastructure/config";
-import { createApp } from "../src/interfaces/http/app";
+import type { Container } from "../src/config/container";
+import type { AppConfig } from "../src/config/env";
+import { createApp } from "./http-app";
 
 const GOOGLE_AUTH_URL =
   "https://accounts.google.com/o/oauth2/v2/auth?client_id=test&state=abc";
@@ -20,8 +21,6 @@ function baseConfig(googleOAuth: AppConfig["googleOAuth"]): AppConfig {
       publicUrl: "https://api.example.test/api/uploads",
     },
     googleOAuth,
-    wechatOAuth: null,
-    wechatMiniProgram: null,
     captcha: null,
     email: {
       provider: "console",
@@ -107,6 +106,9 @@ function createTestApp(options: {
     fileStorage: {} as Container["fileStorage"],
     avatarService: {} as Container["avatarService"],
     tripMediaService: {} as Container["tripMediaService"],
+    planningService: {} as Container["planningService"],
+    proposalApprovalService: null,
+    voiceTokenService: new VoiceTokenService(null, { consume: async () => false }),
     agentService: null,
     trackDeferred: () => {},
     disposeAfterDeferred: async () => {},
@@ -117,6 +119,20 @@ function createTestApp(options: {
 }
 
 describe("mobile OAuth start", () => {
+  it("exposes configured login capabilities without sessions or secrets", async () => {
+    const getSession = vi.fn(async () => { throw new Error("must not resolve sessions"); });
+    const { app } = createTestApp({ googleOAuth: null, getSession });
+    const response = await app.request("/api/auth/capabilities");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(await response.json()).toEqual({ data: { socialProviders: [], emailDelivery: "console" } });
+    expect(getSession).not.toHaveBeenCalled();
+
+    const configured = createTestApp({ googleOAuth: { clientId: "private-id", clientSecret: "private-secret" } });
+    const enabled = await configured.app.request("/api/auth/capabilities");
+    expect(await enabled.json()).toEqual({ data: { socialProviders: ["google"], emailDelivery: "console" } });
+  });
+
   it("returns a stable request id on every API response", async () => {
     const { app } = createTestApp({ googleOAuth: null });
     const generated = await app.request("/api/health");

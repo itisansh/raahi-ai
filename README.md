@@ -1,214 +1,138 @@
-<p align="center">
-  <img src="docs/assets/logo.png" width="96" height="96" alt="OpenTrip logo" />
-</p>
+# Raahi AI
 
-<h1 align="center">OpenTrip</h1>
+Collaborative travel planning for friends exploring India. Raahi AI is being
+built on [OpenTrip](https://github.com/stvlynn/OpenTrip), preserving its
+React/Vite frontend, Express Node API (Hono on Workers), Better Auth and MongoDB/Mongoose persistence on Node; legacy SQL remains for the Worker and data migration.
 
-<p align="center">
-  <strong>Plan trips together. Split everything.</strong>
-</p>
+**Development status:** the local source audit and automated baseline are
+recorded in [BUILD_PROGRESS.md](BUILD_PROGRESS.md). Product branding is in
+progress. Microphone transcription and a read-only AI trip preview are implemented
+with live end-to-end verification pending. The preview asks for missing constraints,
+checks place coordinates and road estimates, and labels estimated costs. It does
+not automatically save a trip. Eligible new-trip proposals can be explicitly
+approved and saved; applying proposals to existing trips remains planned.
+Proposal review includes English/Hindi spoken summaries through ElevenLabs,
+with visible narration, stop/cancel and native replay/mute controls. Short live
+TTS samples pass; browser audio and pronunciation acceptance remain pending.
+Expense entry includes reviewed voice/text drafts with explicit payer and participant selection. INR expenses support paise precision, equal/custom shares and retry protection in the expense form. Database and live parser checks pass; browser acceptance remains incomplete. The Budget board also supports explicit group forecasts and reviewed AI reductions of optional future activities; database approval/revision checks pass, with browser acceptance pending.
 
-<p align="center">
-  Collaborative travel planning for small groups — map itineraries, day schedules,
-  shared expenses, reservations, and an AI trip companion in one place.
-</p>
+## What exists today
 
-<p align="center">
-  <a href="https://opentrip.im"><strong>opentrip.im</strong></a>
-</p>
+The inherited application includes shared trips, invitations and roles, map and
+day views, reservations, expense entry and a trip-scoped AI assistant with
+approved write tools. AI requires a separately configured provider. Full
+realtime fan-out currently uses Cloudflare Durable Objects; Node serves the
+HTTP application.
 
-<p align="center">
-  <a href="README.zh-CN.md">简体中文</a> ·
-  <a href="#features">Features</a> ·
-  <a href="#screenshots">Screenshots</a> ·
-  <a href="#quick-start">Quick start</a> ·
-  <a href="#tech-stack">Tech stack</a>
-</p>
+The current sample trip and screenshots are legacy OpenTrip demonstrations.
+They are not live travel prices, bookings, or evidence of Raahi's future voice
+workflow. Existing expense arithmetic and currency handling require further
+work before they meet Raahi's integer-paise accounting requirements.
 
-<p align="center">
-  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white" />
-  <img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" />
-  <img alt="Hono" src="https://img.shields.io/badge/Hono-API-E36002?logo=hono&logoColor=white" />
-  <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-ready-4169E1?logo=postgresql&logoColor=white" />
-  <img alt="PWA" src="https://img.shields.io/badge/PWA-installable-5A0FC8?logo=pwa&logoColor=white" />
-  <img alt="i18n" src="https://img.shields.io/badge/i18n-EN%20%7C%20中文-green" />
-</p>
+## Roadmap
 
-| Intro |
-| :---: |
-| <video src="https://github.com/user-attachments/assets/c0cdeabc-f26a-477f-a55f-f80e48780d7b" width="920" controls muted playsinline></video> |
+The defining workflow is:
 
-| Trips & invite | Map | Schedule |
-| :---: | :---: | :---: |
-| <video src="https://github.com/user-attachments/assets/e55d18dd-4123-4a64-a49b-e3a169d8a7f3" width="300" controls muted playsinline></video> | <video src="https://github.com/user-attachments/assets/ee63c096-76a2-4b2e-9e6a-ca248c6e3e1f" width="300" controls muted playsinline></video> | <video src="https://github.com/user-attachments/assets/a494cb20-3dcb-4a13-857a-4538734b2ae0" width="300" controls muted playsinline></video> |
+Speak in Hindi, Hinglish or English → edit the transcript → review a sourced
+itinerary proposal → approve → save a shared trip and map → hear a concise
+ElevenLabs response.
 
-| Budget | Votes | Agent |
-| :---: | :---: | :---: |
-| <video src="https://github.com/user-attachments/assets/00b35438-a335-4e2b-a51e-ef37f7a05457" width="300" controls muted playsinline></video> | <video src="https://github.com/user-attachments/assets/a40a214b-d22a-436c-b18b-b9d0193c0e01" width="300" controls muted playsinline></video> | <video src="https://github.com/user-attachments/assets/f8c3e385-bcca-4dcf-bb34-fd308ad26110" width="300" controls muted playsinline></video> |
-
-| Travelogue | PWA & close |
-| :---: | :---: |
-| <video src="https://github.com/user-attachments/assets/3a55bd70-3d78-4cb3-bec1-09203f5638b3" width="300" controls muted playsinline></video> | <video src="https://github.com/user-attachments/assets/75859314-463d-4da7-8ebd-54c52aa9be90" width="300" controls muted playsinline></video> |
-
----
-
-## Why OpenTrip?
-
-Group travel planning is usually a mess of group chats, spreadsheets, and half-updated maps. OpenTrip keeps the whole trip in one shared workspace:
-
-- **See the route** — stops on a live map with day filters, weather, and place search
-- **Own the day** — a schedule board per day so timing and transit stay clear
-- **Spend fairly** — expenses, balances, and minimal settle-up transfers
-- **Decide together** — votes, comments, and invites for the whole crew
-- **Ask the agent** — a trip-aware AI companion when you need a second opinion
-
-The seed demo is **Japan · Autumn** — Tokyo → Kyoto → Osaka, 5 days, 25 stops, and a full expense ledger ready to explore the moment you sign in.
-
----
-
-## Features
-
-| Capability | What you get |
-| --- | --- |
-| **Map itinerary** | Numbered stop markers, per-day routes, place search, stop detail with votes & comments |
-| **Schedule board** | Day columns, inline stop cards, transit segments, weather hints |
-| **Budget & settle-up** | Shared expenses, per-member balances, minimal repayment graph, multi-currency display |
-| **Reservations** | Track bookings and confirmations alongside the itinerary |
-| **Trip agent** | Shared AI chat per trip — ask about the plan, get suggestions, apply changes with approval |
-| **Collaboration** | Invite links, member roles, stop voting, threaded comments |
-| **Desktop + PWA** | Full desktop planner and a mobile-first PWA (installable; WeChat mini-program shell available) |
-| **i18n** | English and 中文, switchable at any time |
-
----
-
-## Screenshots
-
-Planner shots use the **Japan · Autumn** demo. The trips home also shows other demo trips (Iceland, Lisbon, Bali) with Unsplash covers.
-
-### Trips home
-
-Browse active trips, cover photos, members, and status at a glance.
-
-| Desktop | PWA |
-| :---: | :---: |
-| <img src="docs/assets/screenshots/pc-trips.jpg" alt="Desktop trips home" width="480" /> | <img src="docs/assets/screenshots/pwa-trips.jpg" alt="PWA trips home" width="240" /> |
-
-### Map itinerary
-
-Plan the route on a map — filter by day, open a stop, search places.
-
-| Desktop | PWA |
-| :---: | :---: |
-| <img src="docs/assets/screenshots/pc-map.jpg" alt="Desktop map itinerary" width="480" /> | <img src="docs/assets/screenshots/pwa-map.jpg" alt="PWA map itinerary" width="240" /> |
-
-### Schedule
-
-Day-by-day board of sights, food, transit, and stays.
-
-| Desktop | PWA |
-| :---: | :---: |
-| <img src="docs/assets/screenshots/pc-schedule.jpg" alt="Desktop schedule board" width="480" /> | <img src="docs/assets/screenshots/pwa-schedule.jpg" alt="PWA schedule board" width="240" /> |
-
-### Budget & settle-up
-
-Log who paid what — OpenTrip computes balances and the fewest transfers to settle.
-
-| Desktop | PWA |
-| :---: | :---: |
-| <img src="docs/assets/screenshots/pc-budget.jpg" alt="Desktop budget and settle-up" width="480" /> | <img src="docs/assets/screenshots/pwa-budget.jpg" alt="PWA budget and settle-up" width="240" /> |
-
-### Stop detail & collaboration
-
-Votes, comments, costs, and weather on every stop.
-
-<p align="center">
-  <img src="docs/assets/screenshots/pc-stop-detail.jpg" alt="Desktop stop detail with votes and comments" width="720" />
-</p>
-
-### Trip agent
-
-A shared AI companion for the trip — ask in chat, review suggestions, approve writes.
-
-| Desktop | PWA |
-| :---: | :---: |
-| <img src="docs/assets/screenshots/pc-agent.jpg" alt="Desktop trip agent drawer" width="480" /> | <img src="docs/assets/screenshots/pwa-agent.jpg" alt="PWA trip agent sheet" width="240" /> |
-
-### Reservations
-
-Keep bookings next to the plan so nothing falls through the cracks.
-
-| Desktop | PWA |
-| :---: | :---: |
-| <img src="docs/assets/screenshots/pc-reservations.jpg" alt="Desktop reservations" width="480" /> | <img src="docs/assets/screenshots/pwa-reservations.jpg" alt="PWA reservations" width="240" /> |
-
----
-
-## Tech stack
-
-| Layer | Stack |
-| --- | --- |
-| **Web** | React 19 · TypeScript · Vite · Feature-Sliced Design · Tailwind · MapLibre |
-| **API** | Hono · Domain-Driven Design + Hexagonal architecture · Better Auth |
-| **Data** | PostgreSQL · Prisma Migrate |
-| **AI** | Vercel AI SDK · trip-scoped tools with human approval |
-| **Runtime** | Cloudflare (Pages + Workers + Hyperdrive) or Docker Compose |
-| **Clients** | Responsive SPA + PWA · WeChat mini-program WebView shell |
-
----
+See [RAAHI_PLAN.md](RAAHI_PLAN.md) for phase gates and
+[the local gap register](docs/raahi/IMPLEMENTATION_GAPS.md) for verified reuse
+points and remaining work. [API setup](docs/raahi/RAAHI_API_ACCOUNTS_AND_KEYS.md)
+lists server-side credential names. Do not put private keys in `VITE_*` values.
 
 ## Quick start
 
-**Requirements:** Node.js ≥ 20, [pnpm](https://pnpm.io), Docker (for local Postgres).
+Requirements: Node.js compatible with the pinned tooling (Node 24 is recommended),
+pnpm 10.28.1, and an isolated MongoDB replica set or Atlas database.
 
-```bash
-# 1. Install & env
-make setup          # pnpm install, .env, Postgres, migrate, seed
-
-# 2. Develop
-make dev            # web → http://localhost:5170  ·  api → http://localhost:8780
+```sh
+corepack pnpm install --frozen-lockfile
+cp .env.example .env
 ```
 
-Create an account in the UI. A seeded **Japan · Autumn** trip is available so you can explore the full planner immediately.
+Copy the example only when `.env` does not already exist. Edit the ignored
+`.env` locally: set `MONGO_URI` to your development database, generate strong
+`BETTER_AUTH_SECRET` and `REALTIME_GRANT_SECRET` values, and check `BASE_URL`
+and `TRUSTED_ORIGINS`. Keep credentials out of Git and screenshots.
 
-```bash
-# Useful commands
-make db-seed        # re-seed demo trip data
-make check          # typecheck + lint + test + build
-make deploy         # deployment pointers (Cloudflare / Docker)
+```sh
+corepack pnpm dev
 ```
 
----
+The API creates required Mongo collections and indexes before listening. A
+standalone MongoDB server is rejected because approvals and financial writes
+require transactions. New accounts receive a personal Indian demonstration
+trip through the existing signup hook; a SQL seed is not needed.
 
-## Project layout
+The web app runs at `http://localhost:5170`, and the API at
+`http://localhost:8780` with the example settings. The retained `db:*` Prisma
+commands operate on legacy SQL only; they do not initialize MongoDB. See
+[database setup](docs/backend/database.md) and the
+[M3 report](docs/raahi/M3_MONGODB_PERSISTENCE.md).
 
+Email uses the existing local console provider by default. The AI assistant is
+disabled until `AI_MODEL` and `AI_API_KEY` are configured. Set server-side `ELEVENLABS_API_KEY` to enable transcription token issuance.
+Set `ELEVENLABS_VOICE_ID_EN` and `ELEVENLABS_VOICE_ID_HI` from your ElevenLabs
+voice library to enable spoken proposal summaries (the same multilingual voice
+can serve both). The key needs Text to Speech access. Restart `pnpm dev` after
+changing environment values. Review an AI proposal and choose Play summary;
+audio failure preserves the readable itinerary. Full voice workflow acceptance
+remains pending.
+
+## Verification
+
+After installing dependencies and configuring `BASE_URL` (generate the retained
+Prisma client with `pnpm db:generate` if it is absent):
+
+```sh
+corepack pnpm check
+corepack pnpm docs:check
 ```
-apps/
-  web/          React SPA + PWA
-  api/          Hono API (DDD / Hexagonal)
-  miniapp/      WeChat native shell (hosts the PWA)
-packages/       Shared libraries (agent UI catalog, observability)
-deploy/         Cloudflare + Docker deploy configs
-docs/           Architecture & operations notes
-```
 
----
+Mongo integration tests start their own disposable replica set, never read your
+`MONGO_URI`, and download a pinned test binary on first use.
 
-## Contributing
+`make check` runs the same quality pipeline if Make is installed. A successful
+build or mock test does not prove live authentication, provider access, or
+multi-user persistence. The progress log records those checks separately.
 
-Issues and pull requests are welcome. Please:
+## Repository
 
-1. Keep code, comments, and commit messages in **English**
-2. Follow [Conventional Commits](https://www.conventionalcommits.org/) — e.g. `feat(budget): add multi-currency settle-up display`
-3. Run `make check` before opening a PR
+| Path | Purpose |
+| --- | --- |
+| `apps/web` | React/Vite SPA and PWA, Feature-Sliced Design |
+| `apps/api` | Express Node / Hono Worker transports, domain/services/adapter boundaries; MongoDB migration in progress |
+| `apps/docs` | Existing Next.js/Fumadocs documentation site |
+| `packages` | Shared agent UI catalog and observability contracts |
+| `deploy` | Existing Cloudflare and Docker configurations |
+| `docs/raahi` | Raahi specifications and local audit |
 
----
+Read [AGENTS.md](AGENTS.md) and the [documentation index](docs/README.md)
+before contributing. Use English identifiers/comments and Conventional Commits.
+Keep each phase reviewable with tests and an updated progress log. Internal
+`@opentrip/*` identifiers remain intentionally unchanged.
 
-## License
+## Open-source foundation
 
-Licensed under the [Apache License 2.0](LICENSE).
+Raahi AI is a modified application based on
+[OpenTrip by stvlynn and contributors](https://github.com/stvlynn/OpenTrip).
+The original [Apache License 2.0](LICENSE), applicable copyright notices and
+Git history are retained. This repository's branding and development direction
+do not imply endorsement by the upstream project. No implementation code from
+the other research-reference projects was copied in this change.
 
----
+India travel checks are available in a trip’s **Reservations** tab. Select saved
+stops in travel order for road estimates, nearby stay listings and official
+transport search links. Optional `TRAVEL_WEATHER_PROVIDER=open-meteo` enables
+16-day daily forecasts for local/non-commercial use; it defaults disabled in the
+example and requires attribution. See provider terms before deployment. Rooms,
+fares, schedules, local jeeps and road access are never represented as confirmed.
 
-<p align="center">
-  Made for people who travel with friends — and want the plan to stay fair.
-</p>
+**Medical help** is available from the trip planner. Choose a saved stop or opt
+into browser location to search sourced hospital, clinic and pharmacy listings.
+Opening status and emergency capacity remain unknown. India emergency contacts
+are accessible before login. The Reservations tab also offers an offline HTML
+itinerary download; it is a dated snapshot, without group finances or member
+information. Live searches and maps need connectivity.

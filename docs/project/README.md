@@ -4,7 +4,7 @@ title: "Product overview"
 
 # Product overview
 
-OpenTrip is a collaborative travel planning SaaS. A small group plans a trip
+Raahi AI is a collaborative travel planning SaaS. A small group plans a trip
 together — arranging stops on a map and schedule, recording reservations,
 discussing what to keep, and splitting shared expenses fairly.
 
@@ -43,8 +43,8 @@ discussing what to keep, and splitting shared expenses fairly.
 - Reservations CRUD with cancel and optimistic concurrency.
 - Budget: expense list, add/update expense with payer + split, balances,
   settlement, FX display rates.
-- Auth: Better Auth email + password (OTP verify), optional Google / WeChat,
-  2FA, WeChat Mini Program shell hosting the PWA.
+- Auth: Better Auth email + password (OTP verify), optional Google,
+  2FA and browser/PWA mobile access.
 - Weather proxy, street-view search/viewer, agent geo/lodging tools.
 - Realtime trip change fan-out and presence on Cloudflare (Durable Objects).
 - Installable mobile PWA shell with responsive planner.
@@ -70,7 +70,7 @@ See [handoff-implementation.md](handoff-implementation.md).
 - **FX as source of truth for balances** — amounts remain stored as entered;
   FX converts settle-up *display* only ([../backend/fx.md](../backend/fx.md)).
 - **Native iOS/Android apps in this monorepo** — clients are `web`, `api`,
-  `miniapp`, and `docs`; mobile-auth bridges exist for external native apps.
+  and `docs`; mobile-auth bridges exist for external native apps.
 
 Email delivery (verification, reset, invites) is **environment-configured**
 through the API email adapters — do not assume a provider is wired in every

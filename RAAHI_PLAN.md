@@ -1,6 +1,26 @@
 # Raahi AI — Implementation Plan for Codex CLI
 
-**Status:** Proposed roadmap; **not yet executed or verified against the user's local clone**.  
+> **Stack change requested (2026-11-02; M0 completed 2026-11-03):** The user wants
+> Express, MongoDB with Mongoose, and a routes/controllers/middlewares backend
+> layout. See the [migration module](docs/raahi/EXPRESS_MONGODB_MIGRATION_PLAN.md)
+> for the inspected impact map, target folders, sequential modules and gates.
+> It supersedes this document's Hono/SQL-only constraint for that future migration.
+> Node now uses Express and MongoDB/Mongoose; Worker SQL remains during migration.
+> The authorized M0 feasibility spike passed; M1 source implementation is recorded
+> in [the transport report](docs/raahi/M1_EXPRESS_TRANSPORT.md).
+> See [M0 evidence](docs/raahi/M0_BASELINE_AND_COMPATIBILITY.md). The user will
+> supply `MONGO_URI`; do not require restarting PostgreSQL to continue migration.
+> M2 reorganizes backend paths; use [the current layout map](docs/raahi/M2_BACKEND_LAYOUT.md)
+> when following earlier source audits and examples in this plan.
+> M4 records the user decision to start fresh with no legacy data; see
+> [the optional migration tools and limits](docs/raahi/M4_DATA_MIGRATION.md).
+>
+> **India-specific scope added:** Remove WeChat and replace Japan/Tokyo demo
+> trips, imagery and product examples with Indian destinations; use INR and
+> Indian map defaults. See migration module I0 for the audited paths, language
+> clarification and data-preservation gates. This is also planning-only.
+
+**Status:** Local architecture audited; baseline verification in progress. See `BUILD_PROGRESS.md` for evidence and blockers.
 **Updated:** 2026-10-27  
 **Base:** [OpenTrip](https://github.com/stvlynn/OpenTrip) — extend in place, preserve its working behavior and license.  
 **Priority:** Voice-first itinerary generation, followed by expense voice commands and budget-aware replanning.
@@ -19,8 +39,8 @@ Expected: five travelers, ₹35,000 combined budget, origin Lucknow, 6 days, can
 
 **Required under `docs/`:**
 
-- `docs/RAAHI_AI_REPOSITORY_AUDIT_AND_VOICE_PLAN.md` — primary feature-reuse and voice-architecture reference.
-- `docs/RAAHI_AI_BUILD_v1.2.md` — detailed PRD, use cases, contracts, long-term features and India scenarios.
+- `docs/raahi/RAAHI_AI_REPOSITORY_AUDIT_AND_VOICE_PLAN.md` — primary feature-reuse and voice-architecture reference.
+- `docs/raahi/RAAHI_AI_BUILD_v1.2.md` — detailed PRD, use cases, contracts, long-term features and India scenarios.
 
 **Optional:** `docs/RAAHI_AI_INDIA_TRAVEL_APIS.md` — source selection and licensing.
 
@@ -121,6 +141,14 @@ Source labels are assigned by adapter validation, not chosen by the model. Reuse
 
 **Gate:** Existing OpenTrip functionality is demonstrated or failures are documented and understood. **Do not build Raahi features on an unexamined broken baseline.**
 
+### Phase 0B — Raahi identity and honest demonstration data (P0)
+
+Added after the local audit to cover the master development instructions without renumbering the voice phases.
+
+**Tasks:** Rebrand product copy, navigation, authentication, document titles, install metadata, favicon and public documentation as Raahi AI. Keep the existing component system and responsive layouts. Replace travel examples with clearly labeled Indian demonstration data; retain upstream licenses, attribution, package identifiers and migration history. Describe voice as planned until verified. Review persisted demo provisioning before changing fixtures so existing user trips are not overwritten.
+
+**Gate:** Landing, sign-in, dashboard and planner present a consistent Raahi identity; demo data is explicitly identified; attribution is retained; relevant checks pass. Record any browser or database checks that remain unavailable.
+
 ### Phase 1 — Voice UX and reliable transcription (P0)
 
 **Tasks:** Reuse design system to add microphone to trip-creation/discovery and existing trip assistant; recording indicator, explicit start/stop, permissions, final transcript, edit-and-submit, keyboard fallback, errors/timeouts and mobile permission handling. Integrate official ElevenLabs Scribe Realtime with server-issued scoped access. Protect permanent keys. Add mock provider for automated tests and deliberate error simulation.
@@ -208,6 +236,16 @@ Source labels are assigned by adapter validation, not chosen by the model. Reuse
 5. Run focused tests then global checks, record exact outputs/status.
 6. Update `BUILD_PROGRESS.md`, checked scope and blockers; state next phase only if current gate passes.
 7. Ask before making destructive DB changes, deleting data, major architecture rewrites or external real-world actions.
+
+### Local audit constraints (2026-10-27)
+
+- Runtime repositories use `SqlClient` and `*-repository.db.ts`; Prisma owns migrations and the generated database snapshot, rather than every runtime query.
+- `apps/docs` already uses Next.js for Fumadocs. Preserve it; the prohibition on introducing Next.js applies to replacing the React/Vite product.
+- Node supports the HTTP API; full realtime fan-out currently depends on Cloudflare Durable Objects. Render deployment alone does not establish realtime parity.
+- The existing expense amounts and formatting need a coordinated minor-unit migration review. Equal splitting rounds member totals independently, and mixed-currency amounts are summed. Do not represent this as Raahi-compliant paise accounting.
+- Existing proposals cover individual trip operations. Whole-itinerary atomic approval, idempotent creation, evidence and structured voice constraints still need implementation.
+- Credentials missing from this checkout must not prevent mock-based provider tests, but live acceptance remains pending. A failed dependency/typecheck baseline must be understood before adding product functionality.
+- See [the local implementation gap register](docs/raahi/IMPLEMENTATION_GAPS.md) for source paths and phase assignments.
 
 ### Starting prompt to paste into Codex
 

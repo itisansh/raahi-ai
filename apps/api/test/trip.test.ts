@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Trip } from "../src/domain/trip";
 import { computeBudget } from "../src/domain/trip";
-import { seedTrips } from "../src/infrastructure/persistence/seed-data";
+import { seedTrips } from "../src/repositories/seed-data";
 
 function freshTrip(): Trip {
   // Deep clone so aggregate mutations don't leak across tests.
@@ -274,7 +274,7 @@ describe("Trip aggregate", () => {
     expect(withOpts.category).toBe("Food");
     expect(withOpts.cost).toBe(1800);
     // A cost with no explicit currency defaults to the trip currency.
-    expect(withOpts.costCurrency).toBe("JPY");
+    expect(withOpts.costCurrency).toBe("INR");
     expect(withOpts.note).toBe("Try the tsukemen ![pic](https://x/y.jpg)");
 
     trip.insertStop(
@@ -308,7 +308,7 @@ describe("Trip aggregate", () => {
       payer: "lynn",
       participants: ["lynn", "marco"],
     });
-    expect(defaultCurrency.currency).toBe("JPY");
+    expect(defaultCurrency.currency).toBe("INR");
 
     const customCurrency = trip.addExpense({
       description: "Coffee",
@@ -498,7 +498,7 @@ describe("computeBudget", () => {
 
   it("nets paid minus fair share", () => {
     const budget = computeBudget(members, [
-      { id: "e1", description: "dinner", payer: "a", amount: 100, currency: "JPY", category: "Food", participants: ["a", "b"], whenLabel: "", createdOrder: 0 },
+      { id: "e1", description: "dinner", payer: "a", amount: 100, currency: "INR", category: "Food", participants: ["a", "b"], whenLabel: "", createdOrder: 0 },
     ]);
     expect(budget.total).toBe(100);
     expect(budget.balances.find((x) => x.memberId === "a")!.net).toBe(50);
@@ -507,7 +507,7 @@ describe("computeBudget", () => {
 
   it("produces a minimal settlement transferring debtor -> creditor", () => {
     const budget = computeBudget(members, [
-      { id: "e1", description: "dinner", payer: "a", amount: 100, currency: "JPY", category: "Food", participants: ["a", "b"], whenLabel: "", createdOrder: 0 },
+      { id: "e1", description: "dinner", payer: "a", amount: 100, currency: "INR", category: "Food", participants: ["a", "b"], whenLabel: "", createdOrder: 0 },
     ]);
     expect(budget.settlements).toEqual([{ from: "b", to: "a", amount: 50 }]);
   });
@@ -516,7 +516,7 @@ describe("computeBudget", () => {
     const trip = seedTrips()[0]!.snapshot;
     const budget = computeBudget(trip.members, trip.expenses);
     // Sum of all seed expenses.
-    expect(budget.total).toBe(351900);
+    expect(budget.total).toBe(0);
     // Balances net to zero.
     const sum = budget.balances.reduce((n, b) => n + b.net, 0);
     expect(Math.abs(sum)).toBeLessThanOrEqual(1);

@@ -8,7 +8,7 @@ export default function UserHomePage() {
 }
 
 export const metadata: Metadata = {
-  title: "OpenTrip user guide",
+  title: "Raahi AI user guide",
   description:
     "Everything you need to turn a group conversation into a shared trip.",
 };

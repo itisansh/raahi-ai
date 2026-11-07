@@ -54,9 +54,9 @@ export default defineConfig(({ mode }) => {
                 registerType: "prompt",
                 injectRegister: false,
                 manifest: {
-                    name: "OpenTrip",
-                    short_name: "OpenTrip",
-                    description: "One shared plan for the whole crew — routes, days, budgets, and an AI co-planner.",
+                    name: "Raahi AI",
+                    short_name: "Raahi AI",
+                    description: "Shared trip planning for friends exploring India.",
                     // Matches the app background (--ink-50 / --ink-950 tokens)
                     // so the install splash and title bar blend into the UI.
                     theme_color: "#fafbfd",

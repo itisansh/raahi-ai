@@ -9,7 +9,7 @@ export default function DeveloperLayout({ children }: { children: ReactNode }) {
     <DocsLayout
       tree={developerSource.pageTree}
       nav={{
-        title: "OpenTrip Docs",
+        title: "Raahi AI Docs",
         url: "/",
         children: <PerspectiveSwitcher perspective="developer" />,
       }}

@@ -8,7 +8,7 @@ export default function DeveloperHomePage() {
 }
 
 export const metadata: Metadata = {
-  title: "OpenTrip developer docs",
+  title: "Raahi AI developer docs",
   description:
     "Architecture, API contracts, frontend conventions, and operations.",
 };

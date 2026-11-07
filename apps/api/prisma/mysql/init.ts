@@ -16,9 +16,9 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import mysql from "mysql2/promise";
-import { resolveDatabaseProvider } from "../../src/infrastructure/persistence/sql/provider";
-import { resolveMysqlSsl } from "../../src/infrastructure/persistence/sql/mysql-client";
-import type { DatabaseSslMode } from "../../src/infrastructure/config";
+import { resolveDatabaseProvider } from "../../src/repositories/sql/provider";
+import { resolveMysqlSsl } from "../../src/repositories/sql/mysql-client";
+import type { DatabaseSslMode } from "../../src/config/env";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const schemaPath = resolve(__dirname, "schema.sql");

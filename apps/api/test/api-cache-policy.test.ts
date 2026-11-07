@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Container } from "../src/infrastructure/composition/container";
-import { createApp } from "../src/interfaces/http/app";
+import type { Container } from "../src/config/container";
+import { createApp } from "./http-app";
 
 function fixture() {
   const authResponse = new Response(JSON.stringify({ session: { id: "s1" } }), {

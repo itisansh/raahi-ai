@@ -1,18 +1,18 @@
-import { createContainer } from "./infrastructure/composition/container";
-import { loadConfig, type RawEnv } from "./infrastructure/config";
-import { createWorkerStorage } from "./infrastructure/storage/create-worker-storage";
-import type { R2BucketLike } from "./infrastructure/storage/r2-storage";
+import { createContainer } from "./config/container";
+import { loadConfig, type RawEnv } from "./config/env";
+import { createWorkerStorage } from "./integrations/storage/create-worker-storage";
+import type { R2BucketLike } from "./integrations/storage/r2-storage";
 import { createApp } from "./interfaces/http/app";
 import {
   AuthRateLimitObject,
   createCloudflareAuthRateLimitStorage,
-} from "./infrastructure/auth";
+} from "./integrations/auth";
 import {
   CloudflareTripChangePublisher,
   signRealtimeGrant,
   TripRealtimeObject,
   type DurableObjectNamespaceLike,
-} from "./infrastructure/realtime";
+} from "./realtime";
 import * as Sentry from "@sentry/cloudflare";
 import {
   captureException,
@@ -21,11 +21,11 @@ import {
   sanitizeSpan,
   setErrorReporter,
   setRuntimeName,
-} from "./infrastructure/observability";
+} from "./integrations/observability";
 import {
   CloudflareStreetViewCache,
   type CloudflareCacheLike,
-} from "./infrastructure/street-view/cloudflare-street-view-cache";
+} from "./integrations/street-view/cloudflare-street-view-cache";
 
 interface WorkerEnv extends RawEnv {
   /** Optional Hyperdrive binding (query cache enabled). Prefer when available. */
@@ -130,9 +130,8 @@ export async function handleRealtimeUpgrade(
     return new Response("Expected WebSocket", { status: 426 });
   }
   // Browsers always send Origin on a WebSocket upgrade, so the cookie-CSRF
-  // origin check only fires when one is present. Non-browser clients (WeChat
-  // `wx.connectSocket` sends no Origin) authenticate with the Bearer token
-  // enforced by the session check below.
+  // origin check only fires when one is present. Non-browser clients
+  // authenticate with the Bearer token enforced by the session check below.
   const origin = request.headers.get("Origin");
   if (origin && !container.config.trustedOrigins.includes(origin)) {
     return new Response("Untrusted origin", { status: 403 });

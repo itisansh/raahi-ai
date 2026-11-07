@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { StreetViewError, StreetViewService } from "../src/application/street-view";
+import { StreetViewError, StreetViewService } from "../src/services/street-view";
 import type { StreetViewProvider } from "../src/domain/street-view";
-import { MapillaryStreetViewProvider } from "../src/infrastructure/street-view/mapillary/mapillary-provider";
-import { MemoryStreetViewCache } from "../src/infrastructure/street-view/memory-street-view-cache";
+import { MapillaryStreetViewProvider } from "../src/integrations/street-view/mapillary/mapillary-provider";
+import { MemoryStreetViewCache } from "../src/integrations/street-view/memory-street-view-cache";
 
 function provider(overrides: Partial<StreetViewProvider> = {}): StreetViewProvider {
   return {

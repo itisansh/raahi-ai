@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { WeatherService } from "../src/application/weather/weather-service";
+import { WeatherService } from "../src/services/weather/weather-service";
 import type {
   WeatherClient,
   WeatherForecastQuery,
   WeatherForecastSnapshot,
 } from "../src/domain/weather";
-import { CachedWeatherClient } from "../src/infrastructure/weather/cached-weather-client";
-import { mapTimelineResponse } from "../src/infrastructure/weather/openweather-client";
+import { CachedWeatherClient } from "../src/integrations/weather/cached-weather-client";
+import { mapTimelineResponse } from "../src/integrations/weather/openweather-client";
 
 function snapshot(
   overrides: Partial<WeatherForecastSnapshot> = {},

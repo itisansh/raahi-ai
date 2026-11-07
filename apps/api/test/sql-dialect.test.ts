@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { createDialect } from "../src/infrastructure/persistence/sql/dialect";
-import { toMysqlPlaceholders } from "../src/infrastructure/persistence/sql/placeholders";
-import { resolveDatabaseProvider } from "../src/infrastructure/persistence/sql/provider";
+import { createDialect } from "../src/repositories/sql/dialect";
+import { toMysqlPlaceholders } from "../src/repositories/sql/placeholders";
+import { resolveDatabaseProvider } from "../src/repositories/sql/provider";
 
 describe("resolveDatabaseProvider", () => {
   it("defaults to postgres", () => {

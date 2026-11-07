@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TripChange } from "../src/domain/realtime";
-import { TripRealtimeObject } from "../src/infrastructure/realtime";
+import { TripRealtimeObject } from "../src/realtime";
 
 class MemoryStorage {
   readonly values = new Map<string, unknown>();

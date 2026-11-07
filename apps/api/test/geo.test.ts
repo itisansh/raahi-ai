@@ -7,22 +7,22 @@ import type {
   GeoRouteMatrix,
   GeoReviewLookupResult,
 } from "../src/domain/geo";
-import { GeoService } from "../src/application/geo/geo-service";
-import { loadConfig, type RawEnv } from "../src/infrastructure/config";
+import { GeoService } from "../src/services/geo/geo-service";
+import { loadConfig, type RawEnv } from "../src/config/env";
 import {
   mapNominatimResult,
   mapOverpassElement,
   osmTravelProfile,
-} from "../src/infrastructure/geo/osm/mappers";
+} from "../src/integrations/geo/osm/mappers";
 import {
   mapGooglePlace,
   mapGoogleMatrixElement,
   parseDurationSeconds,
-} from "../src/infrastructure/geo/google/mappers";
-import { createGeoProvider } from "../src/infrastructure/geo/create-geo-provider";
-import { OsmGeoProvider } from "../src/infrastructure/geo/osm/osm-geo-provider";
-import { GoogleGeoProvider } from "../src/infrastructure/geo/google/google-geo-provider";
-import { buildGeoReadTools } from "../src/infrastructure/ai/agent-model.ai-sdk";
+} from "../src/integrations/geo/google/mappers";
+import { createGeoProvider } from "../src/integrations/geo/create-geo-provider";
+import { OsmGeoProvider } from "../src/integrations/geo/osm/osm-geo-provider";
+import { GoogleGeoProvider } from "../src/integrations/geo/google/google-geo-provider";
+import { buildGeoReadTools } from "../src/integrations/ai/agent-model.ai-sdk";
 
 function place(overrides: Partial<GeoPlace> = {}): GeoPlace {
   return {

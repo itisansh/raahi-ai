@@ -25,7 +25,12 @@ export function LandingFooter() {
         </div>
         <div className="flex flex-col items-center gap-3 sm:items-end">
           <LanguageSwitch />
-          <p className="text-xs text-muted-foreground">{t("footer.license")}</p>
+          <a
+            href="https://github.com/stvlynn/OpenTrip"
+            className="text-xs text-muted-foreground underline underline-offset-4"
+          >
+            {t("footer.license")}
+          </a>
         </div>
       </div>
     </footer>

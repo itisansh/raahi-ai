@@ -12,10 +12,10 @@ const appPath = resolve(root, "apps/api/src/interfaces/http/app.ts");
 const apiDocsDir = resolve(root, "docs/backend/api");
 const apiDocsIndex = resolve(apiDocsDir, "README.md");
 const apiDocsStub = resolve(root, "docs/backend/api.md");
-const dtoPath = resolve(root, "apps/api/src/application/dto.ts");
+const dtoPath = resolve(root, "apps/api/src/services/dto.ts");
 const opsSchemasPath = resolve(
   root,
-  "apps/api/src/application/trip/ops/schemas.ts",
+  "apps/api/src/services/trip/ops/schemas.ts",
 );
 
 /** Concatenate all markdown under docs/backend/api/ for coverage checks. */
@@ -240,7 +240,7 @@ describe("client API documentation coverage", () => {
 
   it("documents vote/comment as edit (loadEditable) and agent addressed semantics", () => {
     const useCases = readFileSync(
-      resolve(root, "apps/api/src/application/use-cases.ts"),
+      resolve(root, "apps/api/src/services/use-cases.ts"),
       "utf8",
     );
     const voteBlock = useCases.slice(
@@ -259,7 +259,7 @@ describe("client API documentation coverage", () => {
     );
 
     const agentService = readFileSync(
-      resolve(root, "apps/api/src/application/agent/agent-service.ts"),
+      resolve(root, "apps/api/src/services/agent/agent-service.ts"),
       "utf8",
     );
     const postMsg = agentService.slice(

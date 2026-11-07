@@ -14,7 +14,7 @@ Single source of truth for **trip-scoped editor mutations** shared by:
 ## Location
 
 ```
-apps/api/src/application/trip/ops/
+apps/api/src/services/trip/ops/
   schemas.ts   # shared Zod
   catalog.ts   # TRIP_OPS registry
   apply.ts     # applyTripOp

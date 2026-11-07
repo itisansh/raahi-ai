@@ -6,9 +6,11 @@ title: "API (client contract)"
 
 HTTP contract for **web, mobile, and other clients**.
 
-Source of truth for routes: `apps/api/src/interfaces/http/app.ts`. Request
-shapes: edge Zod schemas (including `application/trip/ops/schemas.ts`).
-Response DTOs: application serializers (`application/dto.ts`, agent/preferences
+Source of truth for shared route handlers: `apps/api/src/interfaces/http/app.ts`.
+Node routing/stream bridging: `interfaces/http/express-app.ts`; the Worker
+transport reuses the same route table. Request
+shapes: edge Zod schemas (including `services/trip/ops/schemas.ts`).
+Response DTOs: application serializers (`services/dto.ts`, agent/preferences
 DTOs, invite service types, weather/FX data types).
 
 **Mobile / multi-client start here.**

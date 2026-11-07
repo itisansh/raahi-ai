@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { resolveInitialAvatar } from "../src/application/user/user-initializer";
-import { mapGoogleProfileToDto } from "../src/infrastructure/auth/oauth-profile-mapper";
+import { resolveInitialAvatar } from "../src/services/user/user-initializer";
+import { mapGoogleProfileToDto } from "../src/integrations/auth/oauth-profile-mapper";
 
 describe("resolveInitialAvatar", () => {
   it("uses the OAuth profile image when present", () => {

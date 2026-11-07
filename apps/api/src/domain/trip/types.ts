@@ -80,6 +80,7 @@ export interface StopSnapshot {
 }
 
 export interface ExpenseSnapshot {
+  allocations?: Record<string, number>;
   id: string;
   description: string;
   payer: string;
@@ -121,6 +122,10 @@ export interface TripSnapshot {
 
 /** Optional create-wizard answers persisted on the trip. Omitted fields mean TBD. */
 export interface TripIntake {
+  budgetForecast?: { groupBudgetPaise: number; otherFuturePaise: number; bufferPaise: number; costs: Record<string, number> };
+  origin?: string;
+  budgetBasis?: "per_person" | "group";
+  budgetPaise?: number;
   destination?: string;
   /** Geocoded destination center (set at create when destination is known). */
   destinationLat?: number;
@@ -147,6 +152,7 @@ export interface Settlement {
 }
 
 export interface Budget {
+  excludedCurrencies?: string[];
   total: number;
   perPerson: number;
   balances: Balance[];

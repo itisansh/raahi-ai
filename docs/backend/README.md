@@ -4,41 +4,41 @@ title: "Backend (DDD + Hexagonal)"
 
 # Backend (DDD + Hexagonal)
 
-The backend (`apps/api`) is a Hono + TypeScript app following Domain-Driven
+The backend (`apps/api`) uses Express 5 on Node and a retained Hono transport on Workers, following Domain-Driven
 Design and Hexagonal architecture. Reference:
 [../reference/backend-sources.md](../reference/backend-sources.md).
 
 ## Layers and dependency direction
 
-```
-interfaces  ->  application  ->  domain
-                                   ^
-infrastructure  --- implements ----|
+```text
+interfaces -> services -> domain
+                 ^          ^
+repositories / integrations / realtime
+                 ^
+               config
 ```
 
-- **domain** (`src/domain`) — aggregates, entities, value objects, domain
-  services, and repository ports. No framework/DB/transport imports.
-- **application** (`src/application`) — use cases orchestrating the domain
-  through ports; returns DTOs.
-- **infrastructure** (`src/infrastructure`) — PostgreSQL repository adapters,
-  the database pool, Better Auth, filesystem/S3 storage adapters, and runtime
-  composition (Node + Workers).
-- **interfaces** (`src/interfaces/http`) — Hono routes: parse input, call a use
-  case, format output. Thin.
+- **domain** (`src/domain`) owns aggregates, values, business rules and ports.
+- **services** (`src/services`) orchestrates application workflows through ports.
+- **repositories** (`src/repositories`) contains persistence adapters and fixtures;
+  Mongo adapters serve Node; SQL adapters remain for the Worker and migration rehearsal.
+- **integrations** (`src/integrations`) contains auth, AI, voice, geo, email,
+  storage, telemetry and other external/platform adapters.
+- **realtime** (`src/realtime`) contains the retained collaboration transport.
+- **interfaces** (`src/interfaces/http`) parses HTTP input, calls services and
+  formats output through shared Express/Worker route handlers.
+- **config** (`src/config`) parses environment values (`env.ts`) and assembles
+  dependencies (`container.ts`). Domain/services do not acquire HTTP or database
+  implementation dependencies because their folders were renamed.
 
 ## Composition
 
-`infrastructure/composition` builds a `Container` (pool + repositories + use
-cases). Two entry points share it:
-
-- `src/node-server.ts` — `@hono/node-server` for Docker/local.
-- `src/worker.ts` — Workers `fetch` entry for Cloudflare (connection string
-  from the Hyperdrive binding).
-
-Both entry points inject storage through an application port. Node supports
-explicit `fs` or `s3` configuration; Workers require `s3` so their dependency
-graph never imports the Node filesystem adapter. Avatars and trip note images
-share that port (`AvatarService`, `TripMediaService`).
+- `src/config/container.ts` assembles shared services and legacy SQL adapters.
+- `src/config/mongo-container.ts` selects Mongo adapters and initializes Node persistence.
+- `src/models/mongo.ts` defines business schemas and indexes; Better Auth owns auth collections.
+- `src/config/env.ts` validates environment configuration.
+- `src/node-server.ts` runs the Express Node server for local/Docker.
+- `src/worker.ts` retains the Hono Worker entry during the migration.
 
 ## Client developers (mobile and other apps)
 

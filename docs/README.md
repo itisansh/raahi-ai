@@ -1,8 +1,8 @@
 ---
-title: "OpenTrip documentation"
+title: "Raahi AI documentation"
 ---
 
-# OpenTrip documentation
+# Raahi AI documentation
 
 Travel Planner SaaS — plan trips together, split everything.
 
@@ -89,6 +89,7 @@ Start here for multi-client development:
 
 ### Implementation specifications
 
+- [raahi/README.md](raahi/README.md) — Raahi AI roadmap, local audit and verification status.
 - [superpowers/README.md](superpowers/README.md) — design drafts (not published
   on the Fumadocs developer tree; keep for agents and historical design work)
 

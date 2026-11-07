@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
-import { resolveDatabaseProvider } from "../src/infrastructure/persistence/sql/provider";
-import { createSqlClient } from "../src/infrastructure/persistence/sql/create-sql-client";
+import { resolveDatabaseProvider } from "../src/repositories/sql/provider";
+import { createSqlClient } from "../src/repositories/sql/create-sql-client";
 
 function requireDatabaseUrl(): string {
   const url = process.env.DATABASE_URL?.trim();

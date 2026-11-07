@@ -4,6 +4,46 @@ title: "Database"
 
 # Database
 
+## Node runtime: MongoDB/Mongoose
+
+The Express Node API requires `MONGO_URI` in the ignored root `.env`. Use a
+transaction-capable replica set or Atlas database. `config/mongo-container.ts`
+opens one Mongoose connection and shares its native driver with the pinned
+Better Auth Mongo adapter. It initializes explicit collections and additive
+indexes before accepting requests. Connection failure aborts startup; there is
+no SQL fallback.
+
+Business schemas are in `src/models/mongo.ts`; repository/store adapters are in
+`src/repositories/mongo/`. Better Auth owns its auth collections, including
+string IDs and imported password hashes. The common service composition lives
+in `config/container.ts`; the retained Worker still selects SQL adapters.
+
+Mongo schema/index evolution is versioned under `config/migrations/`. Do not use
+Prisma commands for MongoDB, and do not change the historical Prisma snapshot
+by hand. Initialization records `001-mongo-indexes` in `mongo_migrations`; it is
+repeatable and never drops existing indexes or deletes data. Later schema/data
+changes need a new migration and reconciliation tests.
+
+Trip revisions are compared inside transactions. Stale snapshot writes fail
+with `trip_write_conflict`. Child reads share a snapshot, reservation writes and
+expense commands serialize through the trip revision, and proposal result
+records commit with their trip changes. Approved proposals are not TTL-deleted.
+
+Expense totals and custom allocations are stored as safe integer minor units.
+The adapter maps back to the existing public contract: INR uses paise; existing
+non-INR ledgers retain their whole-unit convention. Reservation amounts already
+use minor units and are not multiplied. See the field mapping and verification
+scope in [M3 persistence](../raahi/M3_MONGODB_PERSISTENCE.md).
+
+Run `pnpm --filter @opentrip/api exec vitest run test/mongo-persistence.test.ts`
+for isolated replica-set verification. It never uses `.env` or a supplied URI.
+A first run downloads MongoDB 8.2.1. The user selected a fresh Mongo database;
+SQL migration is unnecessary. Optional offline migration/reconciliation tools
+and limits are documented in [M4](../raahi/M4_DATA_MIGRATION.md). Hosted rollout
+is separate from local test success.
+
+## Retained SQL runtime and tooling
+
 PostgreSQL (default) or MySQL/MariaDB, selected via env. Runtime repositories
 use a dialect-agnostic `SqlClient`. Prisma migrations remain the Postgres source
 of truth; MySQL uses a SQL bootstrap. Reference:
@@ -46,7 +86,7 @@ createContainer
      (or one shared pool when fresh url is omitted / identical)
 ```
 
-Repositories live under `infrastructure/persistence/*-repository.db.ts` and
+Repositories live under `repositories/*-repository.db.ts` and
 accept `SqlClient`. Callers write PostgreSQL-style `$1` placeholders; the MySQL
 driver rewrites them to `?`. Dialect helpers cover `ON CONFLICT` /
 `INSERT IGNORE` / `ON DUPLICATE KEY`, and `ANY($n)` / `IN (?,?,…)`.
@@ -54,6 +94,13 @@ driver rewrites them to `?`. Dialect helpers cover `ON CONFLICT` /
 
 Prisma Client with `@prisma/adapter-pg` is still available for tooling against
 Postgres. Prefer `SqlClient` for app code so both backends stay supported.
+
+Trip snapshot saves and day reorder/delete operations require the revision read
+before mutating the aggregate. The repository locks the trip row and rejects a
+changed revision with `trip_write_conflict` (HTTP 409). Reload before retrying;
+do not automatically replay a stale snapshot. Retained stops are updated in
+place to preserve reservation links; only stops removed from the snapshot are
+deleted. Votes and comments are written within the same locked transaction.
 
 ## Connection
 
@@ -73,8 +120,8 @@ locally for each production release — only for local dev, or to draft a new
 migration file with `make db-migrate-dev`.
 
 ```ts
-import { createSqlClient } from "../infrastructure/persistence/sql";
-import { loadConfig } from "../infrastructure/config";
+import { createSqlClient } from "../repositories/sql";
+import { loadConfig } from "../config/env";
 
 const config = loadConfig(process.env);
 const db = createSqlClient(config.databaseProvider, config.databaseUrl);

@@ -3,21 +3,21 @@ import type { AgentMessage } from "../src/domain/agent";
 import {
   destinationCenterFromTrip,
   StreetViewGroundingService,
-} from "../src/application/agent/street-view-grounding-service";
-import type { GeoService } from "../src/application/geo/geo-service";
-import type { StreetViewService } from "../src/application/street-view";
+} from "../src/services/agent/street-view-grounding-service";
+import type { GeoService } from "../src/services/geo/geo-service";
+import type { StreetViewService } from "../src/services/street-view";
 import {
   AiSdkAgentModel,
   deterministicStreetViewParts,
-} from "../src/infrastructure/ai/agent-model.ai-sdk";
+} from "../src/integrations/ai/agent-model.ai-sdk";
 import type { TripSnapshot } from "../src/domain/trip";
-import type { WeatherService } from "../src/application/weather/weather-service";
-import type { LodgingService } from "../src/application/lodging/lodging-service";
-import type { FileStorage } from "../src/application/storage";
+import type { WeatherService } from "../src/services/weather/weather-service";
+import type { LodgingService } from "../src/services/lodging/lodging-service";
+import type { FileStorage } from "../src/services/storage";
 import {
   noopObservability,
   type Observability,
-} from "../src/application/observability";
+} from "../src/services/observability";
 import {
   allowedStreetViewImageIds,
   isAgentGroundingPart,

@@ -1,3 +1,4 @@
+import { expenseAllocations, expenseMinor, expenseScale } from "./expense-money";
 import type {
   Balance,
   Budget,
@@ -12,7 +13,11 @@ import type {
 export function computeBudget(
   members: readonly MemberSnapshot[],
   expenses: readonly ExpenseSnapshot[],
+  currency = "INR",
 ): Budget {
+  const excludedCurrencies = [...new Set(expenses.filter(e => (e.currency || currency) !== currency).map(e => e.currency))];
+  expenses = expenses.filter(e => (e.currency || currency) === currency);
+  const scale = expenseScale(currency);
   const paid = new Map<string, number>();
   const share = new Map<string, number>();
   for (const m of members) {
@@ -21,11 +26,8 @@ export function computeBudget(
   }
 
   for (const e of expenses) {
-    paid.set(e.payer, (paid.get(e.payer) ?? 0) + e.amount);
-    const per = e.amount / e.participants.length;
-    for (const p of e.participants) {
-      share.set(p, (share.get(p) ?? 0) + per);
-    }
+    paid.set(e.payer, (paid.get(e.payer) ?? 0) + expenseMinor(e.amount, currency));
+    for (const [id, value] of Object.entries(expenseAllocations(e.amount, currency, e.participants, e.allocations))) share.set(id, (share.get(id) ?? 0) + value);
   }
 
   const balances: Balance[] = members.map((m) => {
@@ -59,8 +61,8 @@ export function computeBudget(
     if (creditor.v < 1) j++;
   }
 
-  const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const total = expenses.reduce((sum, e) => sum + expenseMinor(e.amount, currency), 0);
   const perPerson = members.length ? Math.round(total / members.length) : 0;
 
-  return { total, perPerson, balances, settlements };
+  return { total: total / scale, perPerson: perPerson / scale, balances: balances.map(b => ({ ...b, paid: b.paid / scale, share: b.share / scale, net: b.net / scale })), settlements: settlements.map(s => ({ ...s, amount: s.amount / scale })), excludedCurrencies };
 }

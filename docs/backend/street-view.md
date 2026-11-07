@@ -7,12 +7,12 @@ title: "Street view"
 Street view is a provider-neutral application capability. Agent tools, HTTP
 DTOs, generated UI, itinerary notes, and map interactions use opaque image ids
 and never expose Mapillary-specific URLs or tokens. Mapillary is the first
-driven adapter under `infrastructure/street-view/mapillary`.
+driven adapter under `integrations/street-view/mapillary`.
 
 ## Architecture
 
 - `domain/street-view` defines `StreetViewProvider` and normalized contracts.
-- `application/street-view` validates inputs, clamps search policy, filters the
+- `services/street-view` validates inputs, clamps search policy, filters the
   provider bbox to the requested circle, ranks panoramas deterministically,
   and emits trip-scoped same-origin preview URLs.
 - the Mapillary adapter owns bounded panorama/general candidate queries,

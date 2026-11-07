@@ -53,8 +53,8 @@ export interface TripMapProps {
   locateSignal?: number;
 }
 
-const DEFAULT_CENTER: [number, number] = [0, 20];
-const DEFAULT_ZOOM = 1.6;
+const DEFAULT_CENTER: [number, number] = [78.9, 22.6];
+const DEFAULT_ZOOM = 4;
 const FALLBACK_ZOOM = 10;
 
 function installTripRouteLayers(map: MlMap, theme: MapTheme): void {

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ReservationService } from "../src/application";
+import { ReservationService } from "../src/services";
 import {
   Reservation,
   type ReservationRepository,

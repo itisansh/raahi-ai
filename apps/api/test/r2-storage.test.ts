@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   R2Storage,
   type R2BucketLike,
-} from "../src/infrastructure/storage/r2-storage";
+} from "../src/integrations/storage/r2-storage";
 
 describe("R2Storage", () => {
   it("reads and writes through the bound bucket with namespaced keys", async () => {

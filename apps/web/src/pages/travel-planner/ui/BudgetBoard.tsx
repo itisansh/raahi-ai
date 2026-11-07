@@ -1,6 +1,9 @@
+import { BudgetReplanPanel } from "./BudgetReplanPanel";
+import { ExpenseVoiceDraftInput } from "./ExpenseVoiceDraft";
+import { expenseVoiceCopy, resolveExpenseMembers } from "../model/expense-voice";
 import { MoveRight } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Balance, Expense } from "@/entities/expense";
 import type { Trip } from "@/entities/trip";
@@ -89,11 +92,11 @@ function traceSettlements(balances: readonly Balance[]): Map<string, SettlementT
       traces.set(`${debtor.id}\u0000${creditor.id}`, {
         from: debtor.id,
         to: creditor.id,
-        amount: Math.round(x),
+        amount: x / 100,
         debtorOwed: owedByMember.get(debtor.id) ?? 0,
         creditorDue: dueByMember.get(creditor.id) ?? 0,
-        debtorRemaining: Math.round(debtor.v),
-        creditorRemaining: Math.round(creditor.v),
+        debtorRemaining: debtor.v / 100,
+        creditorRemaining: creditor.v / 100,
       });
     }
     debtor.v -= x;
@@ -116,8 +119,8 @@ export function BudgetBoard({
   currentUserId: string;
   defaultCurrency: string;
   canEdit: boolean;
-  onAddExpense: (input: AddExpenseInput) => void;
-  onUpdateExpense: (expenseId: string, input: AddExpenseInput) => void;
+  onAddExpense: (input: AddExpenseInput) => Promise<unknown>;
+  onUpdateExpense: (expenseId: string, input: AddExpenseInput) => Promise<unknown>;
 }) {
   const { t, i18n } = useTranslation("planner");
   const { t: tc } = useTranslation("common");
@@ -149,6 +152,8 @@ export function BudgetBoard({
 
   return (
     <div className="mx-auto grid w-full max-w-[1060px] grid-cols-[repeat(auto-fit,minmax(330px,1fr))] items-start gap-[18px] px-6 pb-10 pt-[62px]">
+      {!!trip.budget.excludedCurrencies?.length && <p role="status">{expenseVoiceCopy.mixed}</p>}
+      <BudgetReplanPanel trip={trip} canEdit={canEdit} />
       {/* Expenses */}
       <div className="flex min-w-0 flex-col gap-[18px]">
         <div className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-3">
@@ -184,8 +189,8 @@ export function BudgetBoard({
                   tripCurrency={currency}
                   initial={emptyExpenseForm(trip, currentUserId, defaultCurrency || currency)}
                   submitLabel={t("budget.addExpense")}
-                  onSubmit={(input) => {
-                    onAddExpense(input);
+                  onSubmit={async (input) => {
+                    await onAddExpense(input);
                     setOpen(false);
                   }}
                   onCancel={() => setOpen(false)}
@@ -208,8 +213,8 @@ export function BudgetBoard({
                     tripCurrency={currency}
                     initial={expenseToForm(e, trip, currency)}
                     submitLabel={t("budget.save")}
-                    onSubmit={(input) => {
-                      onUpdateExpense(e.id, input);
+                    onSubmit={async (input) => {
+                      await onUpdateExpense(e.id, input);
                       setEditingExpenseId(null);
                     }}
                     onCancel={() => setEditingExpenseId(null)}
@@ -246,10 +251,9 @@ export function BudgetBoard({
                   </span>
                   <span className="font-mono text-[10.5px] text-muted-foreground tabular-nums">
                     {t("budget.each", {
-                      amount: formatMoney(
-                        e.amount / e.participants.length,
-                        expenseCurrencyForDisplay,
-                      ),
+                      amount: e.shares
+                        ? [...new Set(Object.values(e.shares))].sort((a, b) => a - b).map(value => formatMoney(value, expenseCurrencyForDisplay)).join(" / ")
+                        : formatMoney(e.amount / e.participants.length, expenseCurrencyForDisplay),
                     })}
                   </span>
                 </div>
@@ -872,6 +876,7 @@ function SettlementDerivation({
 }
 
 interface ExpenseFormState {
+  allocations?: Record<string, number>;
   desc: string;
   amount: string;
   expenseCurrency: string;
@@ -901,6 +906,7 @@ function expenseToForm(
   tripCurrency: string,
 ): ExpenseFormState {
   return {
+    allocations: expense.allocations,
     desc: expense.description,
     amount: String(expense.amount),
     expenseCurrency: expense.currency || tripCurrency,
@@ -925,12 +931,20 @@ function ExpenseEditor({
   tripCurrency: string;
   initial: ExpenseFormState;
   submitLabel: string;
-  onSubmit: (input: AddExpenseInput) => void;
+  onSubmit: (input: AddExpenseInput) => void | Promise<unknown>;
   onCancel: () => void;
 }) {
   const { t, i18n } = useTranslation("planner");
   const { t: tc } = useTranslation("common");
   const locale = i18n.resolvedLanguage ?? "en";
+  const requestId = useRef(crypto.randomUUID());
+  const [saving, setSaving] = useState(false);
+  const [splitError, setSplitError] = useState(false);
+  const [saveError, setSaveError] = useState(false);
+  const [custom, setCustom] = useState(false);
+  const [shares, setShares] = useState<Record<string, string>>({});
+  const validAmount = (value: number, currency: string) => Number.isFinite(value) && value > 0 && Math.abs(value * (currency === "INR" ? 100 : 1) - Math.round(value * (currency === "INR" ? 100 : 1))) < 0.00001;
+  const [expectedCount, setExpectedCount] = useState<number | null>(null);
   const [desc, setDesc] = useState(initial.desc);
   const [amount, setAmount] = useState(initial.amount);
   const [expenseCurrency, setExpenseCurrency] = useState(initial.expenseCurrency);
@@ -939,6 +953,7 @@ function ExpenseEditor({
   const [parts, setParts] = useState(initial.parts);
 
   useEffect(() => {
+    setCustom(!!initial.allocations); setShares(Object.fromEntries(Object.entries(initial.allocations ?? {}).map(([id, amount]) => [id, String(amount)])));
     setDesc(initial.desc);
     setAmount(initial.amount);
     setExpenseCurrency(initial.expenseCurrency);
@@ -947,22 +962,40 @@ function ExpenseEditor({
     setParts(initial.parts);
   }, [initial]);
 
-  const submit = () => {
-    const value = Number.parseFloat(amount);
+  const submit = async () => {
+    const value = Number(amount);
     const participants = trip.members.map((m) => m.id).filter((id) => parts[id]);
-    if (!desc.trim() || !(value > 0) || participants.length === 0) return;
-    onSubmit({
+    if (!desc.trim() || !validAmount(value, expenseCurrency) || !payer || !expenseCurrency || participants.length === 0 || (expectedCount != null && participants.length !== expectedCount)) return;
+    const allocations = custom ? Object.fromEntries(participants.map(id => [id, Number(shares[id])])) : undefined;
+    if (allocations && (Object.values(allocations).some(value => !validAmount(value, expenseCurrency)) || Object.values(allocations).reduce((sum, value) => sum + Math.round(value * 100), 0) !== Math.round(value * 100))) { setSplitError(true); return; }
+    setSplitError(false);
+    if (saving) return;
+    setSaving(true); setSaveError(false);
+    try { await onSubmit({
+      requestId: requestId.current,
+      allocations,
       description: desc.trim(),
-      amount: Math.round(value),
+      amount: value,
       currency: expenseCurrency,
       category,
       payer,
       participants,
-    });
+    }); } catch { setSaveError(true); } finally { setSaving(false); }
   };
 
   return (
-    <div className="flex flex-col gap-3 px-4 py-3.5">
+    <fieldset disabled={saving} className="flex flex-col gap-3 px-4 py-3.5">
+      {splitError && <p role="alert">{expenseVoiceCopy.invalidSplit}</p>}
+      {saveError && <p role="alert">{expenseVoiceCopy.saveFailed}</p>}
+      <ExpenseVoiceDraftInput tripId={trip.id} onDraft={draft => {
+        const resolved = resolveExpenseMembers(draft, trip.members);
+        setDesc(draft.description ?? ""); setAmount(draft.amountRupees ?? "");
+        setExpenseCurrency(draft.currency === "INR" ? "INR" : ""); setPayer(resolved.payer);
+        setParts(Object.fromEntries(trip.members.map(m => [m.id, resolved.participants.includes(m.id)])));
+        setExpectedCount(draft.participantCount); setCustom(false); setShares({});
+      }} />
+      {expectedCount != null && <p role="status">{expenseVoiceCopy.participants} {expectedCount}</p>}
+      {amount && (!validAmount(Number(amount), expenseCurrency)) && <p role="alert">{expenseVoiceCopy.wholeOnly}</p>}
       <div className="flex flex-col gap-2">
         <Input
           value={desc}
@@ -1070,15 +1103,17 @@ function ExpenseEditor({
           />
         ))}
       </div>
+      <Button type="button" variant="outline" aria-pressed={custom} onClick={() => setCustom(v => !v)}>{custom ? expenseVoiceCopy.equal : expenseVoiceCopy.custom}</Button>
+      {custom && trip.members.filter(m => parts[m.id]).map(m => <label key={m.id}>{expenseVoiceCopy.share} {m.name}<Input type="number" step={expenseCurrency === "INR" ? "0.01" : "1"} value={shares[m.id] ?? ""} onChange={e => setShares(v => ({ ...v, [m.id]: e.target.value }))} /></label>)}
       <div className="flex justify-end gap-2">
         <Button variant="ghost" size="sm" onClick={onCancel}>
           {tc("actions.cancel")}
         </Button>
-        <Button variant="primary" size="sm" onClick={submit}>
+        <Button variant="primary" size="sm" disabled={!desc.trim() || !payer || !expenseCurrency || !validAmount(Number(amount), expenseCurrency) || !Object.values(parts).some(Boolean) || (expectedCount != null && Object.values(parts).filter(Boolean).length !== expectedCount)} onClick={submit}>
           {submitLabel}
         </Button>
       </div>
-    </div>
+    </fieldset>
   );
 }
 
