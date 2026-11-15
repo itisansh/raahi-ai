@@ -9,6 +9,8 @@ export interface AppSidebarProps {
   top?: ReactNode;
   /** Scrollable middle content: page nav or the trip itinerary. */
   children?: ReactNode;
+  /** Optional extra content rendered above the user menu in the footer. */
+  footer?: ReactNode;
   className?: string;
   /** Controlled collapsed state. When omitted, the sidebar manages its own
    * localStorage-backed state for backward compatibility. */
@@ -50,6 +52,7 @@ export function PanelToggleIcon({ className }: { className?: string }) {
 export function AppSidebar({
   top,
   children,
+  footer,
   className,
   collapsed: controlledCollapsed,
   onCollapsedChange,
@@ -133,7 +136,10 @@ export function AppSidebar({
             {children}
           </div>
 
-          <div className="shrink-0 px-3 pb-2"><EmergencyContacts /></div>
+          <div className="shrink-0 px-3 pb-2">
+            {footer ? <div className="mb-2">{footer}</div> : null}
+            <EmergencyContacts />
+          </div>
           <UserMenu />
         </div>
       </aside>

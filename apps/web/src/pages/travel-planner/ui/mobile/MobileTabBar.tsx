@@ -33,13 +33,13 @@ export function MobileTabBar<T extends string>({
             aria-current={active ? "page" : undefined}
             onClick={() => onValueChange(v)}
             className={cn(
-              "flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 transition-[color,scale] duration-[var(--dur-base)] ease-[var(--ease-out)] active:scale-[var(--press-scale)]",
+              "flex h-16 min-w-0 flex-1 flex-col items-center justify-center gap-1 transition-[color,scale] duration-[var(--dur-base)] ease-[var(--ease-out)] active:scale-[var(--press-scale)]",
               active
-                ? "text-corn-600"
+                ? "text-primary"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            <Icon aria-hidden="true" className="size-5" />
+            <Icon aria-hidden="true" className={cn("size-5", active && "drop-shadow-[0_0_6px_currentColor]")} strokeWidth={active ? 2.25 : 1.75} />
             <span className="truncate text-[11px] font-medium">{label}</span>
           </button>
         );

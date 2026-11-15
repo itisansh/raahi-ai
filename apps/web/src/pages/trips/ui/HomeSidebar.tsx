@@ -159,7 +159,7 @@ export function MobileHomeNav({
             onClick={() => onNavigate(item.href)}
             className={cn(
               "wf-interactive flex min-h-[58px] flex-col items-center justify-center gap-1 text-[11px] font-medium",
-              active ? "text-corn-600" : "text-muted-foreground",
+              active ? "text-primary" : "text-muted-foreground",
             )}
           >
             <Icon className="size-5" strokeWidth={active ? 2.25 : 1.8} />

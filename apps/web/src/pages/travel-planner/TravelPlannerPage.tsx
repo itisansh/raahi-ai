@@ -615,11 +615,19 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
   // is visible. The note editor overlays them all while open.
   const panes = (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="relative z-20 m-3 flex w-fit max-w-[calc(100%-1.5rem)] flex-none flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-2 shadow-md">
-        {!isMobile && <Tabs items={tabItems} value={tab} alwaysShowLabels onValueChange={value => { setNoteEditingStopId(null); setTab(value as Tab); }} aria-label={t("navigation")} />}
-        <MedicalHelp tripId={trip.id} stops={trip.stops} selectedStopId={selectedStopId} />
-        {floatingMembers}
-        {!isMobile && agentEnabled && agentCollapsed && <AgentToggle onOpen={() => setAgentPanel(false)} />}
+      {/* Desktop toolbar — tabs left, actions right */}
+      <div className="relative z-20 m-3 flex flex-none items-center justify-between gap-3">
+        {/* Left: mode tabs */}
+        {!isMobile && (
+          <div className="flex items-center rounded-xl border border-border bg-card px-2.5 py-2 shadow-md">
+            <Tabs items={tabItems} value={tab} alwaysShowLabels onValueChange={value => { setNoteEditingStopId(null); setTab(value as Tab); }} aria-label={t("navigation")} />
+          </div>
+        )}
+        {/* Right: invite + members + AI assistant */}
+        <div className="ml-auto flex items-center gap-2.5 rounded-xl border border-border bg-card px-3 py-2 shadow-md">
+          {floatingMembers}
+          {!isMobile && agentEnabled && agentCollapsed && <AgentToggle onOpen={() => setAgentPanel(false)} />}
+        </div>
       </div>
       <div className="relative min-h-0 flex-1">
       {(!online || tripError instanceof TypeError) && <div role="status" className="absolute bottom-3 left-3 right-3 z-20 rounded-lg border border-border bg-background p-3 text-sm">{offlineCopy.offline}<Button type="button" variant="outline" size="sm" onClick={() => void refetch()}>{offlineCopy.retry}</Button></div>}
@@ -728,13 +736,31 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
           subtitle={headerSubtitle}
           onBack={() => navigate("/")}
           onRename={(title) => rename.mutate(title)}
-          onOpenAgent={agentEnabled ? () => setAgentPanel(false) : undefined}
         />
-        {trip.permissions.canEdit && online && <div className="flex justify-end border-b px-3 py-2"><ExistingTripPlanning tripId={trip.id} /></div>}
         <main className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           {panes}
           {!noteEditingStop && tab === "map" ? (
             <MobileItinerarySheet {...sidebarProps} />
+          ) : null}
+          {/* ExistingTripPlanning folded into a floating top-right chip above content */}
+          {trip.permissions.canEdit && online && (
+            <div className="absolute top-2 right-2 z-30">
+              <ExistingTripPlanning tripId={trip.id} />
+            </div>
+          )}
+          {/* AI Assistant floating action button — bottom-right, clears the 64px tab bar */}
+          {agentEnabled ? (
+            <button
+              type="button"
+              onClick={() => setAgentPanel(false)}
+              aria-label={ta("toggle.open")}
+              className="absolute right-4 z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-transform duration-[var(--dur-base)] ease-[var(--ease-out)] active:scale-95 hover:scale-105"
+              style={{ bottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M12 2a8 8 0 0 1 8 8v1a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V10a8 8 0 0 1 8-8z"/><circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"/><path d="M8 17v1a4 4 0 0 0 8 0v-1"/>
+              </svg>
+            </button>
           ) : null}
         </main>
         <MobileTabBar
@@ -808,6 +834,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
         <AppSidebar
           collapsed={sidebarCollapsed}
           onCollapsedChange={toggleSidebarCollapsed}
+          footer={<MedicalHelp tripId={trip.id} stops={trip.stops} selectedStopId={selectedStopId} />}
           top={
             <div className="flex min-w-0 items-start gap-2">
               <div className="min-w-0 flex-1">

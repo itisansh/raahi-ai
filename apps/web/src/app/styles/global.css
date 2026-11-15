@@ -122,6 +122,22 @@ code, kbd, samp, pre {
   font-variant-numeric: tabular-nums;
 }
 
+/* Pointer cursor on every interactive element — single source of truth. */
+button,
+[role="button"],
+a[href],
+select,
+label[for],
+[tabindex]:not([tabindex="-1"]) {
+  cursor: pointer;
+}
+
+/* Text cursor inside inputs/textareas. */
+input,
+textarea {
+  cursor: text;
+}
+
 /* cossUI: no focus glow/ring highlight. Interaction feedback is conveyed by
  * hover, border, and background changes (see Input/Autocomplete), so the
  * browser's default focus outline is removed app-wide. */
