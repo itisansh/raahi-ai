@@ -9,7 +9,6 @@ services:
     buildCommand: bash deploy/render/build.sh
     startCommand: corepack pnpm --filter @opentrip/api start
     healthCheckPath: /api/health
-    maxShutdownDelaySeconds: 45
     envVars:
       - key: NODE_VERSION
         value: 24
