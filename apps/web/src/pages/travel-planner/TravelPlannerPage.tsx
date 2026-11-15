@@ -1,3 +1,4 @@
+import { AgentAvatar } from "./ui/agent/AgentAvatar";
 import { ExistingTripPlanning } from "@/widgets/trip-planning";
 import { Button } from "@/shared/ui/button";
 import { MedicalHelp } from "@/features/medical-help";
@@ -616,7 +617,8 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
   const panes = (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
       {/* Desktop toolbar — tabs left, actions right */}
-      <div className="relative z-20 m-3 flex flex-none items-center justify-between gap-3">
+      <div className="relative z-20 mx-3 my-1 flex flex-none items-center justify-between gap-2 md:m-3">
+        {isMobile && <MedicalHelp tripId={trip.id} stops={trip.stops} selectedStopId={selectedStopId} />}
         {/* Left: mode tabs */}
         {!isMobile && (
           <div className="flex items-center rounded-xl border border-border bg-card px-2.5 py-2 shadow-md">
@@ -624,7 +626,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
           </div>
         )}
         {/* Right: invite + members + AI assistant */}
-        <div className="ml-auto flex items-center gap-2.5 rounded-xl border border-border bg-card px-3 py-2 shadow-md">
+        <div className="ml-auto flex items-center gap-2 rounded-xl px-1 py-1 md:border md:border-border md:bg-card md:px-3 md:py-2 md:shadow-md">
           {floatingMembers}
           {!isMobile && agentEnabled && agentCollapsed && <AgentToggle onOpen={() => setAgentPanel(false)} />}
         </div>
@@ -634,6 +636,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
       <PlannerPane active={!noteEditingStop && tab === "map"}>
         <TripMapView
           trip={trip}
+          planningAction={trip.permissions.canEdit && online ? <ExistingTripPlanning tripId={trip.id} /> : null}
           numbers={numbers}
           day={day}
           activeStopId={selectedStopId}
@@ -742,24 +745,15 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
           {!noteEditingStop && tab === "map" ? (
             <MobileItinerarySheet {...sidebarProps} />
           ) : null}
-          {/* ExistingTripPlanning folded into a floating top-right chip above content */}
-          {trip.permissions.canEdit && online && (
-            <div className="absolute top-2 right-2 z-30">
-              <ExistingTripPlanning tripId={trip.id} />
-            </div>
-          )}
           {/* AI Assistant floating action button — bottom-right, clears the 64px tab bar */}
           {agentEnabled ? (
             <button
               type="button"
               onClick={() => setAgentPanel(false)}
               aria-label={ta("toggle.open")}
-              className="absolute right-4 z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-transform duration-[var(--dur-base)] ease-[var(--ease-out)] active:scale-95 hover:scale-105"
-              style={{ bottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}
+              className="wf-pressable absolute right-4 bottom-4 z-30 flex size-14 items-center justify-center rounded-full bg-[#080d24] shadow-lg"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="M12 2a8 8 0 0 1 8 8v1a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V10a8 8 0 0 1 8-8z"/><circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"/><path d="M8 17v1a4 4 0 0 0 8 0v-1"/>
-              </svg>
+              <AgentAvatar className="size-12" />
             </button>
           ) : null}
         </main>
@@ -845,7 +839,6 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
                   onRename={(title) => rename.mutate(title)}
                 />
               </div>
-              {trip.permissions.canEdit && online && <ExistingTripPlanning tripId={trip.id} />}
 
             </div>
           }

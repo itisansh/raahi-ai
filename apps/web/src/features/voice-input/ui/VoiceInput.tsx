@@ -74,7 +74,7 @@ export function VoiceInput({ onUse, onSend, disabled = false, destinationOnly = 
         {state.status === "recording" ? <SquareIcon aria-hidden className="size-7" /> : agentState === "speaking" ? <AudioLinesIcon aria-hidden className="size-8" /> : <MicIcon aria-hidden className="size-8" />}
       </button>
       <p role="status" className={compact && !busy && !statusLabel ? "sr-only" : "text-sm text-muted-foreground"}>{(state.status === "connecting" || state.status === "recording" || state.status === "finalizing") ? t(`voice.${state.status}`) : statusLabel ?? t("voice.start")}</p>
-      {busy && <div className="raahi-voice-wave" aria-hidden="true">{[0, 1, 2, 3, 4].map(index => <span key={index} style={{ animationDelay: `${index * 110}ms` }} />)}</div>}
+      {(busy || agentState === "speaking") && <div className="raahi-voice-wave" aria-hidden="true">{[0, 1, 2, 3, 4].map(index => <span key={index} />)}</div>}
       {recordingActions}
       {busy && <Button variant="ghost" onClick={() => recorder.current?.cancel()}>{t("voice.cancel")}</Button>}
       {busy && (state.text || state.partial) && <p className="max-h-24 max-w-full overflow-y-auto break-words text-center text-sm">{[state.text, state.partial].filter(Boolean).join(" ")}</p>}

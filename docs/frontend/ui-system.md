@@ -212,14 +212,27 @@ and image/attachment behavior remain supported by the editor.
   The itinerary starts at 44% of the desktop layout; the previous 30% default
   is promoted to this allocation while other saved widths remain respected.
 - Map stops are keyboard-operable buttons with place names. Selecting one opens
-  its itinerary details, reopening a collapsed sidebar. Dashed connections show
-  stop order, including day boundaries; they do not claim road directions.
+  its itinerary details, reopening a collapsed sidebar. Yellow rounded map pins show day and stop indices; no connecting lines are drawn.
 - Raahi AI has a labelled launcher and explanatory panel header. Explicit sends
   from this composer always use the streaming assistant; no mention is needed.
 - Voice supports explicit **Send now** after transcription finalizes or **Stop &
-  edit** before sending. Saffron/teal activity animation respects reduced motion.
+  edit** before sending. Blue/violet/pink voice activity animation respects reduced motion.
 - Emergency contacts open in a dialog from the sidebar or mobile home header;
   planner medical help also includes them. No global fixed button covers content.
 - Travel journal descriptions explain their purpose and browser-only storage.
 - Warm paper and saffron tokens replace monochrome actions; dark surfaces use
   deep teal while retaining the user's selected theme.
+
+
+### Assistant visual and streaming update (2026-11-15)
+
+Assistant avatars and launchers share `shared/ui/ai-aura.css`: a blue illuminated
+orb, with violet/pink/blue composer and planning-action accents. Voice recording,
+processing and speech states use the same palette; activity motion stops for
+reduced-motion users. Medical help stays at the mobile planner's top left.
+
+Planning previews request NDJSON and render incoming model guidance immediately
+as a draft. Final validation replaces that text with the stored reply and unlocks
+approval only when approvable. Speech reads the final stored reply. Cancel clears
+the draft response, preserves the request (including voice input), and aborts the
+request. This is incremental model output, not a simulated typing timer.

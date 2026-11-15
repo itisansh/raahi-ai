@@ -15,7 +15,7 @@ export function MobilePlannerHeader({
   onOpenAgent?: () => void;
 }) {
   return (
-    <header className="flex flex-none items-center gap-2 border-b border-border bg-background px-2 pt-[max(0.375rem,env(safe-area-inset-top))] pb-1.5">
+    <header className="flex flex-none items-center gap-2 border-b border-border bg-background px-2 min-h-20 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3">
       <div className="min-w-0 flex-1">
         <BackButton
           onBack={onBack}

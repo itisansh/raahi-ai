@@ -45,7 +45,7 @@ Below the `md` breakpoint the search control spans the top edge of the map
 the all-days color legend is hidden — the itinerary bottom-sheet pill occupies
 that corner and carries the same per-day information. The zoom and locate
 controls stay in the bottom-right corner, above the floating
-member/invite actions via the `--map-ctrl-bottom-offset` CSS
+assistant action via the `--map-ctrl-bottom-offset` CSS
 variable (defined in `map.css`, set by the page that owns the overlay) so the
 two never overlap. The selected stop opens
 as a bottom detail sheet rather than in the sidebar. See
@@ -84,14 +84,14 @@ tracks the user with `watchPosition` while active.
 
 - **Basemap**: CARTO Positron in light mode and CARTO Dark Matter in dark mode.
   `TripMap` observes the resolved application theme, swaps the MapLibre style
-  in place, and restores the page-owned route source/layers after `style.load`.
+  in place, and resynchronizes markers after `style.load`.
   Camera, markers, popups, and geolocation remain mounted across the swap.
-  Route casing and MapLibre popups/controls use theme-specific contrast.
-- **Markers**: circular numbered pins colored by day; `transit` stops render as
-  rounded squares. Hover scales up; the active stop scales further with a
-  cornflower ring.
-- **Routes**: one line per day (theme-contrast casing + colored line) connecting
-  that day's stops in order.
+  MapLibre popups/controls use theme-specific contrast.
+- **Markers**: bright yellow rounded pins show `day·stop` (for example `5·3`
+  means Day 5, stop 3). Stop indices retain the itinerary's per-day ordering.
+  Accessible names include the day and place. Place labels appear on selection
+  or keyboard focus to avoid overlapping labels on nearby stops.
+- **Connections**: no straight or dashed lines are drawn between stops.
 - **Focus**: selecting a stop flies to it and opens a name popup.
 - **Fit**: when no stop is active, the map fits bounds to the visible stops.
 - **Empty trip + destination**: create stores geocoded `trip.destinationLat/Lng`
@@ -99,7 +99,7 @@ tracks the user with `watchPosition` while active.
   view opens near the destination. If coords are missing, it falls back to a
   Photon geocode of the destination label. Trips with no destination open on a
   neutral world view.
-- **Day filter**: `day = 0` shows all; otherwise only that day's stops/routes.
+- **Day filter**: `day = 0` shows all; otherwise only that day's stops.
 - **Selection event**: clicking a marker calls `onSelectStop(id)`.
 
 ## Loading and failure
@@ -114,3 +114,11 @@ tracks the user with `watchPosition` while active.
 The planner passes stops from the trip API, colored per day. Coordinates and
 day colors match the seed data described in
 [../backend/domain.md](../backend/domain.md).
+
+## Mobile action layout
+
+The taller title header sits above a compact medical-help (left) and member/invite
+(right) row. Plan more stops sits at the map's top right below search. Map zoom
+and location controls reserve 88px at the bottom for the separate assistant
+launcher; desktop reserves 16px. Marker labels always include both day and stop
+indices, including when the map is filtered to one day.

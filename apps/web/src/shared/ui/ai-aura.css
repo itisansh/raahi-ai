@@ -1,0 +1,19 @@
+/* Shared blue, violet and pink light for assistant entry points and voice. */
+.raahi-ai-orb {
+  display: inline-block;
+  position: relative;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 56%, #101534 17%, #296bff 29%, #090f2d 43%, #67caff 62%, #d5f5ff 67%, #172446 74%);
+  box-shadow: 0 0 16px #448aff55, inset 0 -5px 10px #020619;
+}
+.raahi-ai-action {
+  color: #f6f7ff;
+  border: 1px solid #738aff;
+  background: linear-gradient(110deg, #271633, #101d43);
+  box-shadow: -3px 0 14px #dc55ba33, 3px 0 14px #448aff44;
+}
+.raahi-ai-action:hover { background: #202950; }
+.raahi-ai-composer {
+  border: 1px solid #8277dd;
+  box-shadow: -4px 0 18px #dc55ba22, 4px 0 18px #448aff33;
+}

@@ -11,7 +11,7 @@ type Stop = { id: string; name: string; lat: number; lng: number };
 export function MedicalHelp({ tripId, stops, selectedStopId }: { tripId: string; stops: Stop[]; selectedStopId?: string | null }) {
   const [open, setOpen] = useState(false);
   return <Dialog open={open} onOpenChange={setOpen}>
-    <DialogTrigger render={<Button type="button" variant="outline" size="sm" />}>{copy.title}</DialogTrigger>
+    <DialogTrigger render={<Button type="button" variant="outline" size="sm" className="min-h-11" />}>{copy.title}</DialogTrigger>
     <DialogPortal><DialogBackdrop className="fixed inset-0 z-50 bg-black/40" /><DialogSheetViewport><DialogSheetPopup size="lg"><DialogHeader><DialogTitle>{copy.title}</DialogTitle><DialogDescription>{copy.description}</DialogDescription></DialogHeader>
       <DialogPanel>{open && <MedicalSearch tripId={tripId} stops={stops} selectedStopId={selectedStopId} />}</DialogPanel>
       <DialogFooter><DialogClose render={<Button type="button" variant="outline" />}>{copy.close}</DialogClose></DialogFooter>

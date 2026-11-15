@@ -470,3 +470,24 @@ bookings are preserved. Rollback and its actor/timestamp are atomic and retryabl
 the reverted proposal cannot be applied again. Older approvals without snapshots
 are visible but cannot be rolled back. After intervening edits, generate a new
 proposal rather than overwriting newer work.
+
+
+### Incremental planning preview responses
+
+`POST /api/planning/preview` accepts `Accept: application/x-ndjson` to stream:
+
+- `{"type":"status","stage":"planning"}` when processing starts.
+- `{"type":"reply","text":"..."}` containing the current draft reply snapshot.
+- `{"type":"result","data":{...}}` containing the ordinary validated preview or
+  clarification response, after proposal persistence.
+- `{"type":"error","code":"planning_unavailable"}` (or another planning error)
+  terminates an unsuccessful stream; the client must not accept a partial plan.
+
+Each event ends with a newline. Draft text comes from the model's partial
+structured output and is not yet checked or approvable. Model calls receive the
+request cancellation signal. Validation, membership, origin, limits and explicit
+approval remain in place. Clients without this Accept header retain the JSON
+response contract. Streaming failures after headers use an error event, while
+pre-stream authentication, origin and input failures retain their HTTP status.
+The adapter uses AI SDK `streamText` with `Output.object` and
+`partialOutputStream` ([SDK reference](https://ai-sdk.dev/docs/reference/ai-sdk-core/stream-text)).

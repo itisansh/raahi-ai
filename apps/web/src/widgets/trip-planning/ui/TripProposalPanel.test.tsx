@@ -79,3 +79,16 @@ it("submits finalized voice directly without needing a second Send click", async
   expect(JSON.parse(mocks.fetch.mock.calls[0]![1].body).prompt).toBe("Two friends from Jaipur for three days");
   expect(host.textContent).toContain(response.reply.text);
 });
+
+it("shows live draft text before completion and removes it on cancellation", async () => {
+  mocks.fetch.mockImplementation((_path, _init, onReply) => {
+    onReply("Exploring Jaipur with relaxed mornings");
+    return new Promise(() => {});
+  });
+  await render(); await type("Three days in Jaipur"); await click("Send trip request");
+  expect(host.textContent).toContain("Exploring Jaipur with relaxed mornings");
+  expect(host.textContent).toContain("Draft reply");
+  expect(mocks.play).not.toHaveBeenCalled();
+  await click("Cancel request");
+  expect(host.textContent).not.toContain("Exploring Jaipur with relaxed mornings");
+});

@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { useTranslation } from "react-i18next";
 import {
-  type GeoJSONSource,
   GeolocateControl,
   LngLatBounds,
   Map as MlMap,
@@ -14,7 +13,6 @@ import { reversePlace } from "@/shared/api";
 import { useResolvedTheme } from "@/shared/lib/theme";
 import {
   mapStyleUrlForTheme,
-  routeCasingColorForTheme,
   type MapTheme,
 } from "./map-theme";
 import type { MapStop, SearchResult, UserLocationAvatar } from "./types";
@@ -57,42 +55,6 @@ const DEFAULT_CENTER: [number, number] = [78.9, 22.6];
 const DEFAULT_ZOOM = 4;
 const FALLBACK_ZOOM = 10;
 
-function installTripRouteLayers(map: MlMap, theme: MapTheme): void {
-  if (!map.getSource("trip-route")) {
-    map.addSource("trip-route", {
-      type: "geojson",
-      data: { type: "FeatureCollection", features: [] },
-    });
-  }
-  if (!map.getLayer("trip-route-casing")) {
-    map.addLayer({
-      id: "trip-route-casing",
-      type: "line",
-      source: "trip-route",
-      layout: { "line-cap": "round", "line-join": "round" },
-      paint: {
-        "line-color": routeCasingColorForTheme(theme),
-        "line-width": 6,
-        "line-opacity": 0.9,
-      },
-    });
-  }
-  if (!map.getLayer("trip-route-line")) {
-    map.addLayer({
-      id: "trip-route-line",
-      type: "line",
-      source: "trip-route",
-      layout: { "line-cap": "round", "line-join": "round" },
-      paint: {
-        "line-color": ["get", "color"],
-        "line-width": 3.5,
-        "line-dasharray": [2, 1.5],
-        "line-opacity": 0.9,
-      },
-    });
-  }
-}
-
 /** Pushpin cursor (data URI) with the hotspot at the pin tip. */
 const PIN_CURSOR =
   "url(\"data:image/svg+xml;utf8," +
@@ -101,8 +63,7 @@ const PIN_CURSOR =
   ) +
   "\") 16 30, crosshair";
 
-/** MapLibre wrapper in the spirit of mapcn: CARTO positron basemap, per-day
- * colored routes, numbered markers, and active-stop focus. */
+/** Theme-aware basemap with day/stop markers and active-stop focus. */
 export function TripMap({
   stops,
   day,
@@ -374,7 +335,6 @@ export function TripMap({
       contextRef.current?.(e.lngLat.lng, e.lngLat.lat);
     });
     const handleStyleReady = () => {
-      installTripRouteLayers(map, themeRef.current);
       readyRef.current = true;
       map.resize();
       // trigger the first sync
@@ -440,13 +400,12 @@ export function TripMap({
       const el = document.createElement("button");
       el.type = "button";
       el.title = s.name;
-      el.setAttribute("aria-label", `${s.num}. ${s.name}`);
+      el.setAttribute("aria-label", `${t("days.day", { n: s.day })}, ${s.num}. ${s.name}`);
       el.className = "trip-map-marker";
-      el.style.background = s.color;
-      el.textContent = String(s.num);
+      el.textContent = `${s.day}·${s.num}`;
       const label = document.createElement("span");
       label.className = "trip-map-marker-label";
-      label.textContent = s.name;
+      label.textContent = `${t("days.day", { n: s.day })} · ${s.name}`;
       el.appendChild(label);
       el.dataset.active = s.id === active ? "true" : "false";
       if (s.transit) el.dataset.transit = "true";
@@ -459,18 +418,6 @@ export function TripMap({
         .addTo(map);
       markersRef.current.push(marker);
     }
-
-    const ordered = [...visible].sort((a, b) => a.num - b.num);
-    const features = ordered.slice(1).map((stop, index) => ({
-      type: "Feature" as const,
-      properties: { color: stop.color },
-      geometry: {
-        type: "LineString" as const,
-        coordinates: [[ordered[index]!.lng, ordered[index]!.lat], [stop.lng, stop.lat]],
-      },
-    }));
-    const src = map.getSource("trip-route") as GeoJSONSource | undefined;
-    src?.setData({ type: "FeatureCollection", features });
 
     // User asked to locate — don't steal the camera with destination/stops.
     if (locatePendingRef.current) return;
@@ -491,7 +438,7 @@ export function TripMap({
         .setText(activeStop.name)
         .addTo(map);
     } else if (visible.length && !searchResult) {
-      const fitKey = `${day}:${visible.length}`;
+      const fitKey = `${day}:${visible.map(s => `${s.id}:${s.lng}:${s.lat}`).join("|")}`;
       if (fitKey !== lastFitRef.current) {
         lastFitRef.current = fitKey;
         const b = new LngLatBounds();

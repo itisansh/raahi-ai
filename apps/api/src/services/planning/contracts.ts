@@ -76,9 +76,14 @@ export interface PlanningContext {
   canEdit?: boolean;
 }
 
+export interface PlanningProgress {
+  onReply: (text: string) => void;
+  signal: AbortSignal;
+}
+
 export interface PlanningModel {
-  extract(prompt: string, context: PlanningContext | null): Promise<unknown>;
-  propose(intent: TripIntent, context: PlanningContext | null): Promise<unknown>;
+  extract(prompt: string, context: PlanningContext | null, progress?: PlanningProgress): Promise<unknown>;
+  propose(intent: TripIntent, context: PlanningContext | null, progress?: PlanningProgress): Promise<unknown>;
 }
 
 export const requiredIntentFields = ["origin", "partySize", "dayCount", "budgetRupees", "budgetBasis", "currency"] as const;

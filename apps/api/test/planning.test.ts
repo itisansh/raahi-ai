@@ -153,7 +153,7 @@ function httpFixture(authenticated = true) {
   const request = (body: unknown = { prompt }, origin = "https://web.example.test") => app.request("https://web.example.test/api/planning/preview", {
     method: "POST", headers: { Origin: origin, "Content-Type": "application/json" }, body: JSON.stringify(body),
   });
-  return { request, preview };
+  return { request, preview, app };
 }
 describe("planning HTTP boundary", () => {
   it("requires authentication and trusted Origin", async () => {
@@ -208,4 +208,28 @@ it("checks additions against retained times and permits unchanged days", async (
   expect(conflict).toMatchObject({ approvable: false, issues: expect.arrayContaining(["schedule_infeasible"]) });
   existingPlan.stops[0]!.duration = "later";
   expect(await service.preview("owner", { prompt, tripId: "existing" })).toMatchObject({ approvable: false, issues: expect.arrayContaining(["existing_schedule_unverified"]) });
+});
+
+
+it("streams draft reply events before the validated planning result", async () => {
+  const f = httpFixture();
+  let complete!: () => void;
+  f.preview.mockImplementation((...args: unknown[]) => {
+    const progress = args[2] as { onReply: (text: string) => void };
+    progress.onReply("Draft from the model");
+    return new Promise(resolve => { complete = () => resolve({ status: "clarification", missing: ["origin"] }); });
+  });
+  const response = await f.app.request("https://web.example.test/api/planning/preview", {
+    method: "POST", headers: { Origin: "https://web.example.test", "Content-Type": "application/json", Accept: "application/x-ndjson" }, body: JSON.stringify({ prompt }),
+  });
+  expect(response.headers.get("content-type")).toContain("application/x-ndjson");
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  let received = "";
+  while (!received.includes('"type":"reply"')) received += decoder.decode((await reader.read()).value);
+  expect(received).toContain("Draft from the model");
+  expect(received).not.toContain('"type":"result"');
+  complete();
+  while (true) { const chunk = await reader.read(); if (chunk.done) break; received += decoder.decode(chunk.value); }
+  expect(received).toContain('"type":"result"');
 });

@@ -75,12 +75,12 @@ export function BackButton({
             type="button"
             onClick={() => onRename && setEditing(true)}
             title={onRename ? tp("header.renameAria") : title}
-            className="truncate text-left font-heading text-base font-semibold leading-tight tracking-tight transition-[color,scale] duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:text-corn-600 active:scale-[var(--press-scale)]"
+            className="truncate text-left font-heading text-lg md:text-base font-semibold leading-snug tracking-tight transition-[color,scale] duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:text-corn-600 active:scale-[var(--press-scale)]"
           >
             {title}
           </button>
           {subtitle ? (
-            <span className="truncate font-mono text-[11px] text-muted-foreground tabular-nums">
+            <span className="truncate text-xs text-muted-foreground tabular-nums">
               {subtitle}
             </span>
           ) : null}

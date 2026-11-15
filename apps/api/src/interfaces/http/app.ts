@@ -586,6 +586,28 @@ export function createRouteTable(
     }
     const body = await c.req.json().catch(() => null);
     const request = planningRequestSchema.parse(body);
+    if (c.req.header("accept")?.includes("application/x-ndjson")) {
+      const abort = new AbortController();
+      const signal = AbortSignal.any([abort.signal, c.req.raw.signal]);
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          const send = (event: unknown) => {
+            if (!signal.aborted) controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+          };
+          send({ type: "status", stage: "planning" });
+          void container.planningService.preview(c.get("user")!.id, request, {
+            signal, onReply: (text) => send({ type: "reply", text }),
+          }).then(result => send({ type: "result", data: result }))
+            .catch(error => send({ type: "error", code: error instanceof PlanningError ? error.code : "planning_unavailable" }))
+            .finally(() => { if (!signal.aborted) controller.close(); });
+        },
+        cancel() { abort.abort(); },
+      });
+      return new Response(stream, { headers: {
+        "Content-Type": "application/x-ndjson", "Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no",
+      } });
+    }
     try {
       return ok(c, await container.planningService.preview(c.get("user")!.id, request));
     } catch (error) {

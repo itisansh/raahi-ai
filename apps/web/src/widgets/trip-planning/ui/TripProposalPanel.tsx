@@ -17,6 +17,8 @@ export function TripProposalPanel({ tripId, onSaved }: { tripId?: string; onSave
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
   const [turns, setTurns] = useState<Turn[]>([]);
+  const [streamedReply, setStreamedReply] = useState("");
+  const [pendingRequest, setPendingRequest] = useState("");
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [recording, setRecording] = useState(false);
@@ -27,7 +29,7 @@ export function TripProposalPanel({ tripId, onSaved }: { tripId?: string; onSave
   const voicePreference = useRef(voiceEnabled);
   const active = useRef<AbortController | null>(null);
   const replyEnd = useRef<HTMLDivElement>(null);
-  useEffect(() => { replyEnd.current?.scrollIntoView({ block: "end", behavior: "instant" }); }, [turns.length]);
+  useEffect(() => { replyEnd.current?.scrollIntoView({ block: "end", behavior: "instant" }); }, [turns.length, streamedReply]);
   const draftRef = useRef<HTMLTextAreaElement>(null);
   const speech = useReplySpeech();
   const result = turns.at(-1)?.result;
@@ -41,7 +43,7 @@ export function TripProposalPanel({ tripId, onSaved }: { tripId?: string; onSave
     try { localStorage.setItem("raahi:spoken-replies", enabled ? "on" : "off"); } catch { /* Preference remains available for this dialog. */ }
     if (!enabled) speech.stop();
   };
-  const cancel = () => { active.current?.abort(); active.current = null; setBusy(false); speech.stop(); };
+  const cancel = () => { active.current?.abort(); active.current = null; setBusy(false); setStreamedReply(""); setPendingRequest(""); speech.stop(); };
   const generate = async (voiceText?: string) => {
     const submitted = voiceText ? [draft.trim(), voiceText.trim()].filter(Boolean).join(" ") : draft.trim();
     const prompt = [...turns.map(turn => turn.request), submitted].join("\n\n");
@@ -50,14 +52,15 @@ export function TripProposalPanel({ tripId, onSaved }: { tripId?: string; onSave
       return;
     }
     speech.stop();
+    setDraft(submitted);
     const controller = new AbortController();
     active.current = controller;
-    setBusy(true); setError(null);
+    setBusy(true); setError(null); setStreamedReply(""); setPendingRequest(submitted);
     const timeout = setTimeout(() => controller.abort(), 180_000);
     try {
       const next = await apiFetch<PlanningResult>("/api/planning/preview", {
         method: "POST", body: JSON.stringify({ prompt, ...(tripId ? { tripId } : {}) }), signal: controller.signal,
-      });
+      }, text => { if (active.current === controller) setStreamedReply(text); });
       if (active.current !== controller) return;
       setTurns(current => [...current, { id: next.proposalId, request: submitted, result: next }]);
       setDraft("");
@@ -66,7 +69,7 @@ export function TripProposalPanel({ tripId, onSaved }: { tripId?: string; onSave
       if (active.current === controller) setError(copy.errors[cause instanceof ApiError ? cause.code : "generic"] ?? copy.errors.generic!);
     } finally {
       clearTimeout(timeout);
-      if (active.current === controller) { active.current = null; setBusy(false); }
+      if (active.current === controller) { active.current = null; setBusy(false); setStreamedReply(""); setPendingRequest(""); }
     }
   };
   const approve = async () => {
@@ -103,6 +106,11 @@ export function TripProposalPanel({ tripId, onSaved }: { tripId?: string; onSave
             <p className="whitespace-pre-wrap text-sm leading-relaxed">{turn.result.reply.text}</p>
           </div>
         </div>)}
+      </div>}
+      {busy && <div className="space-y-3" aria-busy="true">
+        <p className="ml-8 whitespace-pre-wrap rounded-2xl bg-muted px-4 py-3 text-sm">{pendingRequest}</p>
+        <p className="text-xs text-muted-foreground" role="status">{copy.streamingDraft}</p>
+        <p className="whitespace-pre-wrap text-sm leading-relaxed">{streamedReply || copy.generating}</p>
       </div>}
       {result && <div className="flex flex-wrap items-center gap-2">
         {speech.state === "loading" || speech.state === "speaking"
@@ -157,7 +165,7 @@ export function TripProposalPanel({ tripId, onSaved }: { tripId?: string; onSave
             draftRef.current?.focus();
           }} />
 
-        <div className="flex items-end gap-2 rounded-2xl border border-input bg-background p-2">
+        <div className="raahi-ai-composer flex items-end gap-2 rounded-3xl bg-background p-2">
           <Textarea ref={draftRef} aria-label={copy.request} value={draft} onChange={event => setDraft(event.target.value)}
             disabled={busy || saving || recording} maxLength={4000} rows={2} placeholder={turns.length ? copy.replyPlaceholder : copy.placeholder}
             className="max-h-32 resize-none border-0 bg-transparent shadow-none focus:bg-transparent"

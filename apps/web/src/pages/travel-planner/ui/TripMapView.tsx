@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScanLine } from "lucide-react";
@@ -34,8 +35,10 @@ export function TripMapView({
   onCancelPick,
   onAddStopHere,
   locateSignal = 0,
+  planningAction,
 }: {
   trip: Trip;
+  planningAction?: ReactNode;
   numbers: Map<string, number>;
   day: number;
   activeStopId: string | null;
@@ -163,7 +166,7 @@ export function TripMapView({
   return (
     <ContextMenu>
       {/* The control stack sits above the floating member and invite actions. */}
-      <ContextMenuTrigger className="relative block size-full [--map-ctrl-bottom-offset:64px]">
+      <ContextMenuTrigger className="relative block size-full [--map-ctrl-bottom-offset:88px] md:[--map-ctrl-bottom-offset:16px]">
         {!picking ? (
           <div className="absolute inset-x-3 top-3 z-10 md:inset-x-auto md:left-4 md:top-4 md:w-full md:max-w-xs md:pr-8">
             <MapSearch
@@ -176,6 +179,7 @@ export function TripMapView({
             />
           </div>
         ) : null}
+        {!picking && planningAction ? <div className="absolute right-3 top-16 z-10 md:right-4 md:top-4">{planningAction}</div> : null}
         <TripMap
           stops={stops}
           day={day}
@@ -212,7 +216,6 @@ export function TripMapView({
         ) : null}
         {day === 0 ? (
           <div className="absolute bottom-4 left-4 flex flex-col gap-1.5 rounded-xl bg-card/90 p-3 shadow-[var(--shadow-border),var(--shadow-md)] backdrop-blur-sm max-md:hidden">
-            <p className="max-w-52 text-xs text-muted-foreground">{t("map.routeHint")}</p>
             {trip.days.map((d) => (
               <div key={d.number} className="flex items-center gap-2 text-xs">
                 <span

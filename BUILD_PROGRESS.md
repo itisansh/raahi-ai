@@ -1713,3 +1713,57 @@ success is newly claimed; no secrets were displayed or changed.
   Full application build/tests not run: changes are deployment validation and
   documentation only. No push, deploy, remote environment mutation or live
   weather/email verification performed.
+
+## 2026-11-15 — Mobile map and streaming voice UI polish
+
+Status: **DONE** for implementation and local verification. Live Gemini and
+ElevenLabs calls were not made during this pass.
+
+- Restored mobile medical help at the top left; compacted the member/invite row,
+  enlarged the title header, and moved Plan more stops below map search.
+- Removed map connection layers. Yellow rounded pins show `day·stop`, preserving
+  itinerary order and including day/place in accessible labels. Place-name labels
+  appear only for selected/focused pins. Bounds refresh when visible coordinates
+  change, even when the stop count stays the same.
+- Reserved bottom space between map controls and the assistant launcher. Shared
+  blue orb styling replaces the robot/avatar; planning/chat composers and voice
+  activity use blue/violet/pink light. Recording and speech show animated waves;
+  reduced motion disables activity animation.
+- Added incremental planning guidance through the existing preview endpoint,
+  service and model port. AI SDK structured-output chunks reach the browser as
+  NDJSON snapshots, then the validated/persisted result replaces the draft.
+  Approval and speech use the final result only. Cancellation aborts model work,
+  clears provisional text and preserves typed or spoken input.
+- Reused MedicalHelp, ExistingTripPlanning, coss dialogs/buttons, VoiceInput,
+  TripMap, planning validation and the existing proposal approval flow.
+- Updated `docs/frontend/map.md`, `docs/frontend/ui-system.md`, and the incremental
+  planning preview contract in `docs/backend/api/platform.md`.
+
+Verification (actual results):
+
+- `pnpm typecheck` — PASS.
+- `pnpm lint` — PASS.
+- `pnpm --filter @opentrip/web test` — PASS (initial 111 tests); the subsequent
+  `BASE_URL=http://localhost:8780 pnpm check` also passed the expanded web suite.
+- `pnpm --filter @opentrip/web exec vitest run src/shared/api/client.test.ts src/widgets/trip-planning/ui/TripProposalPanel.test.tsx`
+  — PASS, 9 tests including incremental UTF-8 chunks, incomplete streams and cancel.
+- `pnpm --filter @opentrip/api exec vitest run test/planning.test.ts test/planning-model.test.ts test/planning-reply.test.ts`
+  — initial sandbox HTTP bind failure; PASS outside sandbox, 34 tests. The added
+  real-SDK/mocked-SSE adapter test subsequently passed (6 adapter tests).
+- `BASE_URL=http://localhost:8780 pnpm check` — typecheck, lint and web tests passed;
+  API tests failed under sandbox restrictions. Ran the API suite separately with
+  local-server permission: `BASE_URL=http://localhost:8780 pnpm --filter @opentrip/api test`
+  — PASS, 55 files / 421 tests, including disposable MongoDB integration tests.
+- `pnpm ui:check`, `pnpm docs:check`, `git diff --check` — PASS.
+- `BASE_URL=http://localhost:8780 pnpm build` — PASS across the workspace.
+- Browser: disposable Mongo fixture at 320, 390, 768 and 1440px; no horizontal
+  overflow or page errors; Plan more stops below search on mobile; map controls
+  do not intersect the assistant; day filtering preserves day/stop identity;
+  medical and planning dialogs open. Dark theme
+  screenshots visually inspected. Artifacts and browser script are under
+  `.workspace/mobile-polish/` (ignored). First-run location and assistant sheets
+  were dismissed as part of test setup.
+
+Remaining verification: optional live Gemini streaming and microphone/speaker
+listening check with the user's configured providers. No new credentials or
+configuration variables are required. No deployment or commit performed.

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { MessageCircle } from "lucide-react";
+import { AgentAvatar } from "./AgentAvatar";
 
 /** Labelled assistant entry in the planner toolbar. */
 export function AgentToggle({
@@ -14,9 +14,9 @@ export function AgentToggle({
       onClick={onOpen}
       aria-label={t("toggle.open")}
       title={t("toggle.open")}
-      className="wf-enter wf-interactive wf-pressable flex min-h-10 cursor-pointer gap-2 px-4 items-center justify-center rounded-lg border border-brand/40 bg-brand text-brand-foreground shadow-[0_0_12px_2px_color-mix(in_srgb,var(--brand)_35%,transparent)] transition-shadow duration-300 hover:shadow-[0_0_20px_4px_color-mix(in_srgb,var(--brand)_55%,transparent)] hover:border-brand"
+      className="raahi-ai-action wf-pressable flex min-h-11 items-center justify-center gap-2 rounded-full px-4"
     >
-      <MessageCircle className="size-5" aria-hidden />
+      <AgentAvatar className="size-6" />
       <span className="text-sm font-semibold">{t("panel.title")}</span>
     </button>
   );

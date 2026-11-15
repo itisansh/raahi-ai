@@ -22,7 +22,7 @@ export function FloatingMembers({
   const online = new Set(onlineUserIds);
   return (
     <div className="flex min-w-0 max-w-full items-center gap-2.5">
-      <div className="flex min-w-0 max-w-40 items-center overflow-x-auto">
+      <div className="flex min-w-0 max-w-16 md:max-w-40 items-center overflow-x-auto">
         {members.map((m, i) => {
           const locateSelf = Boolean(m.isCurrentUser && onLocateMe);
           return (

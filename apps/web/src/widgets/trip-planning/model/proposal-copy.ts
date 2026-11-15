@@ -1,4 +1,5 @@
 export const proposalCopy = {
+  streamingDraft: "Draft reply · checking the itinerary before approval",
   greeting: "A good trip starts with an idea.",
   greetingHint: "Tell me what you have in mind. We can work out the destination, dates and budget together.",
   existingGreeting: "Make room for something new.",

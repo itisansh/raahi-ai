@@ -8,7 +8,7 @@ import { proposalCopy as copy } from "../model/proposal-copy";
 export function ExistingTripPlanning({ tripId }: { tripId: string }) {
   const [open, setOpen] = useState(false);
   return <>
-    <Button variant="outline" size="lg" className="min-h-11" onClick={() => setOpen(true)}><MicIcon className="size-4" aria-hidden />{copy.openExisting}</Button>
+    <Button variant="outline" size="lg" className="raahi-ai-action min-h-11 rounded-full" onClick={() => setOpen(true)}><MicIcon className="size-4" aria-hidden />{copy.openExisting}</Button>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogPortal><DialogBackdrop className="fixed inset-0 z-50 bg-black/40" />
         <DialogSheetViewport><DialogSheetPopup size="lg" className="h-full max-h-full rounded-none md:h-[85%] md:max-h-[760px] md:rounded-2xl">

@@ -1,3 +1,4 @@
+import type { PlanningProgress } from "./contracts";
 import { durationMinutes, scheduleMinute } from "./existing-plan";
 import { clarificationReply, previewReply } from "./reply";
 import type { GeoService } from "../geo/geo-service";
@@ -27,7 +28,7 @@ export class PlanningService {
     private proposals?: ProposalStore,
   ) {}
 
-  async preview(userId: string, raw: unknown) {
+  async preview(userId: string, raw: unknown, progress?: PlanningProgress) {
     const request = planningRequestSchema.parse(raw);
     // Check membership before any model/provider request or private context use.
     const context = request.tripId ? await this.context(request.tripId, userId) : null;
@@ -38,8 +39,9 @@ export class PlanningService {
       if (error instanceof PlanningError) throw error;
       throw new PlanningError("planning_unavailable");
     }
-    const extracted = tripIntentSchema.safeParse(await this.model.extract(request.prompt, context));
+    const extracted = tripIntentSchema.safeParse(await (progress ? this.model.extract(request.prompt, context, progress) : this.model.extract(request.prompt, context)));
     if (!extracted.success) throw new PlanningError("planning_invalid_output");
+    progress?.signal.throwIfAborted();
     const intent = extracted.data;
     const missing = requiredIntentFields.filter((key) => intent[key] == null || (key === "currency" && intent.currency !== "INR"));
     if (!missing.length && rupeesToPaise(intent.budgetRupees!) === 0) missing.push("budgetRupees");
@@ -49,8 +51,9 @@ export class PlanningService {
       return clarification;
     }
     const budget = rupeesToPaise(intent.budgetRupees!);
-    const parsed = candidateSchema.safeParse(await this.model.propose(intent, context));
+    const parsed = candidateSchema.safeParse(await (progress ? this.model.propose(intent, context, progress) : this.model.propose(intent, context)));
     if (!parsed.success) throw new PlanningError("planning_invalid_output");
+    progress?.signal.throwIfAborted();
     const candidate = parsed.data;
     if (candidate.days.length !== intent.dayCount || candidate.days.some((day, i) => day.day !== i + 1 || (!context && day.stops.length === 0)) || !candidate.days.some(day => day.stops.length > 0)) {
       throw new PlanningError("planning_invalid_output");
@@ -186,6 +189,7 @@ export class PlanningService {
       },
       issues: [...issues],
     };
+    progress?.signal.throwIfAborted();
     if (this.proposals) await this.proposals.save({ id: preview.proposalId, ownerId: userId, payload: preview, contextTripId: request.tripId ?? null, baseRevision: preview.contextRevision, expiresAt: new Date(Date.now() + 30 * 60_000) });
     return preview;
   }

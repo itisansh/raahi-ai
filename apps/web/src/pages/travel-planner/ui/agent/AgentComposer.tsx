@@ -214,7 +214,7 @@ export function AgentComposer({
         </div>
       ) : null}
 
-      <div className="flex items-end gap-1.5">
+      <div className="raahi-ai-composer flex items-end gap-1.5 rounded-3xl bg-background p-2">
         <input
           ref={fileInputRef}
           type="file"

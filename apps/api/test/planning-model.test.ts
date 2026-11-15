@@ -56,3 +56,22 @@ describe("planning AI SDK adapter with mocked HTTP", () => {
     expect(fetcher).toHaveBeenCalledTimes(1);
   });
 });
+
+it("streams the model guidance before its complete structured proposal", async () => {
+  const plan = {
+    title: "Jaipur", guidance: { response: "Explore Jaipur slowly.", timing: "Start early.", questions: [] },
+    days: [{ day: 1, city: "Jaipur", stops: [{ name: "Amber Fort", startMinute: 540, durationMinutes: 90 }] }],
+    costs: { transport: null, accommodation: null, food: null, activities: null, buffer: null },
+  };
+  const json = JSON.stringify(plan);
+  const chunks = [json.slice(0, 65), json.slice(65, 90), json.slice(90)];
+  const events = chunks.map(content => `data: ${JSON.stringify({ id: "stream-test", object: "chat.completion.chunk", created: 1, model: "fixture-model", choices: [{ index: 0, delta: { content }, finish_reason: null }] })}\n\n`).join("") + 'data: [DONE]\n\n';
+  const fetcher = vi.fn(async () => new Response(events, { headers: { "Content-Type": "text/event-stream" } }));
+  vi.stubGlobal("fetch", fetcher);
+  const onReply = vi.fn();
+  const result = await new AiSdkPlanningModel(config).propose({ ...intent, budgetBasis: "per_person", currency: "INR", language: "en" }, null, { onReply, signal: new AbortController().signal });
+  expect(result).toEqual(plan);
+  expect(onReply).toHaveBeenCalledWith(plan.guidance.response);
+  const call = fetcher.mock.calls[0] as unknown as [string, RequestInit];
+  expect(JSON.parse(call[1].body as string).stream).toBe(true);
+});
