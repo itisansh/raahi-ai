@@ -22,7 +22,7 @@
 
 **Status:** Local architecture audited; baseline verification in progress. See `BUILD_PROGRESS.md` for evidence and blockers.
 **Updated:** 2026-10-27  
-**Base:** [OpenTrip](https://github.com/stvlynn/OpenTrip) — extend in place, preserve its working behavior and license.  
+**Foundation:** See [third-party notices](THIRD_PARTY_NOTICES.md). Extend the existing application in place and preserve applicable license notices.
 **Priority:** Voice-first itinerary generation, followed by expense voice commands and budget-aware replanning.
 
 ## 1. Product objective
@@ -44,13 +44,13 @@ Expected: five travelers, ₹35,000 combined budget, origin Lucknow, 6 days, can
 
 **Optional:** `docs/RAAHI_AI_INDIA_TRAVEL_APIS.md` — source selection and licensing.
 
-This plan supersedes earlier architecture choices in v1.2 if they would replace OpenTrip's working React/Vite/Hono/Better Auth stack with unrelated Next.js/Supabase Auth patterns. The live checkout remains the definitive source for file paths, scripts, migrations and APIs. Codex must verify, not assume, specific implementation details.
+This plan supersedes earlier architecture choices in v1.2 if they would replace Raahi AI's working React/Vite/Hono/Better Auth stack with unrelated Next.js/Supabase Auth patterns. The live checkout remains the definitive source for file paths, scripts, migrations and APIs. Codex must verify, not assume, specific implementation details.
 
 ### Preserve/adapt matrix
 
 | Existing reference | Borrow/adapt | Compatibility strategy |
 |---|---|---|
-| **OpenTrip (base)** | Trip UI, trip AI, maps, invites, votes, schedules, expenses, settlements, auth | Preserve existing code; extend current domain/services/UI patterns |
+| **Raahi AI (base)** | Trip UI, trip AI, maps, invites, votes, schedules, expenses, settlements, auth | Preserve existing code; extend current domain/services/UI patterns |
 | **Travex** | One-shot itinerary input/output; optional receipt review | Port ideas/schema to Hono tools; do not use its localStorage as shared storage |
 | **AI Trip** | Verify places before saving; natural-language itinerary edits | Port algorithms/contracts, not Vue/Nuxt UI |
 | **NomadSync** | Stable trip context, proposed version changes, rollback | Implement in existing Postgres and API; do not introduce MongoDB |
@@ -86,12 +86,12 @@ Trip discovery page / existing AI trip pane
   → sourced place/route suggestions + deterministic feasibility checks
   → versioned proposal (NO automatic write)
   → review and approve
-  → existing OpenTrip trip-write operations + persistent DB
+  → existing Raahi AI trip-write operations + persistent DB
   → visible shared schedule/map/budget
   → concise grounded speech via ElevenLabs TTS (optional, non-blocking)
 ```
 
-**Avoid new parallel architecture:** reuse OpenTrip's trip mutation pipeline, permission checks, API and UI patterns; do not implement a second trip table, second authentication provider or second expense ledger.
+**Avoid new parallel architecture:** reuse Raahi AI's trip mutation pipeline, permission checks, API and UI patterns; do not implement a second trip table, second authentication provider or second expense ledger.
 
 ### Suggested internal contracts (adapt names to actual code)
 
@@ -116,7 +116,7 @@ type RaahiProposal = {
   id: string;
   baseTripRevision: number | null;
   parsedIntent: VoiceIntent;
-  preview: unknown; // replace after inspecting OpenTrip itinerary contracts
+  preview: unknown; // replace after inspecting Raahi AI itinerary contracts
   sources: Array<{ provider: string; url?: string; checkedAt?: string; status: EvidenceStatus }>;
   estimatedCosts: { minPaise: number | null; maxPaise: number | null; bufferPaise: number };
   warnings: string[];
@@ -128,7 +128,7 @@ Source labels are assigned by adapter validation, not chosen by the model. Reuse
 
 ## 4. Phase roadmap — only one active phase at a time
 
-### Phase 0 — Check out and baseline OpenTrip (P0, mandatory)
+### Phase 0 — Check out and baseline Raahi AI (P0, mandatory)
 
 **Tasks**
 
@@ -139,7 +139,7 @@ Source labels are assigned by adapter validation, not chosen by the model. Reuse
 5. Write a code map: exact frontend AI pane/wizard, backend agent entry point, trip write tool, DB schema and expense services.
 6. Record baseline command results, gaps, environment variable names, license, exact git SHA in `BUILD_PROGRESS.md`.
 
-**Gate:** Existing OpenTrip functionality is demonstrated or failures are documented and understood. **Do not build Raahi features on an unexamined broken baseline.**
+**Gate:** Existing Raahi AI functionality is demonstrated or failures are documented and understood. **Do not build Raahi features on an unexamined broken baseline.**
 
 ### Phase 0B — Raahi identity and honest demonstration data (P0)
 
@@ -157,13 +157,13 @@ Added after the local audit to cover the master development instructions without
 
 ### Phase 2 — Voice request → constrained trip proposal (P0)
 
-**Tasks:** Define trip-intent schemas, extract origin/group size/total days/per-person budget/destination hints/dates/preferred language; normalize ₹7,000 to 700000 paise; ask for missing mandatory details; fetch existing trip context; use OpenTrip's AI SDK / trip tools to generate candidate itineraries. Validate stop coordinates using an existing or compatible places adapter. Calculate day/leg feasibility and estimated ranges using deterministic code, display labels for unverified travel information.
+**Tasks:** Define trip-intent schemas, extract origin/group size/total days/per-person budget/destination hints/dates/preferred language; normalize ₹7,000 to 700000 paise; ask for missing mandatory details; fetch existing trip context; use Raahi AI's AI SDK / trip tools to generate candidate itineraries. Validate stop coordinates using an existing or compatible places adapter. Calculate day/leg feasibility and estimated ranges using deterministic code, display labels for unverified travel information.
 
 **Gate:** One spoken or typed prompt creates a complete **preview**, not automatically saved. It contains five travelers, six days, declared budget, suggested verified place coordinates, source labels and any unknown dates. Bad JSON, unavailable providers and implausible connections do not become accepted trip facts.
 
 ### Phase 3 — Approve, persist and collaborate (P0)
 
-**Tasks:** Connect proposal preview to existing OpenTrip approved trip mutations, membership checks, map stops and day schedule. Use proposal ID, `tripRevision` and idempotency to prevent retries duplicating the trip. Keep approval history and reject stale changes. Confirm refresh and second-account trip visibility. Preserve existing votes/invites. Existing-trip approval adds proposed stops alongside current plans, as selected by the user; it does not replace the itinerary. Show retained stops during review and label estimates as additions only.
+**Tasks:** Connect proposal preview to existing Raahi AI approved trip mutations, membership checks, map stops and day schedule. Use proposal ID, `tripRevision` and idempotency to prevent retries duplicating the trip. Keep approval history and reject stale changes. Confirm refresh and second-account trip visibility. Preserve existing votes/invites. Existing-trip approval adds proposed stops alongside current plans, as selected by the user; it does not replace the itinerary. Show retained stops during review and label estimates as additions only.
 
 **Gate:** Human approves once → exact itinerary persists after reload and is accessible only to authorized members. Repeated approval doesn't duplicate records. Nonmembers receive authorization failures.
 
@@ -175,7 +175,7 @@ Added after the local audit to cover the master development instructions without
 
 ### Phase 5 — Voice expenses + deterministic splits (P0)
 
-**Tasks:** Reuse OpenTrip expense entities and settlement code; parse voice expense request, confirm payer, currency, amount and **exact** participant subset, compute integer paise allocations, save through authorized service, show balances, avoid duplicate writes. Optional receipt scanning after core passes.
+**Tasks:** Reuse Raahi AI expense entities and settlement code; parse voice expense request, confirm payer, currency, amount and **exact** participant subset, compute integer paise allocations, save through authorized service, show balances, avoid duplicate writes. Optional receipt scanning after core passes.
 
 **Gate:** In a five-member group, “I paid ₹600 for four people” triggers a follow-up to identify which four before writing. Shares sum to ₹600 and the group balances sum to zero. Refresh displays correct ledger.
 
@@ -205,7 +205,7 @@ Added after the local audit to cover the master development instructions without
 
 ## 5. Must-have vs cut-first
 
-**Must-have demo:** baseline OpenTrip, microphone and STT, one-shot structured trip proposal, approval/persistence, ElevenLabs TTS, collaborative groups and reliable expense splits. **Flagship target:** budget-aware replanning from actual spending.
+**Must-have demo:** baseline Raahi AI, microphone and STT, one-shot structured trip proposal, approval/persistence, ElevenLabs TTS, collaborative groups and reliable expense splits. **Flagship target:** budget-aware replanning from actual spending.
 
 **Cut first if time-limited:** fancy 3D UI, multi-agent orchestration, flight ticket checkout, unofficial live train inventory, auto-booking, receipt OCR, weather embellishments, multi-currency expansion, continuous interruption-capable voice conversation, offline writes. Medical-facility lookup can remain a post-demo bonus.
 
@@ -250,18 +250,18 @@ Added after the local audit to cover the master development instructions without
 ### Starting prompt to paste into Codex
 
 ```text
-We are extending the checked-out OpenTrip codebase into Raahi AI.
+We are extending the existing Raahi AI codebase.
 Read AGENTS.md, RAAHI_PLAN.md, BUILD_PROGRESS.md, and the two Raahi specification files in docs/.
 Do not modify code yet. First audit the local repository and compare it with the documents.
 Identify existing AI tools, trip mutation flow, frontend planning interfaces, map and budget features, auth and migrations.
 Run safe baseline checks and write the exact results (including blockers) in BUILD_PROGRESS.md.
 Report the first implementable small task from the current phase, but do not start the next phase without passing its gate.
-Voice-first trip creation is our primary feature; preserve all existing OpenTrip functionality and conventions.
+Voice-first trip creation is our primary feature; preserve all existing Raahi AI functionality and conventions.
 ```
 
 ## 8. External references (confirm current terms when implementing)
 
-- OpenTrip source: https://github.com/stvlynn/OpenTrip
+- Foundation provenance: [third-party notices](THIRD_PARTY_NOTICES.md)
 - ElevenLabs STT: https://elevenlabs.io/docs/overview/capabilities/speech-to-text
 - ElevenLabs TTS: https://elevenlabs.io/docs/overview/capabilities/text-to-speech
 - Codex `AGENTS.md`: https://developers.openai.com/codex/guides/agents-md

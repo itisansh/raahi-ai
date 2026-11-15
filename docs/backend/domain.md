@@ -169,7 +169,7 @@ link revoked.
 `domain/weather` is a driven port, not a trip aggregate:
 
 - **WeatherForecastQuery / WeatherForecastSnapshot** — vendor-neutral forecast
-  request and response (OpenTrip naming; no OpenWeather types).
+  request and response (Raahi AI naming; no OpenWeather types).
 - **WeatherClient** — `fetchForecast(query)`; implemented by infrastructure
   (cache decorator + provider adapter). Application `WeatherService` is the only
   entry used by HTTP and the agent `checkWeather` tool.
@@ -181,7 +181,7 @@ See [weather.md](./weather.md).
 `domain/geo` is a driven port, not a trip aggregate:
 
 - **GeoPlace / GeoRoute / GeoReview\*** — vendor-neutral place, route, and review
-  shapes (OpenTrip naming; no Nominatim/Google types).
+  shapes (Raahi AI naming; no Nominatim/Google types).
 - **GeoProvider** — `placeSearch`, `placeNearby`, `placeDetail`, `routeCompute`,
   `routeMatrix`, `reviewLookup`; implemented by infrastructure (OSM or Google).
   Application `GeoService` is the only entry used by agent geo read tools.

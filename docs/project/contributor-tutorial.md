@@ -1,37 +1,39 @@
 ---
-title: "Contributor tutorial"
-description: Clone OpenTrip, run it locally, and land a small documentation-safe change.
+title: "Developer tutorial"
+description: Set up Raahi AI, run it locally, and land a small documentation-safe change.
 ---
 
-# Contributor tutorial
+# Developer tutorial
 
-This lesson gets a new contributor from an empty machine to a running local
-stack and a first change that respects OpenTrip’s documentation rules.
+This lesson gets an authorized developer from an empty machine to a running local
+stack and a first change that respects Raahi AI’s documentation rules.
 
 ## Outcome
 
 By the end you will:
 
-1. run web + API against local Postgres;
+1. run web + API against a development MongoDB replica set;
 2. know where user vs developer docs live;
 3. update docs in the same change set when behavior changes.
 
 ## 1. Prerequisites
 
 - Node.js and `pnpm` as required by the repo
-- Docker (for local Postgres)
+- A development MongoDB replica set or Atlas database
 - Git
 
 ## 2. Set up the monorepo
 
+Obtain access to the private repository, then clone its URL into `raahi-ai`.
+From that directory:
+
 ```bash
-git clone https://github.com/stvlynn/OpenTrip.git
-cd OpenTrip
-make setup
+pnpm install --frozen-lockfile
 ```
 
-`make setup` installs dependencies, creates `.env` from `.env.example`, starts
-Postgres when needed, migrates, and seeds.
+If `.env` does not exist, copy `.env.example` to `.env`. Configure `MONGO_URI`,
+auth secrets and `BASE_URL` privately; see [the project README](../../README.md).
+No SQL reset or migration is required for the Node application.
 
 ## 3. Run the product locally
 
@@ -67,7 +69,7 @@ Open http://localhost:5171 — choose **User guide** or **Developer docs**.
 
 ```bash
 pnpm docs:check
-pnpm --filter @opentrip/docs typecheck
+pnpm --filter @raahi/docs typecheck
 make check
 ```
 

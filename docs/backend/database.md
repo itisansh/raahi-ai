@@ -35,7 +35,7 @@ non-INR ledgers retain their whole-unit convention. Reservation amounts already
 use minor units and are not multiplied. See the field mapping and verification
 scope in [M3 persistence](../raahi/M3_MONGODB_PERSISTENCE.md).
 
-Run `pnpm --filter @opentrip/api exec vitest run test/mongo-persistence.test.ts`
+Run `pnpm --filter @raahi/api exec vitest run test/mongo-persistence.test.ts`
 for isolated replica-set verification. It never uses `.env` or a supplied URI.
 A first run downloads MongoDB 8.2.1. The user selected a fresh Mongo database;
 SQL migration is unnecessary. Optional offline migration/reconciliation tools
@@ -61,11 +61,11 @@ Examples:
 ```bash
 # Postgres (local Docker default)
 DATABASE_PROVIDER=postgres
-DATABASE_URL=postgres://opentrip:opentrip@localhost:5430/opentrip
+DATABASE_URL=postgres://user:password@localhost:5430/raahi
 
 # MySQL
 DATABASE_PROVIDER=mysql
-DATABASE_URL=mysql://opentrip:opentrip@localhost:3306/opentrip
+DATABASE_URL=mysql://user:password@localhost:3306/raahi
 ```
 
 On Cloudflare Workers, prefer either:
@@ -152,10 +152,10 @@ MySQL does not use Prisma Migrate (schema provider is Postgres). Bootstrap with:
 
 ```bash
 export DATABASE_PROVIDER=mysql
-export DATABASE_URL=mysql://opentrip:opentrip@localhost:3306/opentrip
+export DATABASE_URL=mysql://user:password@localhost:3306/raahi
 
 # Apply schema
-pnpm --filter @opentrip/api exec tsx --env-file-if-exists=../../.env \
+pnpm --filter @raahi/api exec tsx --env-file-if-exists=../../.env \
   prisma/mysql/apply-schema.ts
 
 # Seed demo data

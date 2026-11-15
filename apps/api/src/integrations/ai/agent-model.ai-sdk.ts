@@ -38,7 +38,7 @@ import {
   type AgentUIDataParts,
   type SpecDataPart,
   type Spec,
-} from "@opentrip/agent-ui-catalog";
+} from "@raahi/agent-ui-catalog";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
@@ -90,7 +90,7 @@ function providerCall<T>(
   call: () => Promise<T>,
 ): Promise<T> {
   return startObservabilitySpan(
-    `opentrip.provider.${provider}.${operation}`,
+    `raahi.provider.${provider}.${operation}`,
     { provider, providerOperation: operation },
     async () => call(),
   );
@@ -188,7 +188,7 @@ export function createAgentLanguageModel(config: AiConfig): LanguageModel {
 
 function chatSystemPrompt(): string {
   const tools = writeToolNames().join(", ");
-  return `You are the OpenTrip trip agent: a quiet, precise trip-planning collaborator embedded in a collaborative trip workspace.
+  return `You are the Raahi AI trip agent: a quiet, precise trip-planning collaborator embedded in a collaborative trip workspace.
 
 This turn is a **write-capable chat** (@agent / thread follow-up). Write tools are available and will pause for member approval before they run.
 
@@ -218,7 +218,7 @@ Itinerary planning (create / fill a multi-day plan):
 
 /** Ambient / threshold replies: read tools only. Must not claim write capability. */
 function ambientSystemPrompt(): string {
-  return `You are the OpenTrip trip agent in a **read-only ambient** turn (plain member message, not @agent chat).
+  return `You are the Raahi AI trip agent in a **read-only ambient** turn (plain member message, not @agent chat).
 
 You only have read tools: checkWeather, placeSearch, placeNearby, placeDetail, routeCompute, routeMatrix, reviewLookup, airbnbSearch, airbnbListingDetails, readTripMedia. You cannot insert/update stops, days, or expenses in this turn.
 
@@ -231,7 +231,7 @@ Rules:
 - Prefer answering with facts from tools/snapshot over asking the member to look things up themselves.`;
 }
 
-const EVALUATION_SYSTEM_PROMPT = `You are the OpenTrip trip agent reviewing a single write operation on a collaborative trip. You must stay silent unless the change creates a material planning risk.
+const EVALUATION_SYSTEM_PROMPT = `You are the Raahi AI trip agent reviewing a single write operation on a collaborative trip. You must stay silent unless the change creates a material planning risk.
 
 Material risks (the only reasons to notify):
 - impossible or highly unrealistic timing between stops,
@@ -248,7 +248,7 @@ Rules:
 - Keep observations factual; never invent stop/day/expense ids not present in the snapshot (except insert_stop / add_expense which create new rows).
 Respond with a JSON object matching the decision schema.`;
 
-const ADDRESSED_SYSTEM_PROMPT = `You are the OpenTrip trip agent deciding whether a member message in the shared trip session is addressing you.
+const ADDRESSED_SYSTEM_PROMPT = `You are the Raahi AI trip agent deciding whether a member message in the shared trip session is addressing you.
 
 Use the recent session context. The latest member message is a follow-up in an ongoing thread when the prior turn was yours.
 
@@ -1423,7 +1423,7 @@ export function buildTripMediaReadTools(
           };
         }
         const file = await startObservabilitySpan(
-          "opentrip.agent.attachment_resolution",
+          "raahi.agent.attachment_resolution",
           { tripId, storagePath: path },
           async () => fileStorage.read(path),
         );

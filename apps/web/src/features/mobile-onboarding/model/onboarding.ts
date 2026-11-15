@@ -1,9 +1,10 @@
+import { readPersistedValue } from "@/shared/lib";
 import { getInstallPrompt } from "./install-prompt";
 
 export type OnboardingStep = "install" | "notifications" | "location";
 export type StepOutcome = "accepted" | "dismissed";
 
-const STORAGE_KEY = "opentrip.mobile-onboarding.v1";
+const STORAGE_KEY = "raahi.mobile-onboarding.v1";
 
 /** Give `beforeinstallprompt` a moment to fire before opening the sheet. */
 export const ONBOARDING_OPEN_DELAY_MS = 1_500;
@@ -12,7 +13,7 @@ type StoredState = Partial<Record<OnboardingStep, StepOutcome>>;
 
 function readState(): StoredState {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = readPersistedValue(STORAGE_KEY);
         return raw ? (JSON.parse(raw) as StoredState) : {};
     } catch {
         return {};

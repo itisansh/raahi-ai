@@ -31,9 +31,8 @@ projects. It prescribes:
 ## Project decision
 
 - [`Makefile`](../../Makefile) keeps the template targets, delegating to pnpm.
-- [`AGENTS.md`](../../AGENTS.md) is the entry doc; `CLAUDE.md` is a symlink to
-  it, and `.claude` is a symlink to `.agents`, matching the requested
-  `CLAUDE.md -> AGENTS.md` and `.claude -> .agents` convention.
+- [`AGENTS.md`](../../AGENTS.md) is the entry doc. Skills live in `.agents/skills/`.
+  Duplicate Claude symlinks were removed during private-project cleanup.
 - The `docs/` tree mirrors the template's subdomains and adds `docs/reference/`
   for auditable source tracking.
 - `docs:check` (`scripts/docs-check.mjs`) enforces that required docs exist and

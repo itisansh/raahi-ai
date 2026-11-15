@@ -46,31 +46,31 @@ dev-nodb: env
 	pnpm dev
 
 dev-web: env
-	pnpm --filter @opentrip/web dev
+	pnpm --filter @raahi/web dev
 
 dev-api: env
-	pnpm --filter @opentrip/api dev
+	pnpm --filter @raahi/api dev
 
 dev-docs:
-	pnpm --filter @opentrip/docs dev
+	pnpm --filter @raahi/docs dev
 
 db-generate:
-	pnpm --filter @opentrip/api db:generate
+	pnpm --filter @raahi/api db:generate
 
 db-pull:
-	pnpm --filter @opentrip/api db:pull
+	pnpm --filter @raahi/api db:pull
 
 db-snapshot: db-pull
 	@echo "Schema snapshot updated in apps/api/prisma/schema.prisma."
 
 db-push:
-	pnpm --filter @opentrip/api db:push
+	pnpm --filter @raahi/api db:push
 
 db-migrate:
 	pnpm db:migrate
 
 db-migrate-dev:
-	pnpm --filter @opentrip/api db:migrate-dev
+	pnpm --filter @raahi/api db:migrate-dev
 
 db-seed:
 	pnpm db:seed

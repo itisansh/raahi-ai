@@ -24,7 +24,7 @@ import {
   isAgentStatusPart,
   sanitizeAgentUiParts,
   validatedAgentUiSpec,
-} from "@opentrip/agent-ui-catalog";
+} from "@raahi/agent-ui-catalog";
 
 function message(
   role: "user" | "assistant",
@@ -297,22 +297,22 @@ describe("StreetViewGroundingService", () => {
     });
 
     expect(spans.map((span) => span.name)).toEqual([
-      "opentrip.provider.geo.place_search",
-      "opentrip.provider.street_view.search",
+      "raahi.provider.geo.place_search",
+      "raahi.provider.street_view.search",
     ]);
     expect(spans[0]?.fields).toMatchObject({
       requestId: "request-1",
       turnId: "turn-1",
       requestedLimit: 5,
-      "opentrip.provider.result_count": 1,
+      "raahi.provider.result_count": 1,
     });
     expect(spans[1]?.fields).toMatchObject({
       requestId: "request-1",
       turnId: "turn-1",
       radiusMeters: 100,
       requestedLimit: 5,
-      "opentrip.provider.outcome": "found",
-      "opentrip.provider.result_count": 2,
+      "raahi.provider.outcome": "found",
+      "raahi.provider.result_count": 2,
     });
     expect(logs).toEqual(
       expect.arrayContaining([

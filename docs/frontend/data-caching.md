@@ -4,8 +4,8 @@ title: "React Query cache and write-echo"
 
 # React Query cache and write-echo
 
-OpenTrip’s SPA uses TanStack Query (`@tanstack/react-query`) for server state.
-Hyperdrive does not invalidate cached `SELECT`s after a write. OpenTrip routes
+Raahi AI’s SPA uses TanStack Query (`@tanstack/react-query`) for server state.
+Hyperdrive does not invalidate cached `SELECT`s after a write. Raahi AI routes
 consistency-critical repositories through the cache-disabled binding, while the
 SPA still uses mutation echo to avoid an unnecessary request and response race.
 

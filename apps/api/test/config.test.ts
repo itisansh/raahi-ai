@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { loadConfig, type RawEnv } from "../src/config/env";
 
 const BASE_ENV: RawEnv = {
-  DATABASE_URL: "postgres://example.test/opentrip",
+  DATABASE_URL: "postgres://example.test/raahi",
   BETTER_AUTH_SECRET: "a-secure-test-secret-with-32-characters",
   BASE_URL: "https://api.example.test",
 };
@@ -19,7 +19,7 @@ describe("loadConfig database provider", () => {
 
     const fromUrl = loadConfig({
       ...BASE_ENV,
-      DATABASE_URL: "mysql://u:p@localhost:3306/opentrip",
+      DATABASE_URL: "mysql://u:p@localhost:3306/raahi",
       STORAGE_BACKEND: "fs",
       STORAGE_ROOT: "/data",
     });
@@ -76,7 +76,7 @@ describe("loadConfig storage", () => {
       STORAGE_BACKEND: "s3",
       STORAGE_ROOT: "/avatars/",
       STORAGE_PUBLIC_URL: "https://cdn.example.test/files/",
-      S3_BUCKET: "opentrip",
+      S3_BUCKET: "raahi",
       S3_REGION: "auto",
       S3_ENDPOINT: "https://storage.example.test",
       S3_ACCESS_KEY_ID: "access-key",
@@ -88,7 +88,7 @@ describe("loadConfig storage", () => {
       backend: "s3",
       root: "avatars",
       publicUrl: "https://cdn.example.test/files/",
-      bucket: "opentrip",
+      bucket: "raahi",
       region: "auto",
       forcePathStyle: true,
     });
@@ -102,7 +102,7 @@ describe("loadConfig storage", () => {
       loadConfig({
         ...BASE_ENV,
         STORAGE_BACKEND: "s3",
-        S3_BUCKET: "opentrip",
+        S3_BUCKET: "raahi",
         S3_REGION: "auto",
         S3_ENDPOINT: "https://example.test",
         S3_ACCESS_KEY_ID: "key",
@@ -122,7 +122,7 @@ describe("loadConfig email", () => {
     });
     expect(config.email).toEqual({
       provider: "console",
-      from: "OpenTrip <noreply@localhost>",
+      from: "Raahi AI <noreply@localhost>",
       resendApiKey: undefined,
     });
   });
@@ -133,12 +133,12 @@ describe("loadConfig email", () => {
       STORAGE_BACKEND: "fs",
       STORAGE_ROOT: "/data",
       EMAIL_PROVIDER: "resend",
-      EMAIL_FROM: "OpenTrip <noreply@example.test>",
+      EMAIL_FROM: "Raahi AI <noreply@example.test>",
       RESEND_API_KEY: "re_test",
     });
     expect(config.email).toEqual({
       provider: "resend",
-      from: "OpenTrip <noreply@example.test>",
+      from: "Raahi AI <noreply@example.test>",
       resendApiKey: "re_test",
     });
   });
@@ -150,7 +150,7 @@ describe("loadConfig email", () => {
         STORAGE_BACKEND: "fs",
         STORAGE_ROOT: "/data",
         EMAIL_PROVIDER: "resend",
-        EMAIL_FROM: "OpenTrip <noreply@example.test>",
+        EMAIL_FROM: "Raahi AI <noreply@example.test>",
       }),
     ).toThrow("RESEND_API_KEY is required when EMAIL_PROVIDER=resend");
 

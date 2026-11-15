@@ -56,8 +56,7 @@
     "button": "开始规划"
   },
   "footer": {
-    "tagline": "为结伴旅行的人而做。",
-    "license": "基于 OpenTrip · Apache 2.0"
+    "tagline": "为结伴旅行的人而做。"
   },
   "preview": {
     "label": "旅行示例 · 非预订或实时报价",

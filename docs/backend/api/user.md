@@ -9,7 +9,7 @@ Unless noted, success body is `{ "data": … }` and the tables describe the **pa
 ## Account profile
 
 Profile reads and display-name updates use Better Auth directly rather than
-duplicate OpenTrip routes:
+duplicate Raahi AI routes:
 
 - `GET /api/auth/get-session` returns the current user profile.
 - `POST /api/auth/update-user` with `{ "name": "…" }` trims the name and

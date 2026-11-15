@@ -1,10 +1,19 @@
-# OpenTrip — Agentic Coding Guidelines
+# Raahi AI — Agentic Coding Guidelines
 
 > Travel Planner SaaS. Read this file first, then follow the documentation map
 > below before writing any code. Template inspired by
 > [`stvlynn/agentic-coding`](https://github.com/stvlynn/agentic-coding).
 
 ---
+
+## Project identity and privacy
+
+Raahi AI is a private project, not an open-source product. Use Raahi AI in
+product copy and `@raahi/*` for workspace packages. Do not add upstream-brand
+marketing or public contribution links. Preserve third-party licenses and
+provenance in `THIRD_PARTY_NOTICES.md` and historical audit records. Legacy
+storage/header/native-callback identifiers are compatibility contracts, not
+branding; do not remove them without a migration. See `PROJECT_LICENSE.md`.
 
 ## Before you start
 
@@ -135,9 +144,9 @@ See [`docs/backend/README.md`](docs/backend/README.md).
   `make db-migrate-dev` to create a migration, run `make db-pull && make db-generate`
   afterwards and commit both the migration directory and the updated snapshot.
 - **Never hand-write migrations.** Create migration files with
-  `pnpm --filter @opentrip/api db:migrate-dev` (or `make db-migrate-dev`).
+  `pnpm --filter @raahi/api db:migrate-dev` (or `make db-migrate-dev`).
 - **Generate the client after every schema change.** Run `make db-generate`
-  (equivalent to `pnpm --filter @opentrip/api db:generate`) after pulling or
+  (equivalent to `pnpm --filter @raahi/api db:generate`) after pulling or
   migrating.
 - **Configuration lives in `apps/api/prisma.config.ts`.** It points to the
   schema, migrations directory, and seed command; `DATABASE_URL` is loaded from
@@ -148,7 +157,7 @@ See [`docs/backend/README.md`](docs/backend/README.md).
   (`repositories/sql`); Postgres remains the Prisma Migrate source
   of truth, MySQL uses `prisma/mysql/schema.sql`.
 - **Seed via `prisma/seed.ts`.** Run `make db-seed` or
-  `pnpm --filter @opentrip/api db:seed`.
+  `pnpm --filter @raahi/api db:seed`.
 - **Reset via `make db-reset`.** Drops the `public` schema, reapplies Prisma
   migrations, and re-seeds.
 
@@ -184,7 +193,7 @@ Read these documents before implementation:
 - docs/raahi/RAAHI_AGENT_RULES.md
 - docs/raahi/RAAHI_API_ACCOUNTS_AND_KEYS.md
 
-Preserve the existing OpenTrip architecture.
+Preserve the existing Raahi AI architecture.
 Implement one phase at a time.
 Voice-first trip planning is the highest priority.
 Run tests and update BUILD_PROGRESS.md after each phase.

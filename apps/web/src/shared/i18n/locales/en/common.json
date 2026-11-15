@@ -1,7 +1,7 @@
 {
   "pwa": {
     "offlineReady": "Raahi AI is ready for offline use",
-    "updateReady": "An Raahi AI update is ready",
+    "updateReady": "A Raahi AI update is ready",
     "updateDescription": "Refresh when you are ready to use the latest version.",
     "updateAction": "Update"
   },
@@ -208,7 +208,7 @@
         "about": {
             "title": "About",
             "version": "Version {{version}}",
-            "description": "Raahi AI is a collaborative trip planner for friends exploring India, built on the open-source OpenTrip foundation."
+            "description": "Raahi AI is a collaborative trip planner for friends exploring India."
         }
     },
   "voice": {

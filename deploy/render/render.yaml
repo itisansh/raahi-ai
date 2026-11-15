@@ -7,7 +7,7 @@ services:
     numInstances: 1
     autoDeployTrigger: off
     buildCommand: bash deploy/render/build.sh
-    startCommand: corepack pnpm --filter @opentrip/api start
+    startCommand: corepack pnpm --filter @raahi/api start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION

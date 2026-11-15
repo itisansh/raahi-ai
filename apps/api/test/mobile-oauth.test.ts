@@ -10,7 +10,7 @@ const GOOGLE_AUTH_URL =
 function baseConfig(googleOAuth: AppConfig["googleOAuth"]): AppConfig {
   return {
     databaseProvider: "postgres",
-    databaseUrl: "postgres://example.test/opentrip",
+    databaseUrl: "postgres://example.test/raahi",
     databaseSsl: "off",
     betterAuthSecret: "a-secure-test-secret-with-32-characters",
     betterAuthUrl: "https://api.example.test",
@@ -23,7 +23,7 @@ function baseConfig(googleOAuth: AppConfig["googleOAuth"]): AppConfig {
     googleOAuth,
     email: {
       provider: "console",
-      from: "OpenTrip <noreply@localhost>",
+      from: "Raahi AI <noreply@localhost>",
       resendApiKey: undefined,
     },
     openWeatherMapApiKey: undefined,
@@ -33,7 +33,7 @@ function baseConfig(googleOAuth: AppConfig["googleOAuth"]): AppConfig {
         nominatimBaseUrl: "https://nominatim.example.test",
         overpassBaseUrl: "https://overpass.example.test",
         osrmBaseUrl: "https://osrm.example.test",
-        userAgent: "OpenTrip-test",
+        userAgent: "Raahi AI-test",
       },
       googleMapsApiKey: undefined,
       timeoutMs: 5_000,
@@ -43,7 +43,7 @@ function baseConfig(googleOAuth: AppConfig["googleOAuth"]): AppConfig {
       ignoreRobotsTxt: false,
       disableGeocoding: false,
       timeoutMs: 30_000,
-      geocodeUserAgent: "OpenTrip-test",
+      geocodeUserAgent: "Raahi AI-test",
     },
     ai: null,
     observability: {

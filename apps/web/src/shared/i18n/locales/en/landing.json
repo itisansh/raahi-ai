@@ -56,8 +56,7 @@
     "button": "Start planning"
   },
   "footer": {
-    "tagline": "For friends exploring India together.",
-    "license": "Built on OpenTrip · Apache 2.0"
+    "tagline": "For friends exploring India together."
   },
   "preview": {
     "label": "Illustrative trip · not a booking or live quote",

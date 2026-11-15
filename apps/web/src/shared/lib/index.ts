@@ -40,3 +40,5 @@ export {
   type VisualViewportBox,
 } from "./visual-viewport";
 export { useNetworkStatus } from "./network";
+
+export { readPersistedValue } from "./persisted-storage";

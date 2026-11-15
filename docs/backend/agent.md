@@ -235,7 +235,7 @@ dismiss). `POST …/apply` and `…/dismiss` remain as aliases.
   `executionCtx.waitUntil` on Workers and a floating promise on Node.
 
 Agent calls emit AI SDK 7 OpenTelemetry spans beneath application-owned
-`opentrip.agent.*` spans. The initiating user UI message id is reused as the
+`raahi.agent.*` spans. The initiating user UI message id is reused as the
 turn id across tool-approval continuations. Generated street-view UI accepts
 only image ids grounded by a successful tool output in the same assistant
 message. Each message exposes a localized “Copy debug info” action containing

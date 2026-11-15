@@ -1767,3 +1767,64 @@ Verification (actual results):
 Remaining verification: optional live Gemini streaming and microphone/speaker
 listening check with the user's configured providers. No new credentials or
 configuration variables are required. No deployment or commit performed.
+
+## 2026-11-15 — Private-project branding and repository cleanup
+
+Status: **DONE** for local implementation and verification.
+
+- Product identity is Raahi AI. Removed upstream marketing/footer/repository
+  links; updated email sender defaults, AI prompts, API identity, documentation,
+  provider user agents and the docs monogram/navigation.
+- Renamed all six workspace packages and their imports/scripts to `raahi-ai` /
+  `@raahi/*`, including Makefile and Render build/start configuration. Regenerated
+  `pnpm-lock.yaml` with pnpm; its only changes are workspace names, with no
+  dependency-version changes. Relinked installed dependencies using the frozen
+  lockfile. The root remains `private: true` and now declares `UNLICENSED` for
+  original project additions.
+- Added `PROJECT_LICENSE.md` and `THIRD_PARTY_NOTICES.md`. Kept the original
+  upstream LICENSE unchanged. Historical source audits, recorded commands and
+  Git history remain accurate; no blanket replacement of historical evidence.
+- Browser keys use `raahi.*`; explicit read-time migration copies existing theme,
+  onboarding, per-user journal and saved-place data. It never overwrites newer
+  values, crosses user boundaries, or deletes the old copy. Full storage does not
+  hide an existing value. Cached auth clients retain old email-header support;
+  the retained native OAuth callback scheme is unchanged for compatibility.
+- Telemetry uses `raahi.*`; external saved telemetry queries should use the new
+  attribute names after deployment. A manually configured Render start command
+  must use `corepack pnpm --filter @raahi/api start`; the committed blueprint and
+  deployment instructions already do.
+- Removed `CLAUDE.md` and `.claude` (symlinks only) and the retired WeChat MCP
+  entry. Preserved `.agents/skills`, `skills-lock.json`, dependency/workspace
+  lockfiles, AGENTS.md, Git, private configuration and optional Sentry MCP setup.
+  README now explains those files. AGENTS.md records the private-project policy.
+- Existing UI/voice/planning code, validation, storage, auth and domain behavior
+  are reused. No database schema, collection data, private env, remote repository
+  visibility or deployed service was changed. No commit created.
+
+Commands and results:
+
+- `pnpm install --lockfile-only --offline` — PASS; workspace-name-only lock diff.
+- `CI=true pnpm install --offline --frozen-lockfile` — PASS; local package links
+  updated. Existing peer/build-script warnings reported; no package upgrades.
+- `pnpm typecheck`, `pnpm lint`, `pnpm ui:check`, `pnpm docs:check`,
+  `git diff --check` — PASS.
+- `BASE_URL=http://localhost:8780 pnpm --filter @raahi/web test` — PASS,
+  30 files / 121 tests, including six storage migration cases.
+- `BASE_URL=http://localhost:8780 pnpm --filter @raahi/api test` — sandbox run
+  blocked local HTTP/Mongo listening; rerun with local-server permission PASS,
+  56 files / 422 tests, including old/new email header compatibility.
+- `pnpm --filter @raahi/agent-ui-catalog --filter @raahi/observability-contract test`
+  — PASS, both shared packages.
+- `BASE_URL=http://localhost:8780 pnpm build` — PASS, whole workspace.
+- Browser script `.workspace/branding/browser.mjs` — PASS outside the browser
+  sandbox: Raahi landing with no upstream link, legacy dark-theme migration,
+  authenticated planner, renamed assistant label, delayed onboarding migration,
+  no page errors. Uses the disposable local fixture, not the supplied database.
+  Screenshot/log retained under `.workspace/branding/` (ignored).
+
+Updated documentation: README (including file explanations), project/third-party
+license statements, AGENTS.md, active architecture/auth/mobile/operations docs,
+package commands in runbooks, Render setup, and current Raahi agent/setup plans.
+No new credentials required. Live provider calls and deployment were not part of
+this branding change. The previously discussed draggable desktop planning panel
+has not been implemented; the user requested a risk discussion before that work.

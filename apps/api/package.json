@@ -1,5 +1,5 @@
 {
-  "name": "@opentrip/api",
+  "name": "@raahi/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -34,8 +34,8 @@
     "@ai-sdk/otel": "1.0.18",
     "@aws-sdk/client-s3": "^3.850.0",
     "@opentelemetry/api": "^1.9.1",
-    "@opentrip/agent-ui-catalog": "workspace:*",
-    "@opentrip/observability-contract": "workspace:*",
+    "@raahi/agent-ui-catalog": "workspace:*",
+    "@raahi/observability-contract": "workspace:*",
     "@sentry/node": "^10.65.0",
     "ai": "^7.0.18",
     "better-auth": "1.6.23",

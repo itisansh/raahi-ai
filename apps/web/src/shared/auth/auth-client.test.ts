@@ -18,7 +18,7 @@ it("sends email signup JSON and captcha through the real auth client", async () 
   expect(request.method).toBe("POST");
   const headers = new Headers(request.headers);
   expect(headers.get("x-captcha-response")).toBe("test-captcha");
-  expect(headers.get("x-opentrip-lang")).toBe("en");
+  expect(headers.get("x-raahi-lang")).toBe("en");
   expect(JSON.parse(request.body as string)).toEqual({
     name: "Test traveller", email: "traveller@example.test", password: "test-password-only",
   });

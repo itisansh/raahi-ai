@@ -36,7 +36,7 @@ export interface DailyFeelsLikeSnapshot {
   morn?: number;
 }
 
-/** One forecast point (hour or day) in OpenTrip naming. */
+/** One forecast point (hour or day) in Raahi AI naming. */
 export interface WeatherForecastEntry {
   /** Unix seconds (UTC). */
   dt: number;

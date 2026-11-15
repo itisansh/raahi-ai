@@ -140,10 +140,10 @@ and the sheet dialog footers already do this.
 `features/mobile-onboarding` (`MobileOnboarding`, mounted from the app
 providers) opens a bottom Drawer on first mobile visit (`useIsMobile()`),
 walking through up to three steps — each asked at most once, with the
-outcome persisted under the `opentrip.mobile-onboarding.v1` localStorage
+outcome persisted under the `raahi.mobile-onboarding.v1` localStorage
 key:
 
-1. **Install** — offers to add OpenTrip to the home screen. On Chromium the
+1. **Install** — offers to add Raahi AI to the home screen. On Chromium the
    `beforeinstallprompt` event is captured at module scope
    (`model/install-prompt.ts`) and replayed from the button via
    `promptInstall()`, which awaits the browser dialog's `userChoice`: the
@@ -193,12 +193,12 @@ with non-string titles are never mirrored.
 - The same document owns the canonical production URL plus Open Graph and
   Twitter card metadata. Both surfaces use the committed 1200×600 image at
   `apps/web/public/og-image.png`, published as
-  `https://opentrip.im/og-image.png`.
+  `https://your-domain.example/og-image.png`.
 - The manifest (inline in `vite.config.ts`) lists the PNG PWA icons;
   `theme_color`/`background_color` match the app background so the install
   splash blends into the UI.
 - Regenerate derived icons after replacing `app-icon-master.png` with
-  `pnpm --filter @opentrip/web icons:generate`
+  `pnpm --filter @raahi/web icons:generate`
   (`apps/web/scripts/generate-pwa-icons.mjs`, `sharp`) and commit the
   output (favicon, apple-touch, and PWA PNGs).
 

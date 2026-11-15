@@ -4,8 +4,8 @@ export type EmailLocale = (typeof EMAIL_LOCALES)[number];
 
 export const DEFAULT_EMAIL_LOCALE: EmailLocale = "en";
 
-/** Retained client header for email language preference. */
-export const EMAIL_LANG_HEADER = "x-opentrip-lang";
+/** Client header for email language preference. */
+export const EMAIL_LANG_HEADER = "x-raahi-lang";
 
 function isEmailLocale(value: string): value is EmailLocale {
   return (EMAIL_LOCALES as readonly string[]).includes(value);
@@ -19,13 +19,13 @@ export function normalizeEmailLocale(raw: string | null | undefined): EmailLocal
 }
 
 /**
- * Resolve mail locale: explicit `x-opentrip-lang` first, then Accept-Language,
+ * Resolve mail locale: explicit `x-raahi-lang` first, then Accept-Language,
  * then English. Prefer the SPA header so inbox language matches the UI the
  * user was using when they triggered the mail.
  */
 export function resolveEmailLocale(headers: Headers | null | undefined): EmailLocale {
   if (!headers) return DEFAULT_EMAIL_LOCALE;
-  const explicit = headers.get(EMAIL_LANG_HEADER);
+  const explicit = headers.get(EMAIL_LANG_HEADER) ?? headers.get("x-opentrip-lang");
   if (explicit) return normalizeEmailLocale(explicit);
 
   const accept = headers.get("accept-language");

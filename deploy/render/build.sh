@@ -30,5 +30,5 @@ NODE
 
 corepack enable
 corepack pnpm install --frozen-lockfile --prod=false
-corepack pnpm --filter @opentrip/api exec tsc --project tsconfig.node.json
-corepack pnpm --filter @opentrip/web build
+corepack pnpm --filter @raahi/api exec tsc --project tsconfig.node.json
+corepack pnpm --filter @raahi/web build

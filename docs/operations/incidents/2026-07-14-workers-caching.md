@@ -95,7 +95,7 @@ After deploy:
 
 There are three separate cache planes and their names are easy to conflate:
 
-| Plane | Intended use | OpenTrip policy |
+| Plane | Intended use | Raahi AI policy |
 | --- | --- | --- |
 | Workers Caching (`wrangler cache.enabled`) | Whole response before Worker execution | Disabled on the authenticated API gateway |
 | Cache API (`caches.default`) | Explicit application-owned entries | Allowed only in bounded adapters with synthetic keys |

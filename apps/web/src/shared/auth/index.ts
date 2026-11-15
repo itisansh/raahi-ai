@@ -25,7 +25,7 @@ export function setTwoFactorRequiredHandler(handler: (() => void) | null): void 
  * `emailOTPClient` enables OTP send/verify for email registration and change.
  * `twoFactorClient` handles TOTP enrollment and the post-sign-in challenge.
  *
- * Every auth request sends `x-opentrip-lang` so transactional mail matches
+ * Every auth request sends `x-raahi-lang` so transactional mail matches
  * the SPA language (`en`). */
 export const authClient = createAuthClient({
   baseURL: config.baseUrl,
@@ -34,7 +34,7 @@ export const authClient = createAuthClient({
     onRequest(context) {
       const headers = new Headers(context.headers);
       headers.set(
-        "x-opentrip-lang",
+        "x-raahi-lang",
         i18n.resolvedLanguage?.split("-")[0] ?? i18n.language?.split("-")[0] ?? "en",
       );
       return { ...context, headers };

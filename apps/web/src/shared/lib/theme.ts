@@ -1,3 +1,4 @@
+import { readPersistedValue } from "./persisted-storage";
 import { useEffect, useState } from "react";
 import {
   THEME_CHANGE_EVENT,
@@ -8,7 +9,7 @@ export type ThemeMode = "system" | "light" | "dark";
 
 export function getStoredTheme(): ThemeMode {
   if (typeof localStorage === "undefined") return "system";
-  const value = localStorage.getItem(THEME_STORAGE_KEY);
+  const value = readPersistedValue(THEME_STORAGE_KEY);
   if (value === "light" || value === "dark" || value === "system") return value;
   return "system";
 }

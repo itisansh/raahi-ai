@@ -37,7 +37,7 @@ export interface TraceFields extends LogFields {
 
 type ErrorReporter = (error: unknown, fields?: LogFields) => void;
 
-const tracer = trace.getTracer("opentrip-api");
+const tracer = trace.getTracer("raahi-api");
 let aiTelemetryRegistered = false;
 let errorReporter: ErrorReporter = () => {};
 let defaultRuntime: RuntimeName = "node";
@@ -177,21 +177,21 @@ function sanitizeAttributes(fields: TraceFields): Attributes {
   const safe = sanitizeTelemetryValue(fields) as Record<string, unknown>;
   const canonicalNames: Record<string, string> = {
     requestId: "request.id",
-    tripId: "opentrip.trip.id",
-    agentSessionId: "opentrip.agent.session_id",
-    turnId: "opentrip.agent.turn_id",
-    messageId: "opentrip.agent.message_id",
-    suggestionId: "opentrip.agent.suggestion_id",
+    tripId: "raahi.trip.id",
+    agentSessionId: "raahi.agent.session_id",
+    turnId: "raahi.agent.turn_id",
+    messageId: "raahi.agent.message_id",
+    suggestionId: "raahi.agent.suggestion_id",
     toolCallId: "gen_ai.tool.call.id",
-    operationKind: "opentrip.operation.kind",
-    tripVersionBefore: "opentrip.trip.version_before",
-    trigger: "opentrip.agent.trigger",
-    runtime: "opentrip.runtime",
-    uiContractVersion: "opentrip.agent.ui.contract_version",
-    uiAttempt: "opentrip.agent.ui.attempt",
-    uiHighRisk: "opentrip.agent.ui.high_risk",
-    uiOutcome: "opentrip.agent.ui.outcome",
-    uiReason: "opentrip.agent.ui.reason",
+    operationKind: "raahi.operation.kind",
+    tripVersionBefore: "raahi.trip.version_before",
+    trigger: "raahi.agent.trigger",
+    runtime: "raahi.runtime",
+    uiContractVersion: "raahi.agent.ui.contract_version",
+    uiAttempt: "raahi.agent.ui.attempt",
+    uiHighRisk: "raahi.agent.ui.high_risk",
+    uiOutcome: "raahi.agent.ui.outcome",
+    uiReason: "raahi.agent.ui.reason",
   };
   return Object.fromEntries(
     Object.entries(safe).filter(

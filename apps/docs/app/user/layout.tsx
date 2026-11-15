@@ -17,7 +17,6 @@ export default function UserLayout({ children }: { children: ReactNode }) {
         {
           text: "Set up Raahi AI",
           url: site.product,
-          external: true,
         },
       ]}
     >

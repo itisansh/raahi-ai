@@ -1,11 +1,11 @@
 ---
 title: "Contributing to the documentation"
-description: "Audience, ownership, Diátaxis structure, screenshots, docs demos, and review rules for OpenTrip documentation."
+description: "Audience, ownership, Diátaxis structure, screenshots, docs demos, and review rules for Raahi AI documentation."
 ---
 
 # Contributing to the documentation
 
-OpenTrip documentation is maintained with the product in the same monorepo.
+Raahi AI documentation is maintained with the product in the same monorepo.
 Documentation changes follow the same pull request, review, and deployment
 workflow as code changes. Authoring follows
 [Diátaxis](https://diataxis.fr/).
@@ -17,7 +17,7 @@ Every page belongs to one primary perspective:
 | Perspective | Reader | Content |
 | --- | --- | --- |
 | User guide | A traveler trying to complete a task | Tutorials, how-to guides, and traveler reference |
-| Developer docs | A contributor changing or operating OpenTrip | Explanation, API/domain reference, ADRs, and runbooks |
+| Developer docs | A contributor changing or operating Raahi AI | Explanation, API/domain reference, ADRs, and runbooks |
 
 Do not mix implementation details into a user workflow. Link to the developer
 page when internal context is genuinely useful.
@@ -80,7 +80,7 @@ Time-sensitive production failures belong in `docs/operations/incidents/`.
 
 ## Use screenshots as evidence
 
-- Capture the real OpenTrip interface; do not use generic mockups.
+- Capture the real Raahi AI interface; do not use generic mockups.
 - Remove or avoid personal data, credentials, private invite links, and secrets.
 - Store committed captures under `docs/assets/screenshots/`.
 - Use descriptive alt text that explains what the reader should notice.
@@ -108,7 +108,7 @@ Rules:
   mobile layout the page needs to call out.
 - Capture English UI for English docs; avoid mixed-locale evidence.
 - Regenerate demos from the sibling Remotion project
-  [`OpenTrip-video`](https://github.com/stvlynn/OpenTrip-video) with
+  [the upstream video project](https://github.com/stvlynn/OpenTrip-video) with
   `npm run export:docs-demos` — see
   [assets/demos/README.md](assets/demos/README.md).
 - Do **not** reuse `docs/assets/promo/` marketing chapters as docs demos.
@@ -121,8 +121,8 @@ directory before development and builds. Generated copies are not committed.
 ```bash
 make dev-docs
 pnpm docs:check
-pnpm --filter @opentrip/docs typecheck
-pnpm --filter @opentrip/docs build
+pnpm --filter @raahi/docs typecheck
+pnpm --filter @raahi/docs build
 ```
 
 Before requesting review, verify relative links, both documentation

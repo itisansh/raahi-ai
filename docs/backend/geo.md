@@ -97,7 +97,7 @@ See `.env.example`:
 | `GEO_OSM_NOMINATIM_URL` | public Nominatim | |
 | `GEO_OSM_OVERPASS_URL` | public Overpass interpreter | |
 | `GEO_OSM_OSRM_URL` | public OSRM demo | |
-| `GEO_OSM_USER_AGENT` | OpenTrip identifying UA | Required for public OSM etiquette |
+| `GEO_OSM_USER_AGENT` | Raahi AI identifying UA | Required for public OSM etiquette |
 | `GEO_TIMEOUT_MS` | `12000` | Upstream abort timeout |
 | `GEO_CACHE_TTL_MS` | `1800000` | 30 minutes |
 | `GOOGLE_MAPS_API_KEY` | unset | Required when provider is `google` |

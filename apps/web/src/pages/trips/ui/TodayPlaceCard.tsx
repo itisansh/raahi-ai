@@ -1,3 +1,4 @@
+import { readPersistedValue } from "@/shared/lib";
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -13,7 +14,7 @@ import { Button } from "@/shared/ui/button";
 import { Card } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
 
-const STORAGE_PREFIX = "opentrip.today-place.v1";
+const STORAGE_PREFIX = "raahi.today-place.v1";
 
 function storageKey(userId: string | undefined): string {
   return `${STORAGE_PREFIX}:${userId ?? "anonymous"}`;
@@ -21,7 +22,7 @@ function storageKey(userId: string | undefined): string {
 
 function loadPlace(userId: string | undefined): PlaceResult | null {
   try {
-    const raw = localStorage.getItem(storageKey(userId));
+    const raw = readPersistedValue(storageKey(userId));
     if (!raw) return null;
     const value = JSON.parse(raw) as Partial<PlaceResult>;
     return typeof value.label === "string" &&

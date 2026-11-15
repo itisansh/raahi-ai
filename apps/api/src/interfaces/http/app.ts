@@ -385,7 +385,7 @@ export function createRouteTable(
       ) ??
       config.trustedOrigins.find((origin) => origin.startsWith("https://"));
     if (webOrigin) return c.redirect(webOrigin.endsWith("/") ? webOrigin : `${webOrigin}/`);
-    return c.text("OpenTrip API", 200);
+    return c.text("Raahi AI API", 200);
   });
 
   // Native clients authenticate in ASWebAuthenticationSession. The start

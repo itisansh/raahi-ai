@@ -56,3 +56,30 @@ Mongo backups and upload backups must be verified before a future production
 release. A code checkout does not roll back database writes.
 
 For structured logging and tracing, see [observability](observability.md).
+
+
+## Private-project branding and development cleanup
+
+The application and workspace packages are named Raahi AI / `@raahi/*`.
+`pnpm-lock.yaml` is required dependency metadata, not a log. Regenerate it with
+pnpm when package names change; do not delete it. `.agents/skills/` and
+`skills-lock.json` are coding-assistant development resources, not app runtime
+files. Redundant `CLAUDE.md` and `.claude` symlinks and the retired WeChat MCP
+entry were removed; the optional Sentry MCP configuration remains.
+
+Browser keys now use `raahi.*`. Reads migrate existing theme, onboarding,
+per-user journal and saved-place values without overwriting new values or
+removing the old copy. Authentication cookies, database contents and private
+`.env` values are unchanged. Cached clients can still send `x-opentrip-lang`;
+current clients send `x-raahi-lang`. The retained native OAuth bridge still uses
+`opentrip://auth/callback` to avoid breaking previously installed native clients;
+the current web/PWA product does not use this callback scheme.
+
+Telemetry now uses `raahi.*` spans and attributes; update external saved queries
+when deploying this change. Any manually configured Render start command must
+use `corepack pnpm --filter @raahi/api start` (the committed blueprint is updated).
+
+Historical audit/build records retain the names and commands actually used.
+[Third-party notices](../../THIRD_PARTY_NOTICES.md) and the original upstream
+license remain separate from the [private-project licensing statement](../../PROJECT_LICENSE.md).
+This cleanup does not change remote repository visibility or deploy the app.

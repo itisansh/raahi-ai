@@ -4,7 +4,7 @@ title: "Observability and agent tracing"
 
 # Observability and agent tracing
 
-OpenTrip uses two complementary observability surfaces:
+Raahi AI uses two complementary observability surfaces:
 
 - Cloudflare Workers Logs or Docker stdout contain newline-delimited JSON logs.
 - Sentry contains request traces, errors, and AI SDK 7 OpenTelemetry spans.
@@ -59,23 +59,23 @@ Typical explicit-chat trace:
 
 ```text
 HTTP request
-└── opentrip.agent.chat
-    ├── opentrip.agent.persist_message
+└── raahi.agent.chat
+    ├── raahi.agent.persist_message
     ├── ai.generateText / ai.streamText
     │   ├── model inference
     │   └── tool execution
-    │       ├── opentrip.provider.*
-    │       └── opentrip.trip.operation.apply
-    └── opentrip.agent.persist_message
+    │       ├── raahi.provider.*
+    │       └── raahi.trip.operation.apply
+    └── raahi.agent.persist_message
 ```
 
 Ambient replies, addressed checks, operation evaluations, and suggestion
-responses use their own `opentrip.agent.*` parent spans. Deferred work is kept
+responses use their own `raahi.agent.*` parent spans. Deferred work is kept
 alive by the Worker execution context and logs the originating request and
 turn identifiers. Weather, geo, lodging, street-view, and attachment reads have
 explicit child spans beneath their AI tool spans. If the browser disconnects
 while the independent SSE drain finishes successfully, the chat span records
-`opentrip.agent.client_disconnected=true` without reporting a false failure.
+`raahi.agent.client_disconnected=true` without reporting a false failure.
 
 ## Debugging workflow
 
@@ -85,14 +85,14 @@ while the independent SSE drain finishes successfully, the chat span records
 
    ```text
    request.id:<request-id>
-   opentrip.agent.turn_id:<turn-id>
-   opentrip.agent.message_id:<message-id>
-   opentrip.agent.suggestion_id:<suggestion-id>
-   opentrip.trip.id:<trip-id>
+   raahi.agent.turn_id:<turn-id>
+   raahi.agent.message_id:<message-id>
+   raahi.agent.suggestion_id:<suggestion-id>
+   raahi.trip.id:<trip-id>
    gen_ai.tool.call.id:<tool-call-id>
-   opentrip.agent.ui.contract_version:2026-07-16.1
-   opentrip.agent.ui.outcome:rejected
-   opentrip.agent.ui.reason:<reason>
+   raahi.agent.ui.contract_version:2026-07-16.1
+   raahi.agent.ui.outcome:rejected
+   raahi.agent.ui.reason:<reason>
    ```
 
 3. Open the trace waterfall. Inspect authorization/context loading, AI steps,
@@ -144,7 +144,7 @@ while the independent SSE drain finishes successfully, the chat span records
 | Symptom | First evidence to inspect |
 | --- | --- |
 | Stream appeared but assistant row vanished | `agent.stream.complete`, then `agent.persist_message` |
-| Tool succeeded but planner rolled back | `opentrip.trip.operation.apply`, version attributes, mutation echo |
+| Tool succeeded but planner rolled back | `raahi.trip.operation.apply`, version attributes, mutation echo |
 | Approval did not execute | Search both HTTP traces by `turnId` and `gen_ai.tool.call.id` |
 | Proactive suggestion is missing | Evaluation decision, confidence threshold, allowed operation, `agent.suggestion.created` |
 | Browser reports CORS after a Worker failure | `worker.fetch_failed`, deferred completion, pool disposal; check for Cloudflare 1101 |
@@ -227,10 +227,10 @@ dictionary-tested; restrict Workers Logs access accordingly.
 For a missing or invalid deterministic card, query the copied message id and
 inspect these events and spans in order:
 
-1. `opentrip.provider.geo.place_search` exists for a place request and records
+1. `raahi.provider.geo.place_search` exists for a place request and records
    `requestedLimit=5`, result count, duration, request id, and turn id. It is
    absent for a coordinate request.
-2. `opentrip.provider.street_view.search` records `radiusMeters=100`,
+2. `raahi.provider.street_view.search` records `radiusMeters=100`,
    `requestedLimit=5`, provider outcome, result count, duration, and the same
    correlation ids. Each application provider span occurs at most once.
 3. `street_view.provider.request_failed` and

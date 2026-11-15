@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Code2, ExternalLink } from "lucide-react";
+import { ArrowRight, BookOpen, Code2 } from "lucide-react";
 import Link from "next/link";
 import { site } from "@/lib/site";
 
@@ -7,11 +7,11 @@ export default function HomePage() {
     <main className="docs-home">
       <nav className="home-nav" aria-label="Primary navigation">
         <Link href="/" className="home-brand">
-          <span className="home-brand-mark">O</span>
+          <span className="home-brand-mark">R</span>
           <span>Raahi AI Docs</span>
         </Link>
         <a href={site.product} className="home-product-link">
-          Set up Raahi AI <ExternalLink size={14} aria-hidden="true" />
+          Set up Raahi AI
         </a>
       </nav>
 

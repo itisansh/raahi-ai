@@ -59,10 +59,10 @@ If migration is needed later, put dedicated migration connection variables in an
 ignored local environment and use a fresh **offline** destination database:
 
 ```sh
-pnpm --filter @opentrip/api exec tsx --env-file-if-exists=../../.env scripts/migrate-mongo.ts export ../../.workspace/private-source.json
-pnpm --filter @opentrip/api exec tsx --env-file-if-exists=../../.env scripts/migrate-mongo.ts import ../../.workspace/private-source.json
-pnpm --filter @opentrip/api exec tsx --env-file-if-exists=../../.env scripts/migrate-mongo.ts reconcile ../../.workspace/private-source.json
-pnpm --filter @opentrip/api exec tsx --env-file-if-exists=../../.env scripts/migrate-mongo.ts restore-export ../../.workspace/private-restored-source.json
+pnpm --filter @raahi/api exec tsx --env-file-if-exists=../../.env scripts/migrate-mongo.ts export ../../.workspace/private-source.json
+pnpm --filter @raahi/api exec tsx --env-file-if-exists=../../.env scripts/migrate-mongo.ts import ../../.workspace/private-source.json
+pnpm --filter @raahi/api exec tsx --env-file-if-exists=../../.env scripts/migrate-mongo.ts reconcile ../../.workspace/private-source.json
+pnpm --filter @raahi/api exec tsx --env-file-if-exists=../../.env scripts/migrate-mongo.ts restore-export ../../.workspace/private-restored-source.json
 ```
 
 Export files are created exclusively with mode 0600 and never overwrite an

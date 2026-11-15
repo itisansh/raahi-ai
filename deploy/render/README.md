@@ -44,7 +44,7 @@ local `.env`. The Blueprint prompts for private values in Render.
 5. Deploy manually and complete the checks below.
 
 Build: `bash deploy/render/build.sh`.
-Start: `corepack pnpm --filter @opentrip/api start`.
+Start: `corepack pnpm --filter @raahi/api start`.
 Service root: repository root. Node: 24.
 `WEB_DIST_PATH=../web/dist` resolves from the API workspace.
 

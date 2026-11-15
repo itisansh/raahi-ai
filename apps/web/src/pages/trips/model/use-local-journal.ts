@@ -1,3 +1,4 @@
+import { readPersistedValue } from "@/shared/lib";
 import { useCallback, useEffect, useState } from "react";
 import {
   journalStorageKey,
@@ -35,7 +36,7 @@ export function useLocalJournal(userId: string | undefined) {
 
     setEntries(
       parseLocalJournalEntries(
-        localStorage.getItem(journalStorageKey(userId)),
+        readPersistedValue(journalStorageKey(userId)),
       ),
     );
     setHydratedUserId(userId);

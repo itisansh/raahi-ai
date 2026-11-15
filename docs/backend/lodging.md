@@ -59,7 +59,7 @@ See `.env.example`:
 | `LODGING_IGNORE_ROBOTS_TXT` | `false` | Testing only |
 | `LODGING_DISABLE_GEOCODING` | `false` | Skip Photon/Nominatim |
 | `LODGING_TIMEOUT_MS` | `30000` | Airbnb HTML fetch timeout |
-| `LODGING_GEOCODE_USER_AGENT` | OpenTrip identifying UA | Photon/Nominatim only |
+| `LODGING_GEOCODE_USER_AGENT` | Raahi AI identifying UA | Photon/Nominatim only |
 
 ## Errors
 
@@ -74,4 +74,4 @@ See `.env.example`:
 
 Airbnb scrape/parse helpers follow
 [openbnb-org/mcp-server-airbnb](https://github.com/openbnb-org/mcp-server-airbnb)
-under the MIT license. OpenTrip is not affiliated with Airbnb or OpenBnB.
+under the MIT license. Raahi AI is not affiliated with Airbnb or OpenBnB.

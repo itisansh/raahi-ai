@@ -1,8 +1,8 @@
 # Raahi AI
 
-Collaborative travel planning for friends exploring India. Raahi AI is being
-built on [OpenTrip](https://github.com/stvlynn/OpenTrip), preserving its
-React/Vite frontend, Express Node API, Better Auth and MongoDB/Mongoose persistence. SQL/Worker code is retained only for legacy tooling and reference.
+Raahi AI is a private, proprietary travel-planning application for friends
+exploring India. It uses React/Vite, an Express Node API, Better Auth and
+MongoDB/Mongoose persistence. SQL code is retained for legacy tooling.
 
 **Development status:** the local source audit and automated baseline are
 recorded in [BUILD_PROGRESS.md](BUILD_PROGRESS.md). Product branding is in
@@ -116,18 +116,28 @@ multi-user persistence. The progress log records those checks separately.
 | `docs/raahi` | Raahi specifications and local audit |
 
 Read [AGENTS.md](AGENTS.md) and the [documentation index](docs/README.md)
-before contributing. Use English identifiers/comments and Conventional Commits.
-Keep each phase reviewable with tests and an updated progress log. Internal
-`@opentrip/*` identifiers remain intentionally unchanged.
+before working on the project. Use English identifiers/comments and Conventional Commits.
+Keep each phase reviewable with tests and an updated progress log. Workspace
+packages use the `@raahi/*` namespace.
 
-## Open-source foundation
+## Private project and third-party notices
 
-Raahi AI is a modified application based on
-[OpenTrip by stvlynn and contributors](https://github.com/stvlynn/OpenTrip).
-The original [Apache License 2.0](LICENSE), applicable copyright notices and
-Git history are retained. This repository's branding and development direction
-do not imply endorsement by the upstream project. No implementation code from
-the other research-reference projects was copied in this change.
+This project is not offered as open source. All workspace packages are private;
+original Raahi AI additions are not licensed for public reuse. See
+[project licensing](PROJECT_LICENSE.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
+Upstream and dependency licenses continue to apply to their respective code.
+
+## Development files
+
+- `pnpm-lock.yaml` pins dependency versions for reproducible installs. Keep it.
+- `pnpm-workspace.yaml` defines the monorepo packages. Keep it.
+- `AGENTS.md` and `.agents/skills/` guide coding assistants; they are development
+  resources and are not bundled into the application.
+- `skills-lock.json` records the sources and hashes of those installed skills.
+- `.mcp.json` contains optional coding-assistant service configuration (Sentry).
+- `.github/` runs automated checks. `node_modules/`, build output and `.workspace/`
+  contain dependencies, generated files and local test artifacts; they are ignored.
+- The duplicate Claude instruction links and retired WeChat MCP entry were removed.
 
 India travel checks are available in a trip’s **Reservations** tab. Select saved
 stops in travel order for road estimates, nearby stay listings and official

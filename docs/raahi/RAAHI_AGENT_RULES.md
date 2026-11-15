@@ -1,8 +1,8 @@
 # Raahi AI — Codex Agent Instructions
 
-> **Purpose:** Repository-root instructions for Codex CLI and other coding agents extending the [OpenTrip](https://github.com/stvlynn/OpenTrip) project into **Raahi AI**, a voice-first, collaborative, budget-aware travel planner focused on India.
+> **Purpose:** Repository-root instructions for Codex CLI and other coding agents maintaining the **Raahi AI** project, a voice-first, collaborative, budget-aware travel planner focused on India.
 >
-> **IMPORTANT FOR AN EXISTING OPENTRIP CLONE:** OpenTrip ALREADY has a root `AGENTS.md`. **Do not blindly overwrite its current contents.** Before installing this document, compare/merge it with the existing root file, keeping current upstream architecture, database, migration, quality, and repository-specific rules. This document restates important known OpenTrip rules and adds Raahi-specific instructions; if upstream has newer implementation details, investigate and preserve them.
+> **IMPORTANT FOR AN EXISTING PROJECT CLONE:** Raahi AI ALREADY has a root `AGENTS.md`. **Do not blindly overwrite its current contents.** Before installing this document, compare/merge it with the existing root file, keeping current upstream architecture, database, migration, quality, and repository-specific rules. This document restates important known Raahi AI rules and adds Raahi-specific instructions; if upstream has newer implementation details, investigate and preserve them.
 
 ## 0. Read first / source-of-truth order
 
@@ -29,7 +29,7 @@ Second demo: **record expense by voice → confirm payer and exact participants 
 
 This is a real software workflow, not a speech-demo glued to an unrelated chat response. Every committed action must have visible persisted effects.
 
-## 2. Preserve OpenTrip's architecture
+## 2. Preserve Raahi AI's architecture
 
 **User-requested future exception (2026-11-02):** Plan migration to Express,
 MongoDB/Mongoose and familiar backend folders using the
@@ -60,7 +60,7 @@ Expected existing technology (confirm in cloned code before changing):
 
 **Do not introduce** a second Next.js app, Supabase Auth, Firebase Auth, MongoDB, another global ORM, or a parallel itinerary/expense implementation unless the user explicitly changes the architecture after an impact analysis. Supabase **hosted Postgres alone** is different from Supabase Auth and may be used if appropriate.
 
-OpenTrip upstream's `AGENTS.md` documents further hard rules to preserve:
+Raahi AI upstream's `AGENTS.md` documents further hard rules to preserve:
 
 - Frontend FSD dependency direction: `app → pages → widgets → features → entities → shared`; use slice public APIs.
 - Backend direction: interfaces/controllers use application use cases; domain is independent; infrastructure implements ports.
@@ -73,12 +73,12 @@ OpenTrip upstream's `AGENTS.md` documents further hard rules to preserve:
 
 1. Inspect the existing implementation and establish a baseline before editing.
 2. Work on **only one phase** from `RAAHI_PLAN.md` at a time, including tests.
-3. Identify relevant existing OpenTrip services before writing new ones.
+3. Identify relevant existing Raahi AI services before writing new ones.
 4. For each work item: describe files to change, implement smallest functional vertical slice, add negative/edge-case tests, run focused checks, then run appropriate overall checks.
 5. After verification, update `BUILD_PROGRESS.md` **with commands and actual results**, not predicted outcomes.
 6. Do not call a feature complete until all its acceptance criteria pass. If blocked, record blocker and stop; do not fake integrations or success messages.
 7. Do not overwrite pre-existing uncommitted user edits. Do not commit or deploy automatically unless the user has requested it.
-8. The user may manually review every phase. No unapproved redesign of existing working OpenTrip screens.
+8. The user may manually review every phase. No unapproved redesign of existing working Raahi AI screens.
 
 ## 4. Voice-first architecture (highest priority)
 
@@ -88,7 +88,7 @@ Use **push-to-talk** for the MVP. Do not require an always-on microphone or a co
 - Wispr Flow may be offered behind an adapter **only if legitimate documented API access is established**; do not invent an endpoint.
 - Send **finalized transcript**, not unstable partial speech, to trip-intent extraction. Show user an editable transcript first.
 - Parse to a validated intent (e.g., `trip.create`, `trip.modify`, `expense.add`, `trip.replan`, `facilities.search`, `question.answer`). Reject invalid/missing fields; ask a specific follow-up rather than fabricate dates, destinations, prices or participants.
-- Use the **existing OpenTrip AI tools** and server-side backend domain rules to plan, propose and apply. LLM output is a *proposal*, not an authoritative write.
+- Use the **existing Raahi AI AI tools** and server-side backend domain rules to plan, propose and apply. LLM output is a *proposal*, not an authoritative write.
 - Require explicit review/approval before creating/saving an itinerary, posting expenses, changing a booking, or applying a replan. Use user permissions and optimistic revision checks so stale proposals cannot overwrite newer group decisions.
 - Preferred spoken response: **ElevenLabs TTS** for a short, grounded summary; include play/stop/mute and text fallback. Voice output must not block persistence or UI if synthesis fails.
 - Feature test: user speaks a five-traveler, six-day North India trip under ₹7,000 per traveler, sees a verified/estimated plan, approves it, refreshes the page, and sees saved trip data.
@@ -138,10 +138,10 @@ Minimum gates per phase:
 At the end of **every** Codex phase, report:
 
 1. Phase and goal, completion state (`DONE`, `PARTIAL`, `BLOCKED`, `NOT STARTED`).
-2. Files changed and reasons; reused OpenTrip modules.
+2. Files changed and reasons; reused Raahi AI modules.
 3. Exact commands run and PASS/FAIL/NOT RUN results, with reason if unrun.
 4. Screens or behaviors manually verified; live-provider results vs mocks.
 5. Remaining gaps, credentials needed (names only), and the next smallest task.
 6. Exact sections updated in `BUILD_PROGRESS.md` and any architecture decision record.
 
-**Start condition for a new checkout:** inspect original OpenTrip `AGENTS.md`, root scripts, README and supplied Raahi docs. Establish the baseline. Do not implement voice or rename project until that baseline is known.
+**Start condition for a new checkout:** inspect original Raahi AI `AGENTS.md`, root scripts, README and supplied Raahi docs. Establish the baseline. Do not implement voice or rename project until that baseline is known.

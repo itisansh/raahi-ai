@@ -1,6 +1,6 @@
 # Raahi AI development reference
 
-Raahi AI extends the OpenTrip application in this repository. These documents
+Raahi AI is the private application maintained in this repository. These documents
 are implementation references for contributors; planned features are not
 claims about the current product.
 

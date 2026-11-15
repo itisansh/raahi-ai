@@ -132,7 +132,7 @@ token-based page is added later.
 ### Two-factor authentication (TOTP)
 
 The `twoFactor` plugin stores secrets in the `twoFactor` table and
-`user.twoFactorEnabled`. Issuer is `OpenTrip`. `allowPasswordless: true` lets
+`user.twoFactorEnabled`. Issuer is `Raahi AI`. `allowPasswordless: true` lets
 accounts without a password enroll (credential accounts still must confirm
 their password).
 
@@ -160,7 +160,7 @@ Outbound mail is selected by env (see `integrations/email/`):
 | `resend` | Sends via [Resend](https://resend.com) HTTP API |
 
 - `EMAIL_FROM` — From header (required for `resend`; defaults to
-  `OpenTrip <noreply@localhost>` for console).
+  `Raahi AI <noreply@localhost>` for console).
 - `RESEND_API_KEY` — required when `EMAIL_PROVIDER=resend`.
 
 OTP copy is built by `buildOtpEmail` (`sign-in`, `email-verification`,
@@ -178,11 +178,11 @@ tabular code, generous padding, one primary CTA.
 **i18n:** copy lives in `email-copy.ts` for `en` | `zh` (same set as the SPA).
 Locale resolution (`email-locale.ts`):
 
-1. `x-opentrip-lang` from the auth client (current i18next language)
+1. `x-raahi-lang` from the auth client (current i18next language)
 2. else `Accept-Language`
 3. else `en`
 
-The web `authClient` attaches `x-opentrip-lang` on every Better Auth request
+The web `authClient` attaches `x-raahi-lang` on every Better Auth request
 via `fetchOptions.onRequest`.
 
 **Production diagnostics (Workers Observability):**
@@ -196,7 +196,7 @@ via `fetchOptions.onRequest`.
 - `POST /api/auth/email-otp/send-verification-otp` → `400` with
   `MISSING_RESPONSE` / `VERIFICATION_FAILED` is **Turnstile**, not Resend.
   The OTP step shows a fresh captcha; resend stays disabled until it completes.
-- Domain DNS for `opentrip.im` must include Resend's DKIM
+- Domain DNS for your sending domain must include Resend's DKIM
   (`resend._domainkey` TXT) plus SPF on `send` (TXT + MX). Optional: `_dmarc`.
 
 ### Social providers
