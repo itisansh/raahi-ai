@@ -1,3 +1,4 @@
+import type { Repayment } from "./finance";
 import { expenseAllocations, expenseMinor, expenseScale } from "./expense-money";
 import type {
   Balance,
@@ -14,6 +15,7 @@ export function computeBudget(
   members: readonly MemberSnapshot[],
   expenses: readonly ExpenseSnapshot[],
   currency = "INR",
+  repayments: readonly Repayment[] = [],
 ): Budget {
   const excludedCurrencies = [...new Set(expenses.filter(e => (e.currency || currency) !== currency).map(e => e.currency))];
   expenses = expenses.filter(e => (e.currency || currency) === currency);
@@ -30,10 +32,15 @@ export function computeBudget(
     for (const [id, value] of Object.entries(expenseAllocations(e.amount, currency, e.participants, e.allocations))) share.set(id, (share.get(id) ?? 0) + value);
   }
 
+  const transfers = new Map<string, number>();
+  for (const repayment of repayments.filter(row => !row.voidedAt && row.currency === currency)) {
+    transfers.set(repayment.from, (transfers.get(repayment.from) ?? 0) + repayment.amountMinor);
+    transfers.set(repayment.to, (transfers.get(repayment.to) ?? 0) - repayment.amountMinor);
+  }
   const balances: Balance[] = members.map((m) => {
     const p = paid.get(m.id) ?? 0;
     const s = share.get(m.id) ?? 0;
-    return { memberId: m.id, paid: p, share: Math.round(s), net: Math.round(p - s) };
+    return { memberId: m.id, paid: p, share: Math.round(s), net: Math.round(p - s + (transfers.get(m.id) ?? 0)) };
   });
 
   const debtors = balances

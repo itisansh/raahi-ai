@@ -94,3 +94,14 @@ describe("speech HTTP boundary", () => {
     expect(new Uint8Array(await audio.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]));
   });
 });
+
+it.each(["clarification", "preview"])("narrates the exact stored %s reply in its original language", async status => {
+  const f = fixture();
+  const reply = { text: "आप कहाँ से यात्रा शुरू करेंगे?", language: "hi" as const };
+  const stored = { ...f.stored, payload: { status, reply } };
+  const service = new SpokenSummaryService(async () => stored, { synthesize: f.synthesize }, { consume: f.consume });
+  expect(await service.describe(id, "owner", "en")).toEqual(reply);
+  await service.speak(id, "owner", "en");
+  expect(f.synthesize).toHaveBeenCalledWith(reply.text, "hi", undefined);
+  await expect(service.speak(id, "outsider", "en")).rejects.toMatchObject({ code: "proposal_not_found" });
+});

@@ -1,9 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { PhoneFrame } from "./DeviceFrames";
+import { IndiaTripPreview } from "./IndiaTripPreview";
 import { Reveal } from "./Reveal";
-import mapShot from "../assets/pwa-map.jpg";
-import scheduleShot from "../assets/pwa-schedule.jpg";
-import agentShot from "../assets/pwa-agent.jpg";
 
 export function MobileShowcase() {
   const { t } = useTranslation("landing");
@@ -19,22 +16,8 @@ export function MobileShowcase() {
           </p>
         </div>
 
-        <div className="flex items-end justify-center">
-          <PhoneFrame
-            src={mapShot}
-            alt={t("mobile.mapAlt")}
-            className="w-36 origin-bottom -rotate-6 sm:w-40"
-          />
-          <PhoneFrame
-            src={scheduleShot}
-            alt={t("mobile.scheduleAlt")}
-            className="z-10 -mx-4 w-40 sm:w-44"
-          />
-          <PhoneFrame
-            src={agentShot}
-            alt={t("mobile.agentAlt")}
-            className="w-36 origin-bottom rotate-6 sm:w-40"
-          />
+        <div className="mx-auto w-full max-w-sm rounded-[2rem] border-4 border-foreground/15 bg-background p-3">
+          <IndiaTripPreview variant="schedule" compact />
         </div>
       </Reveal>
     </section>

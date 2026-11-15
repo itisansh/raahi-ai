@@ -20,10 +20,8 @@ Run `make dev-docs` to preview both perspectives at
 `http://localhost:5171`. The perspective switcher keeps user workflows separate
 from internal architecture without duplicating the underlying documentation.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for audience, structure, screenshot,
-docs demo, and review rules. Interaction clips live under
-[assets/demos/](assets/demos/) and embed via the fumadocs `DemoVideo`
-component. Marketing README chapters under [assets/promo/](assets/promo/)
-are separate and must not be reused as docs demos.
+docs demo, and review rules. Inherited captures and clips have been retired;
+new recordings must show current Raahi Indian itineraries.
 
 ## Map
 
@@ -77,8 +75,8 @@ Start here for multi-client development:
 ### Operations and quality
 
 - [operations/README.md](operations/README.md)
-- [operations/cloudflare.md](operations/cloudflare.md)
-- [operations/docker.md](operations/docker.md)
+- [operations/cloudflare.md](../deploy/render/README.md)
+- [operations/docker.md](../deploy/render/README.md)
 - [operations/observability.md](operations/observability.md)
 - [quality/README.md](quality/README.md)
 - [decisions/README.md](decisions/README.md)
@@ -104,8 +102,7 @@ apps/
 packages/
   agent-ui-catalog/  shared json-render catalog and spec safety boundary
 deploy/
-  cloudflare/  Pages + Workers + Hyperdrive
-  docker/      Compose (postgres + api + web)
+  render/      Native Node free demo + external file storage
 docs/          this documentation
 scripts/       repo tooling (docs:check)
 ```

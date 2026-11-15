@@ -23,11 +23,11 @@
 - Mobile: React browser app / PWA (WeChat client retired during I0).
 - UI: cossUI primitives (Base UI + CVA style), cossUI design tokens.
 - Map: mapcn-style MapLibre GL wrapper.
-- Backend: Express 5 on Node; retained Hono Worker transport during migration.
+- Backend: Express 5 on Node; Worker transport removed.
   TypeScript, Domain-Driven Design + Hexagonal architecture.
 - Database: MongoDB/Mongoose on Node; SQL retained for Worker and migration tooling.
 - Auth: Better Auth (email + password).
-- Deploy: Cloudflare (Pages + Workers + Hyperdrive) and Docker Compose.
+- Deploy: native Node on Render free demo with external S3 storage. Cloudflare and Docker setup removed.
 
 ---
 
@@ -69,8 +69,6 @@
 ### Operations and quality
 
 - [`docs/operations/README.md`](docs/operations/README.md)
-- [`docs/operations/cloudflare.md`](docs/operations/cloudflare.md)
-- [`docs/operations/docker.md`](docs/operations/docker.md)
 - [`docs/quality/README.md`](docs/quality/README.md)
 - [`docs/decisions/README.md`](docs/decisions/README.md)
 
@@ -88,14 +86,10 @@
 - **No redundant UI copy** — do not repeat what a title, icon, or state conveys.
 - **No duplicated implementations** — reuse or extract to the right layer.
 - **No fallback/clever bypass logic** — face the root cause or ask.
-- **No environment-specific config in git.** Production values (R2 bucket /
-  endpoint, captcha provider, email provider, AI model URLs, API keys, etc.)
-  live only in GitHub Actions secrets/variables or local gitignored files
-  (`.env`, `deploy/cloudflare/.secrets.local.json`). Committed files may
-  document **key names** and placeholders (`vars.example.json`,
-  `secrets.example.json`); never real account endpoints, bucket names chosen
-  for prod, or credentials. Cloudflare Worker `vars` in `wrangler.api.jsonc`
-  are local fallbacks only — CI overlays Actions variables at deploy time.
+- **No environment-specific config in git.** Production endpoints, bucket names,
+  API keys and credentials belong only in private environment configuration or
+  Render environment settings. Commit variable names and placeholders only.
+  The root `.env` stays ignored. Never put private keys in `VITE_*` variables.
 
 ---
 
@@ -194,3 +188,10 @@ Preserve the existing OpenTrip architecture.
 Implement one phase at a time.
 Voice-first trip planning is the highest priority.
 Run tests and update BUILD_PROGRESS.md after each phase.
+## India-wide product scope
+
+Raahi supports trip planning across India. Uttarakhand and the North India seed
+trip are examples, not destination restrictions. Use varied Indian regions in
+public copy and examples. Do not reintroduce inherited destination screenshots
+or present a regional emergency number as nationwide. Keep supported currency
+semantics and historical user data intact when changing product examples.

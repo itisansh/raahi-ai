@@ -95,3 +95,13 @@ describe("voice recording lifecycle", () => {
     f.recorder.dispose();
   });
 });
+
+it("shows committed chunks during listening without treating them as a submitted draft", async () => {
+  const f = fixture(); await f.recorder.start(); f.events.audioStarted();
+  f.events.committed("We are two friends");
+  expect(f.state).toMatchObject({ status: "recording", text: "We are two friends" });
+  f.events.partial("from Jaipur");
+  expect(f.state.partial).toBe("from Jaipur");
+  f.recorder.stop(); vi.advanceTimersByTime(300); f.events.committed("from Jaipur");
+  expect(f.state).toMatchObject({ status: "ready", text: "We are two friends from Jaipur" });
+});

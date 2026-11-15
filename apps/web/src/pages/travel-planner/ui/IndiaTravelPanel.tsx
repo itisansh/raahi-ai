@@ -1,3 +1,4 @@
+import { GeoAttribution } from "@/shared/ui/geo-attribution";
 import { useEffect, useRef, useState } from "react";
 import type { Trip } from "@/entities/trip";
 import { apiFetch } from "@/shared/api";
@@ -31,7 +32,7 @@ export function IndiaTravelPanel({ trip }: { trip: Trip }) {
       <h4 className="font-medium">{copy.route}</h4>
       <p>{data.road.status === "road_estimate" ? `${Math.round(data.road.distanceMeters! / 1000)} ${copy.units.km} · ${Math.ceil(data.road.durationSeconds! / 60)} ${copy.units.minutes}` : data.road.status === "choose_route" ? copy.chooseRoute : copy.unavailable}</p>
       <p className="text-xs text-muted-foreground">{copy.uncertainty}</p>
-      <p><a href={data.sourceUrl} target="_blank" rel="noreferrer" className="underline">{copy.source}: {data.source}</a> · {copy.checked}: {new Date(data.checkedAt).toLocaleString()}</p>
+      <GeoAttribution source={data.source} /><p><a href={data.sourceUrl} target="_blank" rel="noreferrer" className="underline">{copy.source}: {data.source}</a> · {copy.checked}: {new Date(data.checkedAt).toLocaleString()}</p>
       <h4 className="font-medium">{copy.weather}</h4>
       {data.weather.status === "forecast" ? <p>{data.weather.minC}–{data.weather.maxC} {copy.units.celsius} · {copy.rain}: {data.weather.precipitationMm} {copy.units.mm}</p> : <p>{weatherText}</p>}
       <p>{copy.date}: {data.serviceDate ?? "—"}</p><p className="text-xs">{copy.weatherNote}</p>

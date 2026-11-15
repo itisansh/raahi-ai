@@ -219,7 +219,7 @@ work from the precached shell.
 including HTML — as `no-cache` so a deploy is picked up promptly and stale
 `index.html` can never pin purged assets; hashed `/assets/*` stay immutable
 and `/fonts/*` get a medium-lived cache. See
-[../operations/cloudflare.md](../operations/cloudflare.md).
+[../operations/cloudflare.md](../../deploy/render/README.md).
 
 ## Conventions
 
@@ -230,3 +230,24 @@ and `/fonts/*` get a medium-lived cache. See
   respects `prefers-reduced-motion`.
 - Mobile-only copy lives in the locale namespaces like everything else
   (e.g. `planner:nav.label`); no literal strings.
+
+### Voice planning
+
+New-trip and existing-trip planning share `widgets/trip-planning`. Phone dialogs
+fill the visual viewport, with scrollable conversation and a separate composer.
+Starter prompts are editable drafts. The microphone shrinks after interaction;
+voice playback can be disabled persistently. Reduced motion disables the orb
+animation. See [Voice-first planning](../raahi/VOICE_FIRST_PLANNING_FLOW.md).
+
+### Repayments, personal caps and plan history
+
+The Budget surface includes a repayment form for money already transferred,
+optional per-member spending caps and proposal history. Repayments require named
+sender/recipient and explicit confirmation; unknown-outcome retries retain the
+same payload and request identity. A known rejected request can be edited.
+Voiding a record requires another confirmation and leaves its audit entry visible.
+Personal caps show allocated actual cost and remaining allowance, excluding future
+estimates. Settle-up details explain net repayments separately from expense shares.
+
+Plan history shows before/after stops before explicit rollback. A later trip
+revision disables rollback. The user can keep the approved plan without any write.

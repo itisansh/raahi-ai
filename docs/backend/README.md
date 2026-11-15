@@ -4,7 +4,7 @@ title: "Backend (DDD + Hexagonal)"
 
 # Backend (DDD + Hexagonal)
 
-The backend (`apps/api`) uses Express 5 on Node and a retained Hono transport on Workers, following Domain-Driven
+The backend (`apps/api`) uses Express 5 on Node with legacy Hono code isolated from the runtime, following Domain-Driven
 Design and Hexagonal architecture. Reference:
 [../reference/backend-sources.md](../reference/backend-sources.md).
 
@@ -21,7 +21,7 @@ repositories / integrations / realtime
 - **domain** (`src/domain`) owns aggregates, values, business rules and ports.
 - **services** (`src/services`) orchestrates application workflows through ports.
 - **repositories** (`src/repositories`) contains persistence adapters and fixtures;
-  Mongo adapters serve Node; SQL adapters remain for the Worker and migration rehearsal.
+  Mongo adapters serve Node; SQL adapters remain for legacy tooling only.
 - **integrations** (`src/integrations`) contains auth, AI, voice, geo, email,
   storage, telemetry and other external/platform adapters.
 - **realtime** (`src/realtime`) contains the retained collaboration transport.
@@ -38,7 +38,8 @@ repositories / integrations / realtime
 - `src/models/mongo.ts` defines business schemas and indexes; Better Auth owns auth collections.
 - `src/config/env.ts` validates environment configuration.
 - `src/node-server.ts` runs the Express Node server for local/Docker.
-- `src/worker.ts` retains the Hono Worker entry during the migration.
+- `src/legacy/worker.ts` retains the historical Worker entry; it is not deployed.
+- `src/legacy/sql-container.ts` and `worker-app.ts` isolate SQL/Hono composition from the Node import graph.
 
 ## Client developers (mobile and other apps)
 

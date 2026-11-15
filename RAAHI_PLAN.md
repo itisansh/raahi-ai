@@ -163,7 +163,7 @@ Added after the local audit to cover the master development instructions without
 
 ### Phase 3 — Approve, persist and collaborate (P0)
 
-**Tasks:** Connect proposal preview to existing OpenTrip approved trip mutations, membership checks, map stops and day schedule. Use proposal ID, `tripRevision` and idempotency to prevent retries duplicating the trip. Keep approval history and reject stale changes. Confirm refresh and second-account trip visibility. Preserve existing votes/invites.
+**Tasks:** Connect proposal preview to existing OpenTrip approved trip mutations, membership checks, map stops and day schedule. Use proposal ID, `tripRevision` and idempotency to prevent retries duplicating the trip. Keep approval history and reject stale changes. Confirm refresh and second-account trip visibility. Preserve existing votes/invites. Existing-trip approval adds proposed stops alongside current plans, as selected by the user; it does not replace the itinerary. Show retained stops during review and label estimates as additions only.
 
 **Gate:** Human approves once → exact itinerary persists after reload and is accessible only to authorized members. Repeated approval doesn't duplicate records. Nonmembers receive authorization failures.
 
@@ -268,3 +268,21 @@ Voice-first trip creation is our primary feature; preserve all existing OpenTrip
 - Product and provider research: the `docs/` files listed above.
 
 **This is a target implementation architecture, not a claim that any new Raahi feature has been built or tested.**
+
+### Product scope clarification — 2026-11-07
+
+Raahi is for travel across India, not an Uttarakhand-only product. Regional
+hero requests and seed trips illustrate workflows; they do not constrain
+supported destinations. Public examples should span Indian regions. See
+[the India-wide cleanup](docs/raahi/INDIA_WIDE_PRODUCT_CLEANUP.md).
+
+### Voice interaction update — 2026-11-10
+
+The user requested a floating animated microphone, one plain-text conversational
+composer, explicit transcript Send, and automatic ElevenLabs replies with an opt-out.
+This supersedes Phase 4's manual-playback-only default for new-trip planning:
+playback follows a submitted request while Voice on is selected. It does not grant
+permission to start the microphone automatically or save a proposal without approval.
+Clarifications and preview replies share visible/spoken text. See
+[the current flow](docs/raahi/VOICE_FIRST_PLANNING_FLOW.md). Browser/device acceptance
+remains separate from automated implementation verification.

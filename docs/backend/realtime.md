@@ -72,7 +72,7 @@ row with `connectionCount > 1`.
 
 - [domain.md](domain.md) — trip aggregate and permissions
 - [trip-ops.md](trip-ops.md) — mutations that bump `trips.version` / revision
-- [../operations/cloudflare.md](../operations/cloudflare.md) — Workers bindings
+- [../operations/cloudflare.md](../../deploy/render/README.md) — Workers bindings
 - [../frontend/data-caching.md](../frontend/data-caching.md) — write-echo vs refetch
 - Superpowers design notes under `docs/superpowers/specs/` (historical drafts;
   this page is the product documentation surface)

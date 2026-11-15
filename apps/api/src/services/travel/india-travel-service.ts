@@ -4,11 +4,11 @@ import type { GeoService } from "../geo/geo-service";
 import type { TravelWeatherProvider, DailyTravelForecast } from "./travel-data";
 export const officialTravelLinks = [
   { name: "IRCTC train search", url: "https://www.irctc.co.in/", status: "search_link" },
-  { name: "Uttarakhand Transport Corporation", url: "https://www.utconline.uk.gov.in/home.aspx", status: "search_link" },
-  { name: "UPSRTC bus search", url: "https://onlineupsrtc.co.in/", status: "search_link" },
+  { name: "IRCTC bus search — India", url: "https://www.bus.irctc.co.in/home", status: "search_link" },
+  { name: "BusIndia — participating operators across India", url: "https://www.busindia.com/", status: "search_link" },
 ] as const;
 export class IndiaTravelService {
-  constructor(private load: (id: string, actor: string) => Promise<TripSnapshot>, private geo: Pick<GeoService, "routeCompute" | "placeNearby">, private source: "osm" | "google", private weather: TravelWeatherProvider | null, private limiter: { consume(actor: string): Promise<boolean> }) {}
+  constructor(private load: (id: string, actor: string) => Promise<TripSnapshot>, private geo: Pick<GeoService, "routeCompute" | "placeNearby">, private source: "osm" | "google" | "geoapify", private weather: TravelWeatherProvider | null, private limiter: { consume(actor: string): Promise<boolean> }) {}
   async inspect(tripId: string, actor: string, stopIds: string[]) {
     if (!stopIds.length || stopIds.length > 6 || new Set(stopIds).size !== stopIds.length) throw new DomainError("invalid_travel_stops", "Choose one to six distinct stops");
     const trip = await this.load(tripId, actor); // Membership precedes provider access.
@@ -22,7 +22,7 @@ export class IndiaTravelService {
     const serviceDate = trip.days.find(day => day.number === stops[0]!.day)?.date || null;
     const locationAvailable = stops.every(s => Number.isFinite(s.lat) && Number.isFinite(s.lng) && s.lat >= 6 && s.lat <= 38 && s.lng >= 68 && s.lng <= 98);
     const checkedAt = new Date().toISOString();
-    const sourceUrl = this.source === "osm" ? "https://www.openstreetmap.org/copyright" : "https://maps.google.com/";
+    const sourceUrl = this.source === "geoapify" ? "https://www.geoapify.com/" : this.source === "osm" ? "https://www.openstreetmap.org/copyright" : "https://maps.google.com/";
     const metadata = { source: this.source, sourceUrl, checkedAt, observedAt: null, serviceDate, cacheMayBeStale: true };
     let road: { status: "road_estimate" | "unavailable" | "choose_route"; distanceMeters?: number; durationSeconds?: number; legs?: Array<{ distanceMeters: number; durationSeconds: number }> } = { status: stops.length < 2 ? "choose_route" : "unavailable" };
     let nearby: { status: "listings" | "empty" | "unavailable"; places: Array<{ id: string; name: string; label: string; lat: number; lng: number }> } = { status: "unavailable", places: [] };

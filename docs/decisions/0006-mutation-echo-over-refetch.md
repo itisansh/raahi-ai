@@ -54,7 +54,7 @@ the mutation response
 
 - New mutations must document the echo + client cache update (see
   [../frontend/data-caching.md](../frontend/data-caching.md) and
-  [../operations/cloudflare.md#hyperdrive-read-after-write](../operations/cloudflare.md#hyperdrive-read-after-write)).
+  [../operations/cloudflare.md#hyperdrive-read-after-write](../../deploy/render/README.md)).
 - Production QA is required for write-then-list flows; local green is not enough.
 - Agents and humans must not “fix” missing list items by globally disabling
   Hyperdrive query caching.

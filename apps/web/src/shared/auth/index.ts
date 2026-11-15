@@ -26,7 +26,7 @@ export function setTwoFactorRequiredHandler(handler: (() => void) | null): void 
  * `twoFactorClient` handles TOTP enrollment and the post-sign-in challenge.
  *
  * Every auth request sends `x-opentrip-lang` so transactional mail matches
- * the SPA language (`en` | `zh`). */
+ * the SPA language (`en`). */
 export const authClient = createAuthClient({
   baseURL: config.baseUrl,
   basePath: "/api/auth",

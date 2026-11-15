@@ -66,3 +66,11 @@ database, provider or deployment verification is claimed.
   records, generic browser compatibility comments and required attribution.
 
 I0 is not complete merely because compilation and automated tests pass.
+
+## India-wide follow-up — 2026-11-07
+
+Inherited landing captures and documentation media have now been retired.
+The landing uses clearly labeled React previews spanning multiple Indian regions.
+Raahi is not limited to the regional onboarding example. See
+[the cleanup report](INDIA_WIDE_PRODUCT_CLEANUP.md). Browser visual acceptance
+and fresh current-product recordings remain pending.

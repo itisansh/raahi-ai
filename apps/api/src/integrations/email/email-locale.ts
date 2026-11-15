@@ -1,17 +1,17 @@
 /** Locales supported by transactional email copy (mirrors SPA i18n). */
-export const EMAIL_LOCALES = ["en", "zh"] as const;
+export const EMAIL_LOCALES = ["en"] as const;
 export type EmailLocale = (typeof EMAIL_LOCALES)[number];
 
 export const DEFAULT_EMAIL_LOCALE: EmailLocale = "en";
 
-/** Client header carrying the SPA language (`opentrip-lang` / i18next). */
+/** Retained client header for email language preference. */
 export const EMAIL_LANG_HEADER = "x-opentrip-lang";
 
 function isEmailLocale(value: string): value is EmailLocale {
   return (EMAIL_LOCALES as readonly string[]).includes(value);
 }
 
-/** Normalize tags like `zh-CN` / `en-US` → `zh` / `en`. */
+/** English is the only supported email locale, including for older clients. */
 export function normalizeEmailLocale(raw: string | null | undefined): EmailLocale {
   if (!raw) return DEFAULT_EMAIL_LOCALE;
   const primary = raw.trim().toLowerCase().split(/[_-]/)[0] ?? "";

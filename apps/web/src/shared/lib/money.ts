@@ -1,6 +1,4 @@
-/** Money helpers. Amounts are integer minor units; JPY has no sub-unit so the
- * integer is the yen value. Mirrors the prototype `yen()` output (`¥` + grouped
- * integer) while staying locale-aware for grouping. */
+/** Currency-aware formatting and exact INR conversion helpers. */
 const SYMBOLS: Record<string, string> = {
   JPY: "¥",
   USD: "$",
@@ -131,7 +129,7 @@ export const CURRENCIES: readonly string[] = buildCurrencyList();
  * the request stays bounded; unsupported codes simply omit from rates. */
 export const FX_QUOTE_CURRENCIES: readonly string[] = [...PREFERRED_CURRENCIES];
 
-/** Localized currency name for `code`, e.g. `日元` / `Japanese Yen`. */
+/** Localized currency name for `code`, e.g. `印度卢比` / `Indian Rupee`. */
 export function currencyDisplayName(code: string, locale: string): string {
   const normalized = code.trim().toUpperCase();
   if (!normalized) return code;
@@ -145,7 +143,7 @@ export function currencyDisplayName(code: string, locale: string): string {
   }
 }
 
-/** Picker label: `JPY 日元` / `JPY Japanese Yen`. */
+/** Picker label: `INR 印度卢比` / `INR Indian Rupee`. */
 export function currencyOptionLabel(code: string, locale: string): string {
   const normalized = code.trim().toUpperCase();
   const name = currencyDisplayName(normalized, locale);
@@ -229,7 +227,7 @@ export function formatConvertedMoney(
   return `${symbol}${grouped}`;
 }
 
-/** Human-readable FX rate line, e.g. `1 JPY = 0.00615 USD`. */
+/** Human-readable FX rate line, e.g. `1 INR = 0.01 USD`. */
 export function formatFxRate(
   base: string,
   quote: string,

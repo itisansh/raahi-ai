@@ -5,16 +5,16 @@
   },
   "hero": {
     "title": "Good trips start with a shared plan.",
-    "subtitle": "Plan your next India trip with friends. Keep the route, daily plans and shared expenses together, with an AI assistant to help you explore the options.",
-    "primary": "Start planning",
+    "subtitle": "Plan trips across India with friends — from Rajasthan and Kerala to Goa, the Northeast and the Himalayas. Keep routes, daily plans and shared expenses together.",
+    "primary": "Plan by voice",
     "secondary": "See how it works",
-    "imageAlt": "Legacy OpenTrip example: a five-day Japan itinerary"
+    "imageAlt": "Illustrative India trip plan"
   },
   "facts": {
-    "label": "Legacy example · illustrative data",
-    "days": "5 days",
-    "stops": "25 stops",
-    "route": "Tokyo → Kyoto → Osaka"
+    "label": "Explore across India",
+    "days": "Cities and heritage",
+    "stops": "Coasts and mountains",
+    "route": "Plan your own route"
   },
   "features": {
     "map": {
@@ -52,12 +52,73 @@
   },
   "cta": {
     "title": "Your crew is ready when you are.",
-    "subtitle": "Create a trip with your friends. The current sample is illustrative; Indian demo itineraries and voice planning are in development.",
+    "subtitle": "Choose any Indian destination, invite your friends and build your shared plan.",
     "button": "Start planning"
   },
   "footer": {
     "tagline": "For friends exploring India together.",
     "license": "Built on OpenTrip · Apache 2.0"
   },
-  "legacyPreview": "These captures show the original OpenTrip example. Raahi AI’s India demo and voice workflow are in development."
+  "preview": {
+    "label": "Illustrative trip · not a booking or live quote",
+    "day": "Day",
+    "budget": "Group budget",
+    "people": "4 friends",
+    "cost": "₹24,000",
+    "map": "Route overview",
+    "schedule": "Day plan",
+    "agent": "Planning request",
+    "collaborate": "Group decision",
+    "question": "Can we keep one afternoon free?",
+    "answer": "Review suggested changes before saving.",
+    "vote": "Vote and discuss with your group",
+    "budgetNote": "Record actual expenses as you travel.",
+    "routes": [
+      {
+        "title": "Rajasthan cities",
+        "route": "Jaipur → Jodhpur → Udaipur",
+        "stops": [
+          "Jaipur old city",
+          "Jodhpur blue city",
+          "Udaipur lakes"
+        ]
+      },
+      {
+        "title": "Kerala together",
+        "route": "Kochi → Munnar → Alappuzha",
+        "stops": [
+          "Kochi waterfront",
+          "Munnar hills",
+          "Alappuzha backwaters"
+        ]
+      },
+      {
+        "title": "A Goa break",
+        "route": "Panaji → Old Goa → South Goa",
+        "stops": [
+          "Panaji neighbourhoods",
+          "Old Goa heritage",
+          "South Goa coast"
+        ]
+      },
+      {
+        "title": "Meghalaya trails",
+        "route": "Shillong → Sohra → Dawki",
+        "stops": [
+          "Shillong markets",
+          "Sohra landscapes",
+          "Dawki riverside"
+        ]
+      },
+      {
+        "title": "A Himalayan trip",
+        "route": "Rishikesh → Chopta → Haridwar",
+        "stops": [
+          "Rishikesh riverside",
+          "Chopta trails",
+          "Haridwar ghats"
+        ]
+      }
+    ]
+  }
 }

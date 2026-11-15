@@ -69,7 +69,7 @@ Create/update handlers return the **written** DTO (echo), not a post-write
 `SELECT` through Hyperdrive. Clients must apply that body to local caches
 instead of immediately refetching the list — see
 [../../frontend/data-caching.md](../../frontend/data-caching.md) and
-[../../operations/cloudflare.md#hyperdrive-read-after-write](../../operations/cloudflare.md#hyperdrive-read-after-write).
+[../../operations/cloudflare.md#hyperdrive-read-after-write](../../../deploy/render/README.md).
 Examples: `POST /api/trips`, agent `POST …/messages`, preference PATCH.
 
 ---

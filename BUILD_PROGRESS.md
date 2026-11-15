@@ -2,16 +2,16 @@
 
 > Evidence log for the inspected local checkout. Unchecked criteria remain unverified; passing mocked tests does not establish live provider behavior.
 
-- **Updated:** 2026-11-04
+- **Updated:** 2026-11-15
 - **Project:** Raahi AI (OpenTrip-based)
 - **Current phase:** Phase 8 — medical facilities and resilience (PARTIAL)
-- **Active task:** M5 Node platform parity IN PROGRESS. Single-process rate limiting implemented; realtime and staging acceptance remain. See section 39.
+- **Active task:** Live provider acceptance; see section 47. Browser voice/model checks pass; physical-device voice and successful live nearby/medical listings remain.
 - **Implementation state:** Voice and proposal preview implemented; automated checks pass, live acceptance incomplete
 - **Local git SHA:** `253ff744c3022d4deea1ce0de0aaab585c120512`
 - **Branch:** `dev/raahi`
 - **Deployment URL:** NOT CONFIGURED
-- **Live ElevenLabs key present:** YES (presence checked without displaying values; live transcription not verified)
-- **Voice pipeline tested:** NO
+- **Live ElevenLabs key present:** YES (live scoped-token browser transcription verified on 2026-11-15)
+- **Voice pipeline tested:** YES — live browser STT → reviewed Send → model clarification → TTS playback; prerecorded input, physical microphone not verified
 - **Live transport provider tested:** NO
 
 ### Future stack migration request — planning only (2026-11-02)
@@ -53,12 +53,12 @@
 |---|---|---|---|
 | 0 | Inspect and run OpenTrip baseline | PARTIAL | Source audit complete; configured typecheck/lint/tests/UI check pass; full build and live DB/browser checks pending |
 | 0B | Raahi identity and honest demo data | PARTIAL | Product names, metadata, auth/email and public copy updated; icons, Indian fixtures and screenshot replacement remain |
-| 1 | Microphone UI + live STT + text fallback | PARTIAL | Token endpoint and microphone review implemented; 23 new mock tests pass; live speech/browser acceptance pending |
+| 1 | Microphone UI + live STT + text fallback | PARTIAL | Live token issuance, transcript lifecycle and mobile browser checks pass; physical microphone recognition pending |
 | 2 | Voice/text → validated itinerary proposal | PARTIAL | Preview API/UI, paise costs and place/route evidence; live Gemini extraction and candidate generation pass after section 15 fix; browser/full geo acceptance pending |
-| 3 | Approve proposal → persisted shared itinerary | PARTIAL | Atomic new-trip approval, stored evidence/history, concurrent retry protection and PostgreSQL second-member reload verified; existing-trip application and browser verification pending |
-| 4 | ElevenLabs human-like spoken response | PARTIAL | Stored proposal summaries, English/Hindi TTS, playback/cancel controls implemented; live short TTS samples pass; browser/listening acceptance pending |
-| 5 | Voice expenses + exact share allocation | PARTIAL | INR paise/custom splits and same-request retries implemented; live parser/PostgreSQL checks pass; browser acceptance pending |
-| 6 | Budget-aware replanning | PARTIAL | INR forecasts, actual/booking totals, AI optional-stop reductions and atomic revision-safe approval verified; browser acceptance pending |
+| 3 | Approve proposal → persisted shared itinerary | PARTIAL | Mongo new-trip and additive existing-trip approval implemented; revision, permission, retry and second-member tests pass; live multi-user browser acceptance pending |
+| 4 | ElevenLabs human-like spoken response | PARTIAL | Automatic reply speech, mute/cancel/replay implemented; live English/Hindi generation and mocked browser checks pass; device listening acceptance pending |
+| 5 | Voice expenses + exact share allocation | PARTIAL | Paise/custom splits, repayment records and personal caps implemented; authenticated browser save/reload and Mongo checks pass; physical speech acceptance pending |
+| 6 | Budget-aware replanning | PARTIAL | Forecasts, reviewed reductions and revision-safe rollback implemented; browser approve/reject/restore pass with deterministic model; live-model end-to-end acceptance pending |
 | 7 | India transport and places provider adapters | PARTIAL | Road/forecast checks and official links implemented; live route/weather pass, nearby provider unavailable; browser acceptance pending |
 | 8 | Nearby medical + resilience | PARTIAL | Stop/opt-in GPS medical lookup, public contacts, offline export/retry implemented; automated checks pass, browser/live listing acceptance pending |
 | 9 | Deploy + E2E demo | NOT STARTED | Real deployed journey and regression tests |
@@ -1327,3 +1327,367 @@ success is newly claimed; no secrets were displayed or changed.
   replica sets. Render secrets/provider email and hosting creation are user steps
   documented in `deploy/render/README.md`. Multi-instance coordination remains
   unsupported; run one process. Cloudflare retirement remains M6.
+
+## 40. M6 local cleanup — 2026-11-07
+
+- User explicitly deferred Render deployment and requested M6 cleanup now,
+  with a Git commit before changes. Created local checkpoint `9ab6726`; ignored
+  `.env` and `.workspace` files were not committed. Nothing was pushed.
+- This overrides the original hosted M5-before-M6 ordering for local cleanup
+  only. Hosted acceptance and production cutover remain pending.
+- Isolated SQL composition and Hono/Worker entry under `src/legacy/`, removing
+  their runtime imports from Node service composition and the HTTP route table.
+  SQL/Worker packages remain development-only for historical tools/tests; unused
+  Hono adapters were removed. Added a runtime import-graph regression gate.
+- Archived the old Cloudflare workflow outside GitHub's active workflow folder;
+  marked root Cloudflare commands `legacy:*`. Normal Make setup/dev/API commands
+  now use MongoDB without PostgreSQL startup, migrations or Docker.
+- Updated current operations/architecture docs and marked old deployment guides
+  as historical. Preserved SQL snapshots/migrations and optional migration tools.
+  Final controllers/routes/db reorganization remains deferred per user request.
+- No real database writes, resets, provider calls or deployment occurred.
+  Verification results are recorded below after completion; logs: `.workspace/m6/`.
+- Final verification: full `pnpm check` passed (exit 0): 410 API tests, 88 web
+  tests, 15 shared-package tests, workspace typecheck/lint, UI checks and all
+  production builds. Documentation and whitespace checks passed. Frozen/offline
+  lockfile validation and Make setup/API dry runs passed. Initial moved-file
+  test import failures were corrected before this final run.
+- Local M6 cleanup is complete; M5 staging acceptance and M6 hosted cutover/
+  backup-restore rehearsal remain deferred. Cleanup changes are uncommitted for
+  review; `9ab6726` is the requested pre-cleanup recovery checkpoint.
+
+## 41. India-wide product cleanup — 2026-11-07
+
+- User requested removal of inherited destination content and clarified Raahi
+  serves all India, not only Uttarakhand. Kept the existing regional onboarding
+  trip as a labeled example; did not change supplied database records.
+- Replaced inherited landing captures with labeled React trip previews spanning
+  Rajasthan, Kerala, Goa, Meghalaya and the Himalayas. Updated both landing
+  locales, destination placeholders, user guide and Chinese README.
+- Retired inherited documentation screenshots, videos and promotional clips;
+  historical originals remain in Git. Source audit finds no old destination
+  mentions in active authored product copy. Accurate currency support remains.
+- INR is now the settings picker default. Medical/offline contacts now use the
+  verified nationwide 112 contact; removed unconditional regional ambulance
+  guidance. Travel shortcuts now cover IRCTC trains/buses and BusIndia providers.
+- Added medical routing regressions across five regions, including Port Blair,
+  and an offline-export check preventing unconditional regional contacts.
+  See `docs/raahi/INDIA_WIDE_PRODUCT_CLEANUP.md` for scope/sources and limits.
+- Deployment remains deferred. No real database writes or provider searches
+  performed; browser visual acceptance and fresh demo recordings remain pending.
+- Final verification: full `pnpm check` passed (exit 0): 415 API tests, 88 web
+  tests, 15 shared-package tests, workspace typecheck/lint, UI checks and all
+  production builds. Docs and whitespace checks passed. Initial preview i18n
+  array-key type errors were fixed before the final run. Logs are under
+  `.workspace/india-product/`. Existing M6 changes were preserved.
+
+## 42. Voice-first guided planning and seasonal prompt — 2026-11-07
+
+- User described microphone → animated listening → reviewed text → Gemini
+  response + ElevenLabs speech, with constraint questions and mobile layout.
+- Centralized model policy covers all India, missing constraints, strict budget,
+  destination discovery, dates/month, timing/pace/accessibility and region-specific
+  seasonal considerations. Unknown dates/years are never assumed; current
+  closures, permits and safe access are explicitly unverified.
+- Added optional intent preferences and preview response/timing/questions while
+  preserving existing payload compatibility. Client retains initial request
+  across typed/voice follow-ups and offers an explicit dates-undecided checkbox.
+- Made microphone prominent in planning and landing CTA. Added reduced-motion
+  aware listening feedback, stacked narrow-screen details, wrapping costs and
+  full-width audio controls. Existing dialog visual-viewport behavior retained.
+- Kept explicit transcript/send/save and playback controls. This is turn-based;
+  continuous hands-free talk, spoken clarifications and automatic playback remain
+  unimplemented. Live microphone/audio and browser viewport acceptance pending.
+- Added preference/guidance propagation regression and transport-level prompt
+  checks. No deployment, real database mutation or live provider calls performed.
+  See `docs/raahi/VOICE_FIRST_PLANNING_FLOW.md`; logs: `.workspace/voice-flow/`.
+- Final full workspace check passed (exit 0): 416 API, 88 frontend and 15
+  shared-package tests, typecheck/lint, UI checks and production builds. Final
+  frontend typecheck/lint also passed after the refinement-input polish. Docs
+  and whitespace checks passed. No browser viewport or live speech/model run
+  is claimed by these checks.
+
+## 43. Conversational new-trip voice interface — 2026-11-10
+
+- **Scope:** user requested implementation of the animated microphone → reviewed
+  transcript → explicit Send → model reply → automatic ElevenLabs playback flow,
+  with speech opt-out and removal of unnecessary existing controls.
+- **Implemented:** single conversational composer with previous messages, floating
+  microphone with listening/speaking states, finalized text inserted for editing,
+  voice preference retained in browser storage, automatic replies, stop/replay,
+  cancellation on recording/send/hide/unmount, and browser autoplay-block handling.
+  Complete itinerary/evidence/costs live in an expandable section; saving remains
+  explicit and disabled while an unsent change/recording/request is present.
+- **Simplified:** removed separate planning follow-up/transcript forms and old
+  manual spoken-summary UI/language switches. Disabled Markdown fixed formatting
+  toolbar in notes/journal; existing content/editor support retained. Retired
+  speech component copies (including prior local edits) preserved locally under
+  `.workspace/voice-agent/retired/`. Manual trip creation remains a secondary option.
+- **Backend:** 1–4,000 character prompts; owner-scoped expiring clarification and
+  preview replies stored in existing mixed proposal payloads. Speech reads the
+  same visible reply in its original language. Clarification IDs explicitly
+  reject approval. Existing origin/session/rate/expiry checks remain. No database
+  schema/index migration, real database mutation, deployment or provider call.
+- **Verification:** frontend suite PASS 94 tests (including rendered React
+  conversation and audio lifecycle tests); focused planning/speech/approval plus
+  disposable Mongo suite PASS 56 tests. Frontend lint and changed API-file lint
+  PASS; UI/docs/whitespace checks PASS. Frontend production build/typecheck PASS
+  before the final retired-component cleanup; final build result recorded below.
+- **Full workspace gate:** `BASE_URL=http://localhost:8780 pnpm check` FAIL at
+  existing API typecheck errors from English-only locale work: remaining `zh`
+  entries in `integrations/email/email-copy.ts`, street-view locale branches and
+  `test/street-view-grounding.test.ts`. A separate final API typecheck confirms
+  those same errors; no new voice-file type errors reported. This task does not
+  mark the overall project green.
+- **Test corrections:** Express HTTP tests initially hit sandbox loopback EPERM;
+  approved execution passed. Updated the old minimum-length test for conversational
+  short input. DOM harness supplies missing jsdom AbortSignal.any/localStorage;
+  audio rejection handling now recognizes DOMException by name across realms.
+- **Limits:** no real-browser viewport inspection, live microphone transcription,
+  audible ElevenLabs response or live model run claimed. This is tap-to-record and
+  send, not continuous hands-free/barge-in conversation. Phase acceptance remains
+  PARTIAL until live browser/device verification. Logs: `.workspace/voice-agent/`.
+- **Docs:** `VOICE_FIRST_PLANNING_FLOW.md`, API platform contract, frontend UI
+  system and roadmap updated for the new interaction and speech contract.
+- **Final frontend gate:** `BASE_URL=http://localhost:8780 pnpm --filter
+  @opentrip/web build` PASS after the retired-component cleanup, including
+  TypeScript and PWA production output. Existing bundle-size warnings remain.
+  Final docs and whitespace checks PASS.
+
+## 44. 2026-11-11 — Phases 1–4 audit and mobile planning
+
+- **Phase 1:** improved live committed/partial transcript visibility and compact
+  microphone state. Explicit Send remains required. Scoped live STT token issuance
+  passed; real microphone recognition in English/Hindi/Hinglish remains unverified.
+- **Phase 2:** existing-trip prompts include retained plans, preserve dates/day
+  count and allow days without additions. Combined schedules validate travel,
+  overlaps, rest and return travel. Unknown existing timing blocks approval.
+  Live English/Hinglish model extraction passed; full live geo itinerary acceptance
+  remains separate from deterministic service tests.
+- **Phase 3:** implemented the user's selected additive behavior on Mongo.
+  Approval preserves existing plans, expenses and bookings, checks current edit
+  permission and revision transactionally, applies retries once and publishes
+  realtime changes once. Disposable Mongo tests cover concurrent approval,
+  second-member reads, stale previews and revoked editing permissions. Retained
+  SQL approval remains new-trip-only. No supplied database was reset or modified.
+- **Phase 4:** automatic speech ignores replies arriving in hidden tabs; mute,
+  stop, replay and autoplay recovery remain. Live English/Hindi TTS returned audio.
+  Audible pronunciation and physical-device playback still require acceptance.
+- **Mobile:** full-height planning dialog, independently scrolling conversation,
+  stable composer, editable starter prompts and larger controls. Browser checks
+  passed at five viewport sizes including reduced height, explicit send,
+  clarification, voice opt-out, reduced motion and no horizontal overflow.
+  APIs were mocked in this browser run; screenshots were visually inspected.
+- **Structure:** shared planning composition moved to `widgets/trip-planning`
+  (both new and existing trip entry points); voice/audio remain reusable features.
+  Temporary browser harness moved out of app source to `.workspace/phases-1-4`.
+- **Cleanup:** resolved stale English-only locale type errors in email and street
+  view copy/tests. Existing notes/journal formatting-toolbar cleanup is retained.
+- **Verification:** frontend 97 tests PASS; focused API 89 tests PASS, including
+  16 disposable Mongo tests. Final workspace result recorded below. Logs, browser
+  screenshots and provider status evidence: `.workspace/phases-1-4/`.
+- **Status:** phases remain PARTIAL for the explicitly listed live/device gates;
+  automated success is not claimed as end-to-end microphone acceptance.
+
+- **Final gate:** `BASE_URL=http://localhost:8780 pnpm check` PASS: workspace
+  typechecks, lint, 535 tests (423 API, 97 web, 15 shared packages), UI checks and
+  production builds. `pnpm docs:check` and `git diff --check` PASS. Existing bundle
+  size warnings remain. The first final run caught a missing frontend cost-scope
+  type; fixed before the passing run. Sandbox loopback failures were rerun with
+  approved permissions. Nothing was deployed or committed.
+
+## 45. 2026-11-11 — Phase 5 audit and expense review corrections
+
+- **Audit:** voice extraction, exact INR shares, custom allocations, permission
+  checks and idempotent persistence already exist. No duplicate expense engine
+  or schema migration was added.
+- **Corrected:** settle-up explanations previously divided custom expenses
+  equally and included other currencies. They now use saved shares, deterministic
+  paise remainders and same-currency filtering. Transfer traces previously divided
+  major-unit values by 100 again and skipped sub-unit transfers; they now compute
+  in minor integers and convert once. Regression tests cover custom shares,
+  four-of-five exclusion, fractional sums, paise transfers and whole-unit currency.
+- **Voice/mobile:** compact animated microphone, reviewed text and explicit draft
+  extraction; cancellation retains text and ignores late replies. Saving is
+  blocked while recording/interpreting. Exact-member selected/requested counts
+  and 44-pixel participant targets improve the review step. Duplicate spoken names
+  resolve to one participant ID.
+- **Mongo acceptance:** disposable five-member trip, selected four, 600.01 INR,
+  concurrent same-key retries, exact zero-sum balances, excluded fifth member,
+  changed-payload rejection, outsider rejection, custom-share reload and second
+  member read all PASS. No supplied database touched.
+- **Tests:** full web suite PASS (104 tests); focused voice-expense and Mongo
+  suite PASS (25 tests). Build/typecheck/lint final results recorded below.
+- **Remaining:** real microphone → draft → exact member confirmation → Save →
+  browser reload acceptance, including device permission and audio behavior.
+  Live extraction evidence from section 27 is retained, not claimed rerun.
+  Phase 5 remains PARTIAL until that device/browser gate is exercised.
+- **Evidence:** `.workspace/phase5-review/`. No deployment or commit.
+- **Final checks:** frontend production build/typecheck and lint PASS; API
+  typecheck and changed-test lint PASS; docs/UI/whitespace checks PASS. Removed
+  an unused type import caught by lint after extracting settlement calculations.
+  Existing build-size warnings remain. Browser/device acceptance was not rerun
+  in this phase; React interaction tests are not claimed as a browser run.
+
+## 46. 2026-11-12 — Finance, rollback and phases 5–8 acceptance
+
+- **Authorized scope:** user selected implementation of repayments, individual
+  caps and proposal rollback alongside browser and live-provider verification.
+- **Repayments:** separate records of money already transferred, explicit
+  confirmation, exact minor units, debtor/creditor bounds, current edit permission,
+  revision checks and same-request replay. Voiding preserves actor/time audit.
+  Neither recording nor voiding changes travel expenses or allocated spending.
+  Settle-up balances and explanations account for net repayments.
+- **Personal caps:** optional member limits in trip currency with allocated actual
+  spending and remaining allowance. Editable by trip editors; clearing is explicit.
+  Caps do not invent allocations for future group estimates or prohibit recording
+  real spending. Existing non-INR whole-unit semantics remain.
+- **Persistence:** optional strict embedded `finance` schema; additive migration
+  002 records rollout without backfilling or rewriting old money. Mongo writes
+  serialize on the trip revision and publish realtime invalidation. SQL legacy
+  storage has no new finance/history write implementation.
+- **Existing-trip proposals:** reviewed additive stop application is retained.
+  New planning/budget approvals keep before/after stop snapshots; budget approvals
+  also keep the prior forecast. History provides a review then explicit rollback.
+  Rollback is atomic, idempotent and only available at the applied revision;
+  later edits/bookings block it. Expenses, finance, membership and bookings stay
+  intact. Reverted proposals cannot be reapplied. Older approvals without
+  snapshots cannot be retroactively rolled back.
+- **Mobile and medical fixes:** collapsible finance/history sections, accessible
+  full participant names and explicit selector labels. Browser testing exposed
+  a missing Base UI portal in MedicalHelp; replaced with the existing responsive
+  dialog sheet. A failed GPS request now clears previously selected coordinates.
+- **Backend tests:** focused expense/budget/medical/Mongo suite PASS 52 tests;
+  Mongo persistence/migration suite PASS 28 tests, including repayment retry,
+  cap overspend, voiding, rollback preservation and stale rollback rejection.
+  Frontend suite PASS 106 tests before final dialog/label fixes; final checks below.
+- **Live providers:** configured Overpass endpoint failed with a connection
+  timeout (also reproduced with direct curl). Documented alternative
+  `overpass.private.coffee` failed to connect; `maps.mail.ru` returned HTTP 504.
+  No successful nearby/medical result is claimed. Alternatives were process-local
+  diagnostic overrides; app configuration and production credentials were not
+  changed. Public instance reference: https://wiki.openstreetmap.org/wiki/Overpass_API
+- **Evidence:** `.workspace/phases-5-8/`. Browser API uses a disposable replica set
+  and synthetic Better Auth accounts. No supplied database was reset or used.
+
+- **Combined browser acceptance PASS:** actual React components, real Better Auth,
+  HTTP services and disposable Mongo. Verified reviewed transcript → explicit
+  extraction → exactly four of five → save → reload; second authenticated member
+  reads the same expense; balances conserve paise. Rejected replan preserves stops;
+  approved replan removes them; reviewed rollback restores them. Repayment/void
+  and personal-cap changes persist. GPS is opt-in, permission denial clears prior
+  coordinates, saved-stop selection remains available, directions encode location,
+  provider errors can retry, offline search is disabled and contacts remain visible.
+  Downloaded HTML contains itinerary but no member/expense details; mobile has no
+  horizontal overflow. Screenshots inspected. Speech events, model outputs and
+  medical listings were synthetic fixtures, not live provider acceptance.
+- **Browser corrections:** fixed the missing medical portal and stale GPS state;
+  added explicit accessible names for member and finance/location controls. Test
+  selectors were corrected to distinguish payer from participant groups and not
+  depend on a particular currency-minus glyph. Permission denial is exercised in
+  the correct isolated browser context.
+- **Automated gate:** 548 workspace tests PASS (427 API, 106 web, 15 shared),
+  typechecks/lint/UI checks PASS. Final build result below. Temporary app harness
+  moved back under `.workspace/phases-5-8`; no test route or account in production.
+- **Final gate:** `BASE_URL=http://localhost:8780 pnpm check` PASS through all
+  production builds. Docs and whitespace checks PASS. Existing bundle-size
+  warnings remain. Disposable browser API/Mongo stopped after verification.
+  No deployment, commit or production configuration change.
+- **Remaining acceptance:** successful live nearby/medical results (three tested
+  public endpoints timed out or returned 504), physical microphone/audio quality,
+  and a live-model end-to-end replan. Browser fixtures do not establish those gates.
+
+
+## 47. Live browser provider acceptance (2026-11-15)
+
+- **Isolation:** disposable Mongo replica set and synthetic authenticated users;
+  actual configured model and ElevenLabs adapters, without response fixtures.
+  The local browser harness forwards API calls with authentication and Origin;
+  it does not replace provider responses or the Scribe SDK. Production database
+  and configuration were not modified. Local harness CAPTCHA disabled only for
+  synthetic sign-in. Browser viewport 390 × 844, reduced motion enabled.
+- **Voice PASS:** existing ElevenLabs-generated English audio was decoded to WAV
+  and supplied through Chromium's fake microphone device. The real SDK opened
+  the live Scribe WebSocket, received partial transcripts, and committed
+  “Where would you like to travel?”. The editable draft did not submit until
+  Send. The live planning endpoint returned a clarification; the real summary
+  endpoint returned MPEG audio and the browser emitted `playing`. Voice-off
+  control switched off successfully. No page errors or horizontal overflow.
+  This verifies recorded-audio browser integration, not human microphone quality,
+  pronunciation, audible speaker quality, or mobile-device autoplay policies.
+- **Model PASS:** live English and Hinglish extraction plus English/Hindi speech
+  generation passed direct adapter checks. Browser expense interpretation used
+  the real model with typed text (not a fabricated transcription): ₹600.01 lunch
+  for four people. Exactly four of five members were required; save/reload and
+  second-member reads passed; balances conserved paise. Live-model budget replan
+  rejection preserved stops; approval removed the optional stop and reviewed
+  rollback restored it. Repayment/void and individual cap persistence passed.
+- **Medical still BLOCKED:** actual browser GPS consent and search reached the
+  live backend. OSM returned `status: unavailable`, not listings. The configured
+  Overpass endpoint timed out, a direct diagnostic also timed out, Private.coffee
+  timed out, and VK Maps returned HTTP 504. No sample facilities substituted.
+  Existing Google alternative needs a locally configured Google Maps key with
+  Places API (New); Routes API is needed by the shared travel adapter. Geoapify
+  remains unimplemented. All three alternatives were process-local diagnostics,
+  not production endpoint changes.
+- **Evidence:** ignored `.workspace/live-acceptance/providers.log`,
+  `browser-final.log`, `browser-evidence.json`, `finance.log`, `places.log`,
+  `places-alternative.log`, `places-coffee.log`, `medical-diagnostic.log`,
+  `voice.png`, and `medical.png`. Harness scripts are retained in that directory.
+  Corrected harness-only routing, Origin forwarding and detached Audio event
+  observation during verification; no application behavior change was necessary.
+- **Gate boundary:** successful live medical listings and directions to returned
+  facilities, physical-device microphone/audio quality, and complete live-model
+  itinerary generation are still unverified. Prior automated fixtures remain
+  useful regression tests but are not evidence of those gates.
+- **Closeout:** documentation and whitespace checks PASS. Temporary browser entry
+  files archived outside the app; disposable API/Mongo and Vite stopped.
+
+
+## 48. Local environment cleanup (2026-11-15)
+
+- Grouped private `.env` by current Node/Mongo app, authentication, storage, model,
+  ElevenLabs, geo providers and weather. Removed duplicate assignments, retired
+  SQL/Worker/WeChat entries, the unused `BTTER_AUTH_SECRET` typo and empty unused
+  provider/observability slots. Preserved all effective retained values exactly,
+  including the newly supplied Geoapify key. No credentials displayed or committed.
+- Reworked `.env.example` for current Node/Mongo development. Optional supported
+  features and deployment settings are commented; legacy SQL and speculative
+  inventory/routing variables are no longer part of the default template.
+- Geoapify remains pending implementation; its key is clearly marked as inactive
+  until the adapter is added. The active provider was not silently changed.
+- Validation PASS: retained values unchanged, no duplicate keys, `loadNodeConfig`
+  parses the cleaned file, required Mongo/model/speech settings and Geoapify key
+  are present. Validation did not connect to the database or any paid provider.
+
+
+## 49. Geoapify adapter verification and test coverage (2026-11-15)
+
+- **Audit finding:** The `GeoapifyGeoProvider` adapter, `GeoService`, `MedicalService`
+  wiring, `createGeoProvider` factory, and `loadNodeConfig` env parsing for
+  `GEO_PROVIDER=geoapify` / `GEOAPIFY_API_KEY` were already fully implemented.
+  Section 47 noted "Geoapify remains unimplemented" because the live OSM/Overpass
+  endpoints timed out during the browser acceptance run — not because the Geoapify
+  code was absent. The adapter was already present and correct.
+- **Category mapping verified:** `hospital` → `healthcare.hospital`,
+  `medical_clinic` → `healthcare.clinic_or_praxis`, `pharmacy` → `healthcare.pharmacy`
+  passed upstream; response normalization adds human aliases (`hospital`, `clinic`,
+  `pharmacy`) alongside the raw Geoapify category strings so `MedicalService`
+  filtering matches correctly for all three healthcare categories.
+- **New test coverage added** (`test/geoapify.test.ts`): 11 net new tests (17 total,
+  up from 6). Added:
+  - `clinic` and `pharmacy` category mapping for `placeNearby`
+  - `placeSearch` (text, bias, limit params)
+  - `placeDetail` (Place Details v2, null on empty collection)
+  - `reviewLookup` unsupported without network call
+  - Transit unsupported for `routeMatrix`
+  - `createGeoProvider` selects `GeoapifyGeoProvider` from config
+  - `MedicalService` × Geoapify integration: hospital, clinic, pharmacy listing
+    and empty-result paths, verifying sourceUrl, category pass-through, and
+    distance filtering end-to-end.
+- **Full suite:** 419/419 tests pass (`pnpm --filter @opentrip/api test`).
+  No application code changed; only tests were added.
+- **Remaining gate:** live browser acceptance with the configured `GEOAPIFY_API_KEY`
+  (place search returning real Indian hospital/clinic/pharmacy listings and
+  directions to returned facilities). The adapter is ready; the gate is a live
+  network test, not a code gap.

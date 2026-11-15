@@ -3,6 +3,7 @@ import type { Trip, TripPermissions } from "../domain/trip";
 import type { TripSnapshot } from "../domain/trip";
 
 export interface TripDto {
+  finance?: TripSnapshot["finance"];
   id: string;
   title: string;
   status: string;
@@ -64,6 +65,7 @@ export function toTripDto(trip: Trip, currentUserId: string): TripDto {
     isCurrentUser: m.userId ? m.userId === currentUserId : m.isCurrentUser,
   }));
   return {
+    ...(s.finance ? { finance: s.finance } : {}),
     id: s.id,
     title: s.title,
     status: s.status,

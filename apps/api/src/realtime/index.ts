@@ -1,4 +1,3 @@
-export { TripRealtimeObject } from "./trip-realtime-object";
 export { signRealtimeGrant, verifyRealtimeGrant } from "./realtime-grant";
 export type { RealtimeConnectionGrant } from "./realtime-grant";
 export {
@@ -11,9 +10,3 @@ export type {
   RealtimeServerMessage,
   StoredRealtimeEvent,
 } from "./protocol";
-export {
-  CloudflareTripChangePublisher,
-  type DurableObjectNamespaceLike,
-  type DurableObjectStubLike,
-  type RealtimeDefer,
-} from "./cloudflare-trip-change-publisher";

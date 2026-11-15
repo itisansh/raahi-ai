@@ -87,7 +87,10 @@ export class VoiceRecorder {
         committed: (text) => {
           if (!current()) return;
           this.chunks.push(text.trim());
-          if (this.state.status !== "finalizing") return;
+          if (this.state.status !== "finalizing") {
+            this.emit({ text: this.chunks.filter(Boolean).join(" ").slice(0, 8_000), partial: "" });
+            return;
+          }
           const final = this.chunks.filter(Boolean).join(" ").slice(0, 8_000);
           this.release();
           this.emit(final

@@ -3,13 +3,6 @@ export interface GoogleOAuthConfig {
     clientSecret: string;
 }
 
-export type CaptchaProvider = "cloudflare-turnstile";
-
-export interface CaptchaConfig {
-    provider: CaptchaProvider;
-    secretKey: string;
-}
-
 export type EmailProviderName = "console" | "resend";
 
 /** Transactional email (OTP, etc.). Defaults to `console` for local dev. */
@@ -47,7 +40,7 @@ export interface StreetViewConfig {
     timeoutMs: number;
 }
 
-export type GeoProviderName = "osm" | "google";
+export type GeoProviderName = "osm" | "google" | "geoapify";
 
 export interface OsmGeoEndpoints {
     nominatimBaseUrl: string;
@@ -62,6 +55,7 @@ export interface GeoConfig {
     osm: OsmGeoEndpoints;
     /** Required when provider is `google`. */
     googleMapsApiKey: string | undefined;
+    geoapifyApiKey?: string;
     timeoutMs: number;
     cacheTtlMs: number;
 }
@@ -103,7 +97,6 @@ export interface AppConfig {
     trustedOrigins: string[];
     storage: StorageConfig;
     googleOAuth: GoogleOAuthConfig | null;
-    captcha: CaptchaConfig | null;
     email: EmailConfig;
     openWeatherMapApiKey: string | undefined;
     geo: GeoConfig;
@@ -137,15 +130,7 @@ export interface S3StorageConfig extends StorageConfigBase {
     forcePathStyle: boolean;
 }
 
-export interface R2StorageConfig extends StorageConfigBase {
-    backend: "r2";
-    root: string;
-}
-
-export type StorageConfig =
-    | FileSystemStorageConfig
-    | S3StorageConfig
-    | R2StorageConfig;
+export type StorageConfig = FileSystemStorageConfig | S3StorageConfig;
 
 export interface RawEnv {
     TRAVEL_WEATHER_PROVIDER?: string;
@@ -165,8 +150,6 @@ export interface RawEnv {
     TRUSTED_ORIGINS?: string;
     GOOGLE_CLIENT_ID?: string;
     GOOGLE_CLIENT_SECRET?: string;
-    CAPTCHA_PROVIDER?: string;
-    CAPTCHA_SECRET_KEY?: string;
     /** Transactional email: `console` (default) | `resend`. */
     EMAIL_PROVIDER?: string;
     /** From address for outbound mail. Required for `resend`. */
@@ -183,8 +166,8 @@ export interface RawEnv {
     S3_SECRET_ACCESS_KEY?: string;
     S3_FORCE_PATH_STYLE?: string;
     OPENWEATHERMAP_API_KEY?: string;
-    VITE_OPENWEATHERMAP_API_KEY?: string;
     GEO_PROVIDER?: string;
+    GEOAPIFY_API_KEY?: string;
     GEO_OSM_NOMINATIM_URL?: string;
     GEO_OSM_OVERPASS_URL?: string;
     GEO_OSM_OSRM_URL?: string;
@@ -210,30 +193,6 @@ export interface RawEnv {
     LODGING_TIMEOUT_MS?: string;
     LODGING_GEOCODE_USER_AGENT?: string;
     UNSPLASH_ACCESS_KEY?: string;
-}
-
-const CAPTCHA_PROVIDERS: CaptchaProvider[] = [
-    "cloudflare-turnstile",
-];
-
-function parseCaptchaConfig(env: RawEnv): CaptchaConfig | null {
-    const provider = env.CAPTCHA_PROVIDER?.trim();
-    if (!provider) return null;
-
-    if (!CAPTCHA_PROVIDERS.includes(provider as CaptchaProvider)) {
-        throw new Error(
-            `CAPTCHA_PROVIDER must be one of ${CAPTCHA_PROVIDERS.join(", ")}`,
-        );
-    }
-
-    const secretKey = env.CAPTCHA_SECRET_KEY?.trim();
-    if (!secretKey) {
-        throw new Error(
-            "CAPTCHA_SECRET_KEY is required when CAPTCHA_PROVIDER is set",
-        );
-    }
-
-    return { provider: provider as CaptchaProvider, secretKey };
 }
 
 /** Build validated config from an env-like object. A Hyperdrive connection
@@ -284,11 +243,9 @@ export function loadConfig(env: RawEnv, connectionString?: string, persistence: 
             googleClientId && googleClientSecret
                 ? { clientId: googleClientId, clientSecret: googleClientSecret }
                 : null,
-        captcha: parseCaptchaConfig(env),
         email: parseEmailConfig(env),
         openWeatherMapApiKey:
-          env.OPENWEATHERMAP_API_KEY?.trim() ||
-          env.VITE_OPENWEATHERMAP_API_KEY?.trim(),
+          env.OPENWEATHERMAP_API_KEY?.trim(),
         geo: parseGeoConfig(env),
         lodging: parseLodgingConfig(env),
         ai: parseAiConfig(env),
@@ -311,10 +268,12 @@ const DEFAULT_GEO_CACHE_TTL_MS = 30 * 60 * 1000;
 /** Geo provider selection. Defaults to OSM; Google requires an API key. */
 function parseGeoConfig(env: RawEnv): GeoConfig {
     const providerRaw = env.GEO_PROVIDER?.trim().toLowerCase() || "osm";
-    if (providerRaw !== "osm" && providerRaw !== "google") {
-        throw new Error('GEO_PROVIDER must be either "osm" or "google"');
+    if (providerRaw !== "osm" && providerRaw !== "google" && providerRaw !== "geoapify") {
+        throw new Error('GEO_PROVIDER must be "osm", "google", or "geoapify"');
     }
     const provider = providerRaw as GeoProviderName;
+    const geoapifyApiKey = env.GEOAPIFY_API_KEY?.trim() || undefined;
+    if (provider === "geoapify" && !geoapifyApiKey) throw new Error("GEOAPIFY_API_KEY is required when GEO_PROVIDER=geoapify");
     const googleMapsApiKey = env.GOOGLE_MAPS_API_KEY?.trim() || undefined;
     if (provider === "google" && !googleMapsApiKey) {
         throw new Error(
@@ -337,6 +296,7 @@ function parseGeoConfig(env: RawEnv): GeoConfig {
             userAgent,
         },
         googleMapsApiKey,
+        geoapifyApiKey,
         timeoutMs: parseNumber(
             env.GEO_TIMEOUT_MS,
             "GEO_TIMEOUT_MS",
@@ -499,14 +459,7 @@ function loadStorageConfig(env: RawEnv, publicUrl: string): StorageConfig {
             ),
         };
     }
-    if (backend === "r2") {
-        return {
-            backend,
-            root: env.STORAGE_ROOT?.trim().replace(/^\/+|\/+$/g, "") ?? "",
-            publicUrl,
-        };
-    }
-    throw new Error('STORAGE_BACKEND must be "fs", "s3", or "r2"');
+    throw new Error('STORAGE_BACKEND must be "fs" or "s3"');
 }
 
 function requireEnv(value: string | undefined, name: string): string {

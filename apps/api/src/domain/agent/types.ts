@@ -8,7 +8,7 @@ import type {
 
 export type AgentMessageRole = "user" | "assistant" | "system";
 
-export type AgentLanguage = "en" | "zh";
+export type AgentLanguage = "en";
 
 export type AgentStreetViewRequest =
   | {

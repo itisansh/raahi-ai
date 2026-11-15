@@ -1,0 +1,37 @@
+.raahi-voice-orb {
+  display: grid;
+  place-items: center;
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--foreground);
+  color: var(--background);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--foreground) 12%, transparent);
+  cursor: pointer;
+  transition: transform 180ms ease-out, background-color 180ms ease-out;
+  animation: raahi-float 4s ease-in-out infinite;
+}
+.raahi-voice-orb::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border: 1px solid var(--border);
+  border-radius: inherit;
+}
+.raahi-voice-orb[data-state="recording"],
+.raahi-voice-orb[data-state="speaking"] { background: var(--brand); color: var(--brand-foreground); }
+.raahi-voice-orb[data-state="recording"]::before,
+.raahi-voice-orb[data-state="speaking"]::before { animation: raahi-listen 1.5s ease-in-out infinite; border-color: var(--brand); }
+.raahi-voice-orb:focus-visible { outline: 2px solid var(--ring); outline-offset: 12px; }
+.raahi-voice-orb:active { transform: scale(.96); }
+.raahi-voice-orb:disabled { cursor: default; }
+@keyframes raahi-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -5px; } }
+@keyframes raahi-listen { 0%, 100% { scale: 1; opacity: .6; } 50% { scale: 1.12; opacity: .2; } }
+@media (prefers-reduced-motion: reduce) {
+  .raahi-voice-orb, .raahi-voice-orb::before { animation: none !important; transition: none; }
+}
+
+.raahi-voice-orb[data-compact="true"] { width: 48px; height: 48px; animation: none; }
+.raahi-voice-orb[data-compact="true"]::before { inset: -4px; }
+.raahi-voice-orb[data-compact="true"] svg { width: 22px; height: 22px; }

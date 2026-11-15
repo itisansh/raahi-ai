@@ -29,7 +29,7 @@ See [agent.md](./agent.md).
 Agent read tools
         → GeoService (application) → stable DTOs
                 → GeoProvider (domain port)
-                        → OsmGeoProvider | GoogleGeoProvider
+                        → OsmGeoProvider | GoogleGeoProvider | GeoapifyGeoProvider
 ```
 
 - **Domain** (`domain/geo`) — vendor-neutral place/route/review types and the
@@ -39,7 +39,7 @@ Agent read tools
   results to DTOs; raises `DomainError` for bad input and lets adapters raise
   `GeoError` for upstream/config failures.
 - **Infrastructure** — provider adapters + shared cache/rate-limit/HTTP helpers.
-  `GEO_PROVIDER=osm|google` selects the implementation in
+  `GEO_PROVIDER=osm|google|geoapify` selects the implementation in
   `createGeoProvider` at composition time.
 
 ## Providers
@@ -65,6 +65,18 @@ Overpass / OSRM can replace the public endpoints without code changes.
 
 Requires `GOOGLE_MAPS_API_KEY` when `GEO_PROVIDER=google`.
 
+### Geoapify
+
+Requires `GEOAPIFY_API_KEY` with `GEO_PROVIDER=geoapify`. Search uses Geocoding;
+nearby places and medical facilities use Places; detail uses Place Details;
+road routes and matrices use Routing and Route Matrix. Driving, walking and
+cycling are supported; transit and reviews are explicitly unsupported.
+Coordinates, distances and durations are normalized to the existing domain
+port. Hospital/clinic/pharmacy categories map to Geoapify healthcare categories.
+Requests are paced and cached; failures never switch providers or invent results.
+Medical/travel/planning views attribute Geoapify and OpenStreetMap. HTTP error
+logs redact the API key and do not log upstream response bodies.
+
 ## Caching and pacing
 
 - **On-demand only** — agent tool calls may refresh upstream. No cron.
@@ -81,7 +93,7 @@ See `.env.example`:
 
 | Variable | Default | Notes |
 | --- | --- | --- |
-| `GEO_PROVIDER` | `osm` | `osm` or `google` |
+| `GEO_PROVIDER` | `osm` | `osm`, `google`, or `geoapify` |
 | `GEO_OSM_NOMINATIM_URL` | public Nominatim | |
 | `GEO_OSM_OVERPASS_URL` | public Overpass interpreter | |
 | `GEO_OSM_OSRM_URL` | public OSRM demo | |

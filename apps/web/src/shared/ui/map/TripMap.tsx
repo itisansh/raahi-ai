@@ -255,7 +255,7 @@ export function TripMap({
     reverseAbortRef.current?.abort();
     const ac = new AbortController();
     reverseAbortRef.current = ac;
-    const lang = i18n.language.startsWith("zh") ? "zh" : "en";
+    const lang = i18n.resolvedLanguage ?? "en";
     void reversePlace(lat, lng, lang)
       .then((place) => {
         if (ac.signal.aborted) return;

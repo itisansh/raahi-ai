@@ -21,7 +21,7 @@ function distance(lat: number, lng: number, a: number, b: number) {
 const osmCategories = { hospital: ["amenity=hospital", "healthcare=hospital"], clinic: ["amenity=clinic", "amenity=doctors", "healthcare=clinic", "healthcare=doctor"], pharmacy: ["amenity=pharmacy", "healthcare=pharmacy"] };
 const matching = { hospital: ["hospital", "general_hospital"], clinic: ["clinic", "doctors", "doctor", "medical_clinic", "medical_center"], pharmacy: ["pharmacy"] };
 export class MedicalService {
-  constructor(private load: (id: string, actor: string) => Promise<TripSnapshot>, private geo: Pick<GeoService, "placeNearby">, private source: "osm" | "google", private limiter: { consume(actor: string): Promise<boolean> }) {}
+  constructor(private load: (id: string, actor: string) => Promise<TripSnapshot>, private geo: Pick<GeoService, "placeNearby">, private source: "osm" | "google" | "geoapify", private limiter: { consume(actor: string): Promise<boolean> }) {}
   async search(id: string, actor: string, raw: unknown) {
     const request = medicalRequestSchema.parse(raw);
     const trip = await this.load(id, actor);
@@ -34,7 +34,7 @@ export class MedicalService {
     } else { lat = Number(request.location.lat.toFixed(4)); lng = Number(request.location.lng.toFixed(4)); label = "Current location"; }
     try { if (!await this.limiter.consume(actor)) throw new DomainError("medical_rate_limited", "Please wait before searching again"); }
     catch (error) { if (error instanceof DomainError) throw error; throw new DomainError("medical_unavailable", "Medical place search unavailable"); }
-    const base = { category: request.category, radiusMeters: request.radiusMeters, location: { lat, lng, label, kind: request.location.kind }, source: this.source, sourceUrl: this.source === "osm" ? "https://www.openstreetmap.org/copyright" : "https://maps.google.com/", checkedAt: new Date().toISOString(), observedAt: null, cacheMayBeStale: true, emergencyCapacity: "unknown", openingStatus: "unknown" };
+    const base = { category: request.category, radiusMeters: request.radiusMeters, location: { lat, lng, label, kind: request.location.kind }, source: this.source, sourceUrl: this.source === "geoapify" ? "https://www.geoapify.com/" : this.source === "osm" ? "https://www.openstreetmap.org/copyright" : "https://maps.google.com/", checkedAt: new Date().toISOString(), observedAt: null, cacheMayBeStale: true, emergencyCapacity: "unknown", openingStatus: "unknown" };
     if (![lat, lng].every(Number.isFinite) || lat < 6 || lat > 38 || lng < 68 || lng > 98) return { ...base, status: "location_unavailable", places: [] };
     try {
       const results = await this.geo.placeNearby({ lat, lng, radiusMeters: request.radiusMeters, categories: this.source === "osm" ? osmCategories[request.category] : [request.category === "clinic" ? "medical_clinic" : request.category], limit: 20 });

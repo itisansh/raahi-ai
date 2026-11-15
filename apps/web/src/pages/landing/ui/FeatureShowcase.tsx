@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { cn } from "@/shared/lib";
 import { FEATURES, type Feature } from "../lib/content";
-import { BrowserFrame } from "./DeviceFrames";
+import { IndiaTripPreview } from "./IndiaTripPreview";
 import { Reveal } from "./Reveal";
 
 function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
@@ -13,7 +13,7 @@ function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
   return (
     <Reveal className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
       <div className={cn(reverse && "md:order-2")}>
-        <BrowserFrame src={feature.image} alt={t(`${base}.imageAlt`)} />
+        <IndiaTripPreview variant={feature.id} />
       </div>
       <div className={cn("max-w-md", reverse ? "md:order-1" : "md:justify-self-end")}>
         <span className="inline-flex size-9 items-center justify-center rounded-xl bg-brand-muted text-brand">

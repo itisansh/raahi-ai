@@ -194,3 +194,15 @@ skill).
   while opacity/color transitions are kept — gentler, not zero. Hover-driven
   motion is gated behind `@media (hover: hover) and (pointer: fine)` so touch
   taps never fire false hover animations.
+
+## Voice planning controls
+
+The new-trip planner uses a single plain-text composer and an animated microphone
+with explicit recording/stop states. Motion respects reduced-motion preferences.
+Reply speech is enabled by default, with a persistent browser opt-out, cancellation
+and manual replay for browsers that block autoplay. See
+[voice planning](../raahi/VOICE_FIRST_PLANNING_FLOW.md).
+
+The Markdown editor's fixed TopBar and floating Toolbar are disabled to remove
+formatting chrome from notes and journal writing. Existing formatted documents
+and image/attachment behavior remain supported by the editor.

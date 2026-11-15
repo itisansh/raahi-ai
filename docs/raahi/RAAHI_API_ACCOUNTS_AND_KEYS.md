@@ -11,7 +11,7 @@
 | NOW | **GitHub** — https://github.com | Fork/host Raahi code, pull requests | Sign in / git authentication | No third-party API key required for normal git cloning |
 | NOW | **ElevenLabs** — https://elevenlabs.io | Voice-to-text (Scribe Realtime) + humanlike voice replies (TTS) | `ELEVENLABS_API_KEY` | One provider for both STT and TTS; protect key server-side, mint short-lived client tokens for realtime STT |
 | NOW | **One AI inference provider**: e.g., **Google AI Studio** — https://aistudio.google.com or **OpenRouter** — https://openrouter.ai | Raahi's actual trip-planning LLM and tool calling | Key stored in OpenTrip's `AI_API_KEY` | ChatGPT Plus / Codex login does not pay for your deployed application's AI calls. Choose only **one** initially and check model/tool compatibility |
-| SOON | **Geoapify** — https://myprojects.geoapify.com/ | Geocoding, places, pharmacies/hospitals | `GEOAPIFY_API_KEY` (new Raahi adapter) | Optional for first baseline; verify quota, attribution, and terms. OpenTrip already has OSM-based geolocation |
+| SOON | **Geoapify** — https://myprojects.geoapify.com/ | Geocoding, places, pharmacies/hospitals | `GEOAPIFY_API_KEY` with `GEO_PROVIDER=geoapify` | Optional for first baseline; verify quota, attribution, and terms. OpenTrip already has OSM-based geolocation |
 | DEPLOY | **Render** — https://dashboard.render.com | Public web/API deployment, optional hosted PostgreSQL | Render login and dashboard config; no Render API token required for manual deploy | Use Render secret environment variables; free instances have limitations |
 | OPTIONAL | **openrouteservice** — https://openrouteservice.org | Road/walking distance and route estimates | `OPENROUTESERVICE_API_KEY` (new adapter) | Existing OpenTrip OSM/OSRM backend can be used for first demo |
 | OPTIONAL | **OpenWeatherMap** — https://openweathermap.org/api | Existing OpenTrip weather adapter | `OPENWEATHERMAP_API_KEY` | Alternatively write an Open-Meteo adapter; Open-Meteo's noncommercial endpoint needs no account/key |
@@ -119,8 +119,8 @@ endpoint: https://open-meteo.com/en/terms.
 
 This daily adapter does not replace the existing `OPENWEATHERMAP_API_KEY` hourly
 weather feature. Existing OSM/Google geo configuration supplies road estimates and
-nearby stay listings. Geoapify and openrouteservice remain optional, unimplemented
-reserved adapters; no new keys are required for this Phase 7 implementation.
+nearby stay listings. Geoapify is implemented for places and road routing; openrouteservice remains
+unimplemented. Select Geoapify with its API key or use the existing OSM/Google adapters.
 Rail/bus entries are official search links, not authorized inventory integrations.
 
 ## Through-Phase-8 key requirements
@@ -143,6 +143,16 @@ Rail/bus entries are official search links, not authorized inventory integration
   not prerequisites for local console-email authentication.
 - `OPENWEATHERMAP_API_KEY` is optional for the existing hourly weather feature;
   the opted-in noncommercial Open-Meteo daily adapter needs no key.
-- Do not obtain Geoapify/openrouteservice/vendor keys just for the placeholders:
-  those adapters are not implemented. Live rail/bus inventory would need a
-  separately selected, authorized provider and implementation.
+- Geoapify now supports places, medical search and road routing. Openrouteservice
+  and live rail/bus inventory still need separately selected integrations.
+
+
+## Current Geoapify and Render setup (2026-11-15)
+
+This section supersedes earlier placeholder and deployment notes. Geoapify is
+implemented: set `GEO_PROVIDER=geoapify` and `GEOAPIFY_API_KEY` privately. Live
+places, hospital listings, geocoding, detail, road routing and matrices passed.
+No Google Maps or openrouteservice key is needed for this configuration.
+Cloudflare/Turnstile and Docker integrations have been removed. Render's free
+demo uses external S3-compatible storage plus MongoDB, Resend and the existing
+AI/ElevenLabs keys; see [Render setup](../../deploy/render/README.md).

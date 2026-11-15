@@ -227,3 +227,145 @@ describe("Mongo replica-set persistence", () => {
     } finally { await connection.close(); await container.dispose(); }
   }, 30_000);
 });
+
+// Planning additions share the existing snapshot/revision/transaction boundary.
+it("applies a reviewed plan alongside existing stops once and preserves linked data", async () => {
+  const { ProposalApprovalService } = await import("../src/services/planning/approval-service");
+  const trip = fixture();
+  trip.addMember({ userId: "second-planner", name: "Second", role: "editor", canInvite: false });
+  const before = trip.toSnapshot();
+  const oldStop = before.stops[0]!;
+  trip.toggleVote(oldStop.id, before.members[0]!.id);
+  trip.addComment(oldStop.id, before.members[0]!.id, "Keep this stop");
+  await trips.create(trip);
+  const saved = (await trips.findById(before.id))!.toSnapshot();
+  const publisher = { publish: vi.fn(async () => {}) };
+  const store = new MongoProposalStore(db, publisher);
+  const approval = new ProposalApprovalService(store);
+  const id = crypto.randomUUID();
+  await store.save({ id, ownerId: "owner", contextTripId: before.id, baseRevision: saved.version, expiresAt: new Date(Date.now() + 60_000), payload: {
+    status: "preview", issues: [], days: [{ day: 1, city: "Jaipur", stops: [{ name: "New museum", startMinute: 900, durationMinutes: 60, evidence: { source: "fixture", checkedAt: new Date().toISOString(), place: { lat: 26.9, lng: 75.8 } } }] }],
+  } });
+  const results = await Promise.all([approval.approve(id, { id: "owner", name: "Owner" }), approval.approve(id, { id: "owner", name: "Owner" })]);
+  expect(results.map(r => r.tripId)).toEqual([before.id, before.id]);
+  const after = (await trips.findById(before.id))!.toSnapshot();
+  expect(after.stops).toHaveLength(saved.stops.length + 1);
+  expect(after.stops.find(s => s.id === oldStop.id)).toEqual(saved.stops.find(s => s.id === oldStop.id));
+  expect(after.days).toEqual(saved.days); expect(after.expenses).toEqual(saved.expenses);
+  expect(after.version).toBe(saved.version + 1);
+  expect((await trips.findById(before.id))!.permissionsFor("second-planner").isMember).toBe(true);
+  expect(publisher.publish).toHaveBeenCalledTimes(1);
+  expect(await db.models.proposals.findOne({ id }).lean()).toMatchObject({ resultTripId: before.id });
+});
+
+it("rejects stale additions and revoked approval retries without partial writes", async () => {
+  const { ProposalApprovalService } = await import("../src/services/planning/approval-service");
+  const trip = fixture();
+  trip.addMember({ userId: "editor-planner", name: "Editor", role: "editor", canInvite: false });
+  await trips.create(trip);
+  const snapshot = (await trips.findById(trip.toSnapshot().id))!.toSnapshot();
+  const store = new MongoProposalStore(db);
+  const approval = new ProposalApprovalService(store);
+  const id = crypto.randomUUID();
+  await store.save({ id, ownerId: "editor-planner", contextTripId: snapshot.id, baseRevision: snapshot.version, expiresAt: new Date(Date.now() + 60_000), payload: { status: "preview", issues: [], days: [] } });
+  await trips.rename(snapshot.id, "Changed by another member");
+  await expect(approval.approve(id, { id: "editor-planner", name: "Editor" })).rejects.toMatchObject({ code: "trip_write_conflict" });
+  expect(await db.models.proposals.findOne({ id }).lean()).toMatchObject({ resultTripId: null, approvedAt: null });
+  await db.models.members.updateOne({ tripId: snapshot.id, userId: "editor-planner" }, { $set: { role: "viewer" } });
+  await expect(approval.approve(id, { id: "editor-planner", name: "Editor" })).rejects.toMatchObject({ code: "forbidden" });
+  expect((await trips.findById(snapshot.id))!.toSnapshot().stops).toEqual(snapshot.stops);
+});
+
+it("persists four-of-five expense shares exactly and rejects changed retry details", async () => {
+  const trip = fixture();
+  for (const name of ["Asha", "Kabir", "Meera", "Ravi"]) trip.addMember({ userId: `expense-${name}`, name, role: "editor", canInvite: false });
+  await trips.create(trip);
+  const snapshot = trip.toSnapshot();
+  const selected = snapshot.members.slice(0, 4).map(member => member.id);
+  const excluded = snapshot.members[4]!.id;
+  const service = new TripService(trips);
+  const input = { requestId: crypto.randomUUID(), description: "Lunch", amount: 600.01, currency: "INR", payer: selected[0]!, participants: selected };
+  await Promise.all([service.addExpense(trip.id, input, "owner"), service.addExpense(trip.id, input, "owner")]);
+  let reloaded = (await trips.findById(trip.id))!;
+  expect(reloaded.toSnapshot().expenses).toHaveLength(1);
+  const budget = reloaded.budget();
+  expect(budget.balances.find(row => row.memberId === excluded)!.share).toBe(0);
+  expect(budget.balances.reduce((sum, row) => sum + Math.round(row.share * 100), 0)).toBe(60001);
+  expect(budget.balances.reduce((sum, row) => sum + Math.round(row.net * 100), 0)).toBe(0);
+  await expect(service.addExpense(trip.id, { ...input, amount: 601 }, "owner")).rejects.toThrow();
+  await expect(service.addExpense(trip.id, { ...input, requestId: crypto.randomUUID() }, "outsider")).rejects.toThrow();
+  const allocations = Object.fromEntries(selected.map((id, i) => [id, i === 0 ? 300.01 : 100]));
+  await service.addExpense(trip.id, { ...input, requestId: crypto.randomUUID(), description: "Custom meal", allocations }, "owner");
+  reloaded = (await trips.findById(trip.id))!;
+  expect(reloaded.toSnapshot().expenses.find(expense => expense.description === "Custom meal")!.allocations).toEqual(allocations);
+  expect(reloaded.budget().balances.reduce((sum, row) => sum + Math.round(row.net * 100), 0)).toBe(0);
+  expect((await service.getTrip(trip.id, "expense-Asha")).expenses).toHaveLength(2);
+});
+
+it("records and voids repayments once without changing travel spending or personal caps", async () => {
+  const { FinanceService } = await import("../src/services/finance/finance-service");
+  const { MongoFinanceStore } = await import("../src/repositories/mongo/finance");
+  const trip = fixture(); trip.addMember({ userId: "debtor", name: "Debtor", role: "editor", canInvite: false });
+  const s = trip.toSnapshot(); const [owner, debtor] = s.members;
+  trip.addExpense({ description: "Lunch", amount: 600.01, currency: "INR", payer: owner!.id, participants: [debtor!.id] });
+  await trips.create(trip);
+  const service = new FinanceService(new MongoFinanceStore(db));
+  const status = await service.status(s.id, "owner");
+  const input = { requestId: crypto.randomUUID(), from: debtor!.id, to: owner!.id, amountMinor: 15001, currency: "INR", revision: status.revision, confirm: true };
+  await Promise.all([service.repay(s.id, "owner", input), service.repay(s.id, "owner", input)]);
+  let after = await service.status(s.id, "debtor");
+  expect(after.repayments).toHaveLength(1); expect(after.budget.total).toBe(600.01);
+  expect(after.budget.balances.find(b => b.memberId === debtor!.id)!.net).toBe(-450);
+  expect(after.budget.balances.reduce((sum, b) => sum + Math.round(b.net * 100), 0)).toBe(0);
+  await expect(service.repay(s.id, "owner", { ...input, amountMinor: 15000 })).rejects.toMatchObject({ code: "repayment_conflict" });
+  await expect(service.repay(s.id, "outsider", input)).rejects.toThrow();
+  await expect(service.repay(s.id, "owner", { ...input, requestId: crypto.randomUUID(), revision: after.revision, amountMinor: 50000 })).rejects.toMatchObject({ code: "repayment_exceeds_balance" });
+  after = await service.cap(s.id, "owner", { memberId: debtor!.id, capMinor: 50000, revision: after.revision });
+  expect(after.caps.find(c => c.memberId === debtor!.id)).toMatchObject({ spentMinor: 60001, remainingMinor: -10001 });
+  const voidInput = { repaymentId: after.repayments[0]!.id, revision: after.revision, confirm: true };
+  await Promise.all([service.void(s.id, "owner", voidInput), service.void(s.id, "owner", voidInput)]);
+  after = await service.status(s.id, "owner");
+  expect(after.repayments[0]!.voidedAt).toBeTruthy(); expect(after.budget.total).toBe(600.01);
+  expect(after.budget.balances.find(b => b.memberId === debtor!.id)!.net).toBe(-600.01);
+  expect((await trips.findById(s.id))!.toSnapshot().expenses).toHaveLength(1);
+});
+
+it("reviews and rolls back planning additions once, preserving the expense ledger", async () => {
+  const { ProposalApprovalService } = await import("../src/services/planning/approval-service");
+  const { MongoHistoryStore } = await import("../src/repositories/mongo/history");
+  const trip = fixture(); const s = trip.toSnapshot();
+  trip.addExpense({ description: "Lunch", amount: 600, currency: "INR", payer: s.members[0]!.id, participants: [s.members[0]!.id] });
+  await trips.create(trip);
+  const before = structuredClone(trip.toSnapshot());
+  const store = new MongoProposalStore(db); const approval = new ProposalApprovalService(store); const history = new MongoHistoryStore(db);
+  const id = crypto.randomUUID();
+  await store.save({ id, ownerId: "owner", contextTripId: s.id, baseRevision: before.version, expiresAt: new Date(Date.now() + 60_000), payload: { status: "preview", issues: [], days: [{ day: 1, city: "Jaipur", stops: [{ name: "Added stop", startMinute: 900, durationMinutes: 60, evidence: { source: "fixture", checkedAt: new Date().toISOString(), place: { lat: 26.9, lng: 75.8 } } }] }] } });
+  await approval.approve(id, { id: "owner", name: "Owner" });
+  expect((await history.list(s.id, "owner"))[0]).toMatchObject({ canRollback: true, beforeStops: [{ name: "Museum" }] });
+  await expect(history.rollback(s.id, "outsider", id, before.version + 1)).rejects.toThrow();
+  await Promise.all([history.rollback(s.id, "owner", id, before.version + 1), history.rollback(s.id, "owner", id, before.version + 1)]);
+  const after = (await trips.findById(s.id))!.toSnapshot();
+  expect(after.stops).toEqual(before.stops); expect(after.expenses).toEqual(before.expenses);
+  expect(after.version).toBe(before.version + 2);
+  expect((await history.list(s.id, "owner"))[0]).toMatchObject({ canRollback: false });
+  await expect(approval.approve(id, { id: "owner", name: "Owner" })).rejects.toMatchObject({ code: "proposal_rolled_back" });
+});
+
+it("restores a budget replan forecast and refuses rollback over later changes", async () => {
+  const { MongoHistoryStore } = await import("../src/repositories/mongo/history");
+  const trip = fixture(); await trips.create(trip); const before = structuredClone(trip.toSnapshot());
+  const store = new MongoBudgetStore(db); const history = new MongoHistoryStore(db);
+  const forecast = { groupBudgetPaise: 100000, otherFuturePaise: 0, bufferPaise: 0, costs: { [before.stops[0]!.id]: 10000 } };
+  await store.forecast(before.id, "owner", forecast);
+  const revision = (await trips.findById(before.id))!.toSnapshot().version;
+  const id = await store.saveProposal(before.id, "owner", revision, { kind: "budget_replan", stopIds: [before.stops[0]!.id] });
+  await store.approve(id, "owner", () => [before.stops[0]!.id], before.id);
+  await history.rollback(before.id, "owner", id, revision + 1);
+  let after = (await trips.findById(before.id))!.toSnapshot();
+  expect(after.stops).toEqual(before.stops); expect(after.intake!.budgetForecast).toEqual(forecast);
+  const next = await store.saveProposal(before.id, "owner", after.version, { kind: "budget_replan", stopIds: [before.stops[0]!.id] });
+  await store.approve(next, "owner", () => [before.stops[0]!.id], before.id);
+  await trips.rename(before.id, "Later change"); after = (await trips.findById(before.id))!.toSnapshot();
+  await expect(history.rollback(before.id, "owner", next, after.version)).rejects.toMatchObject({ code: "trip_write_conflict" });
+  expect((await trips.findById(before.id))!.toSnapshot().stops).toHaveLength(0);
+});

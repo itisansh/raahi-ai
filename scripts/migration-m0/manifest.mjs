@@ -23,7 +23,7 @@ function visit(node) {
   ts.forEachChild(node, visit);
 }
 visit(ast);
-routes.push({ method: 'GET', path: '/api/trips/:tripId/realtime', source: 'apps/api/src/worker.ts',
+routes.push({ method: 'GET', path: '/api/trips/:tripId/realtime', source: 'apps/api/src/legacy/worker.ts',
   authentication: 'origin/session/membership on WebSocket upgrade', runtime: 'Cloudflare only' });
 const schema = readFileSync('apps/api/prisma/schema.prisma', 'utf8');
 const models = [...schema.matchAll(/model (\w+) \{([\s\S]*?)\n\}/g)].map(([, name, body]) => ({

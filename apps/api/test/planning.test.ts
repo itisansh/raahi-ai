@@ -47,6 +47,13 @@ describe("planning constraints and arithmetic", () => {
   it.each(["NaN", "-1", "1.001", "1e3", "999999999999999999999", "7,000"]) ("rejects unnormalized money %s", (value) => {
     expect(() => rupeesToPaise(value)).toThrow();
   });
+  it("preserves stated timing preferences and returns general model guidance separately from evidence", async () => {
+    const guidance = { response: "A relaxed route fits your request.", timing: "Dates are undecided; current access is unverified.", questions: ["Which month can you travel?"] };
+    const f = fixture({ ...intent, travelPreferences: "Strict cap, relaxed mornings, dates undecided" }, { ...candidate(), guidance });
+    const result = await f.service.preview("user", { prompt });
+    expect(f.model.propose).toHaveBeenCalledWith(expect.objectContaining({ travelPreferences: "Strict cap, relaxed mornings, dates undecided" }), null);
+    expect(result).toMatchObject({ status: "preview", guidance, saved: false });
+  });
   it("builds a six-day preview with deterministic group costs and source coordinates", async () => {
     const f = fixture();
     const result = await f.service.preview("user", { prompt });
@@ -157,7 +164,7 @@ describe("planning HTTP boundary", () => {
   it("rejects oversized and malformed input before model execution", async () => {
     const f = httpFixture();
     expect((await f.request({ prompt: "x".repeat(21000) })).status).toBe(413);
-    expect((await f.request({ prompt: "short" })).status).toBe(400);
+    expect((await f.request({ prompt: "   " })).status).toBe(400);
     expect(f.preview).not.toHaveBeenCalled();
   });
   it("returns uncached results and sanitized rate/provider errors", async () => {
@@ -168,4 +175,37 @@ describe("planning HTTP boundary", () => {
     f.preview.mockRejectedValue(new PlanningError("planning_unavailable"));
     expect((await f.request()).status).toBe(503);
   });
+});
+
+it("stores a short conversational clarification for owner-scoped speech without creating a trip", async () => {
+  const f = fixture({ ...intent, origin: null, budgetBasis: null });
+  const save = vi.fn(async () => {});
+  const approve = vi.fn();
+  const service = new PlanningService(f.model, f.geo, "osm", f.context, f.limiter, { save, approve });
+  const result = await service.preview("owner", { prompt: "Goa" });
+  expect(result.status).toBe("clarification");
+  expect(result.reply.language).toBe("hi");
+  expect(result.reply.text).toContain("कहाँ");
+  expect(save).toHaveBeenCalledWith(expect.objectContaining({ ownerId: "owner", id: result.proposalId, payload: result }));
+  expect(approve).not.toHaveBeenCalled(); expect(f.model.propose).not.toHaveBeenCalled();
+});
+
+it("checks additions against retained times and permits unchanged days", async () => {
+  const plan = candidate();
+  plan.days.slice(1).forEach(day => { day.stops = []; });
+  const f = fixture(intent, plan);
+  const store = { supportsExisting: true, save: vi.fn(async () => {}), approve: vi.fn() };
+  const existingPlan = {
+    currency: "INR", startDate: "", days: plan.days.map(day => ({ number: day.day, date: "", dateLabel: "", city: day.city, color: "" })),
+    stops: [{ id: "retained", day: 1, name: "Existing museum", time: "10:00", duration: "1 hour", lat: 30, lng: 78 }],
+  };
+  const context = { tripId: "existing", revision: 4, title: "Existing trip", intake: null, days: existingPlan.days, canEdit: true, existingPlan };
+  const service = new PlanningService(f.model, f.geo, "osm", async () => context as never, f.limiter, store);
+  const preview = await service.preview("owner", { prompt, tripId: "existing" });
+  expect(preview).toMatchObject({ status: "preview", changeMode: "append_stops", costScope: "additions", approvable: true, retainedStops: [{ id: "retained" }] });
+  existingPlan.stops[0]!.time = "14:30";
+  const conflict = await service.preview("owner", { prompt, tripId: "existing" });
+  expect(conflict).toMatchObject({ approvable: false, issues: expect.arrayContaining(["schedule_infeasible"]) });
+  existingPlan.stops[0]!.duration = "later";
+  expect(await service.preview("owner", { prompt, tripId: "existing" })).toMatchObject({ approvable: false, issues: expect.arrayContaining(["existing_schedule_unverified"]) });
 });

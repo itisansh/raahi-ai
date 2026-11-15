@@ -68,6 +68,7 @@ export interface TripIntake {
 }
 
 export interface Trip {
+  finance?: { repayments: Array<{ from: string; to: string; amountMinor: number; currency: string; voidedAt?: string }> };
   id: string;
   title: string;
   status: TripStatus;

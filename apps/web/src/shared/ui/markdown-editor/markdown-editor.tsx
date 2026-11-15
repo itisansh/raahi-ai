@@ -101,24 +101,14 @@ function MarkdownEditorInner({
         [Crepe.Feature.CodeMirror]: false,
         [Crepe.Feature.Table]: false,
         [Crepe.Feature.AI]: false,
-        // Fixed chrome instead of the selection-floating toolbar.
+        // Keep writing focused; existing Markdown formatting remains supported.
         [Crepe.Feature.Toolbar]: false,
-        [Crepe.Feature.TopBar]: true,
+        [Crepe.Feature.TopBar]: false,
       },
       featureConfigs: {
         [Crepe.Feature.Placeholder]: {
           text: placeholder ?? "",
           mode: "block",
-        },
-        [Crepe.Feature.TopBar]: {
-          headingOptions: [
-            { label: "Paragraph", level: null },
-            { label: "Heading 1", level: 1 },
-            { label: "Heading 2", level: 2 },
-            { label: "Heading 3", level: 3 },
-            { label: "Heading 4", level: 4 },
-            { label: "Heading 5", level: 5 },
-          ],
         },
         [Crepe.Feature.BlockEdit]: {
           textGroup: { h6: null },

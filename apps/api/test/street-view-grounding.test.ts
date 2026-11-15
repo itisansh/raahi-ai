@@ -99,7 +99,7 @@ describe("StreetViewGroundingService", () => {
 
     expect(result).toMatchObject({
       outcome: "found",
-      request: { kind: "place", query: "东京塔", language: "zh" },
+      request: { kind: "place", query: "东京塔", language: "en" },
       selectedImageId: "image-1",
       imageIds: ["image-1", "image-2"],
     });
@@ -107,7 +107,7 @@ describe("StreetViewGroundingService", () => {
     expect(placeSearch).toHaveBeenCalledWith({
       query: "东京塔",
       limit: 5,
-      lang: "zh",
+      lang: "en",
     });
     expect(searchNearby).toHaveBeenCalledTimes(1);
     expect(searchNearby).toHaveBeenCalledWith(
@@ -376,7 +376,7 @@ describe("StreetViewGroundingService", () => {
     expect(placeSearch).toHaveBeenCalledWith({
       query: "中山公园",
       limit: 5,
-      lang: "zh",
+      lang: "en",
       near: { lat: 31.2304, lng: 121.4737 },
     });
     expect(searchNearby).toHaveBeenCalledWith(
@@ -490,7 +490,7 @@ describe("deterministic street-view UI parts", () => {
         request: {
           kind: "place",
           query: "东京塔",
-          language: "zh",
+          language: "en",
           selectionIndex: 0,
         },
         placeLabel: "东京塔",

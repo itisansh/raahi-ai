@@ -2,7 +2,6 @@ import { betterAuth } from "better-auth";
 import { APIError } from "better-auth/api";
 import {
   bearer,
-  captcha,
   emailOTP,
   oneTimeToken,
   twoFactor,
@@ -35,7 +34,7 @@ export interface CreateAuthOptions {
   /** When set, each new user receives a personal copy of the sample trip. */
   tripRepository?: TripRepository;
   loadSampleTripTemplate?: () => Promise<Trip>;
-  /** Globally consistent storage supplied by the Cloudflare Worker runtime. */
+  /** Atomic storage supplied by the runtime. */
   rateLimitStorage?: AuthRateLimitStorage;
   /** Synchronizes Better Auth profile changes into trip member projections. */
   profileProjection?: UserProfileProjectionService;
@@ -46,15 +45,8 @@ export interface CreateAuthOptions {
 /** OTP lifetime in seconds (Better Auth emailOTP default is 300). */
 const OTP_EXPIRES_IN_SECONDS = 300;
 
-/** Captcha-protected auth POSTs. Includes email OTP send so resend is gated. */
-const CAPTCHA_ENDPOINTS = [
-  "/sign-up/email",
-  "/sign-in/email",
-  "/request-password-reset",
-  "/email-otp/send-verification-otp",
-] as const;
 
-/** Build Better Auth over the shared pg pool. Email + password (OTP-verified
+/** Build Better Auth over the selected database adapter. Email + password (OTP-verified
  * sign-up) plus optional Google OAuth, change-email / password reset mail,
  * and TOTP two-factor authentication.
  *
@@ -76,7 +68,7 @@ const CAPTCHA_ENDPOINTS = [
  * when trip dependencies are wired (see {@link CreateAuthOptions}). */
 export function createAuth(
   config: AppConfig,
-  /** Driver pool: `pg.Pool` (postgres) or `mysql2` pool (mysql). */
+  /** Mongo adapter on Node; driver pools only in legacy SQL tooling. */
   database: unknown,
   options: CreateAuthOptions = {},
 ) {
@@ -275,15 +267,6 @@ export function createAuth(
                 // without one when they have no credential account yet.
                 allowPasswordless: true,
             }),
-            ...(config.captcha
-                ? [
-                      captcha({
-                          provider: config.captcha.provider,
-                          secretKey: config.captcha.secretKey,
-                          endpoints: [...CAPTCHA_ENDPOINTS],
-                      }),
-                  ]
-                : []),
         ],
     });
 }

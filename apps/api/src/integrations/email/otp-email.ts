@@ -28,9 +28,7 @@ export function buildOtpEmail(input: {
   const text = [
     copy.intro,
     "",
-    locale === "zh"
-      ? `验证码：${input.otp}`
-      : `Your verification code is ${input.otp}.`,
+    `Your verification code is ${input.otp}.`,
     expiryLine,
     "",
     copy.ignore,

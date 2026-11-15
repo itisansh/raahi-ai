@@ -58,36 +58,6 @@ const OTP_COPY: Record<EmailLocale, Record<OtpEmailType, OtpEmailCopy>> = {
       ignore: "If you did not request this, you can ignore this email.",
     },
   },
-  zh: {
-    "sign-in": {
-      subject: "你的 Raahi AI 登录验证码",
-      heading: "登录验证码",
-      intro: "请使用以下验证码完成 Raahi AI 登录。",
-      expiry: (m) => `验证码将在 ${m} 分钟后失效。`,
-      ignore: "如果这不是你本人的操作，可以忽略这封邮件。",
-    },
-    "email-verification": {
-      subject: "验证你的 Raahi AI 邮箱",
-      heading: "验证邮箱",
-      intro: "请输入以下验证码，以完成 Raahi AI 账号邮箱验证。",
-      expiry: (m) => `验证码将在 ${m} 分钟后失效。`,
-      ignore: "如果这不是你本人的操作，可以忽略这封邮件。",
-    },
-    "forget-password": {
-      subject: "重置你的 Raahi AI 密码",
-      heading: "重置密码",
-      intro: "请输入以下验证码，为账号设置新密码。",
-      expiry: (m) => `验证码将在 ${m} 分钟后失效。`,
-      ignore: "如果这不是你本人的操作，可以忽略这封邮件。",
-    },
-    "change-email": {
-      subject: "确认你的新 Raahi AI 邮箱",
-      heading: "确认新邮箱",
-      intro: "请输入以下验证码，以确认新的邮箱地址。",
-      expiry: (m) => `验证码将在 ${m} 分钟后失效。`,
-      ignore: "如果这不是你本人的操作，可以忽略这封邮件。",
-    },
-  },
 };
 
 const LINK_COPY: Record<EmailLocale, Record<LinkEmailType, LinkEmailCopy>> = {
@@ -111,26 +81,6 @@ const LINK_COPY: Record<EmailLocale, Record<LinkEmailType, LinkEmailCopy>> = {
       orOpenLink: "Or open this link:",
       ignore: "If you did not request this, you can ignore this email.",
       detail: (value) => `Requested new email: ${value}`,
-    },
-  },
-  zh: {
-    "reset-password": {
-      subject: "重置你的 Raahi AI 密码",
-      heading: "重置密码",
-      intro: "点击下方按钮，为你的 Raahi AI 账号设置新密码。",
-      button: "重置密码",
-      orOpenLink: "或打开此链接：",
-      ignore: "如果这不是你本人的操作，可以忽略这封邮件。",
-      detail: (value) => value,
-    },
-    "change-email-confirmation": {
-      subject: "确认修改 Raahi AI 邮箱",
-      heading: "确认修改邮箱",
-      intro: "请确认你要更改 Raahi AI 账号绑定的邮箱。",
-      button: "确认修改邮箱",
-      orOpenLink: "或打开此链接：",
-      ignore: "如果这不是你本人的操作，可以忽略这封邮件。",
-      detail: (value) => `请求的新邮箱：${value}`,
     },
   },
 };

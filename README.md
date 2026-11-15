@@ -2,7 +2,7 @@
 
 Collaborative travel planning for friends exploring India. Raahi AI is being
 built on [OpenTrip](https://github.com/stvlynn/OpenTrip), preserving its
-React/Vite frontend, Express Node API (Hono on Workers), Better Auth and MongoDB/Mongoose persistence on Node; legacy SQL remains for the Worker and data migration.
+React/Vite frontend, Express Node API, Better Auth and MongoDB/Mongoose persistence. SQL/Worker code is retained only for legacy tooling and reference.
 
 **Development status:** the local source audit and automated baseline are
 recorded in [BUILD_PROGRESS.md](BUILD_PROGRESS.md). Product branding is in
@@ -20,14 +20,12 @@ Expense entry includes reviewed voice/text drafts with explicit payer and partic
 
 The inherited application includes shared trips, invitations and roles, map and
 day views, reservations, expense entry and a trip-scoped AI assistant with
-approved write tools. AI requires a separately configured provider. Full
-realtime fan-out currently uses Cloudflare Durable Objects; Node serves the
-HTTP application.
+approved write tools. AI requires a separately configured provider. Node provides single-process realtime collaboration; hosted acceptance is still pending.
 
-The current sample trip and screenshots are legacy OpenTrip demonstrations.
-They are not live travel prices, bookings, or evidence of Raahi's future voice
-workflow. Existing expense arithmetic and currency handling require further
-work before they meet Raahi's integer-paise accounting requirements.
+Raahi supports planning across India. Rajasthan, Kerala, Goa, the Northeast
+and the Himalayas are examples, not a destination whitelist. The personal
+onboarding trip is one regional example. Landing previews are illustrative
+plans, not live prices or bookings. INR expenses use deterministic paise splits.
 
 ## Roadmap
 
@@ -42,6 +40,14 @@ See [RAAHI_PLAN.md](RAAHI_PLAN.md) for phase gates and
 points and remaining work. [API setup](docs/raahi/RAAHI_API_ACCOUNTS_AND_KEYS.md)
 lists server-side credential names. Do not put private keys in `VITE_*` values.
 
+## Migration status
+
+The application runs on Node/Express and MongoDB. Cloudflare Worker and Docker
+deployment/runtime files have been removed. Geoapify supplies places, medical
+search and road routing. See [Render setup](deploy/render/README.md) for the free
+single-service demo with external upload storage.
+The final controllers/routes/db folder reorganization remains a later step.
+
 ## Quick start
 
 Requirements: Node.js compatible with the pinned tooling (Node 24 is recommended),
@@ -54,7 +60,7 @@ cp .env.example .env
 
 Copy the example only when `.env` does not already exist. Edit the ignored
 `.env` locally: set `MONGO_URI` to your development database, generate strong
-`BETTER_AUTH_SECRET` and `REALTIME_GRANT_SECRET` values, and check `BASE_URL`
+`BETTER_AUTH_SECRET` value, and check `BASE_URL`
 and `TRUSTED_ORIGINS`. Keep credentials out of Git and screenshots.
 
 ```sh
@@ -103,10 +109,10 @@ multi-user persistence. The progress log records those checks separately.
 | Path | Purpose |
 | --- | --- |
 | `apps/web` | React/Vite SPA and PWA, Feature-Sliced Design |
-| `apps/api` | Express Node / Hono Worker transports, domain/services/adapter boundaries; MongoDB migration in progress |
+| `apps/api` | Express Node, MongoDB/Mongoose, domain/services/adapter boundaries |
 | `apps/docs` | Existing Next.js/Fumadocs documentation site |
 | `packages` | Shared agent UI catalog and observability contracts |
-| `deploy` | Existing Cloudflare and Docker configurations |
+| `deploy` | Native Node preparation and archived deployment configurations |
 | `docs/raahi` | Raahi specifications and local audit |
 
 Read [AGENTS.md](AGENTS.md) and the [documentation index](docs/README.md)

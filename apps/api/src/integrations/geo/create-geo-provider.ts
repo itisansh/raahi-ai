@@ -1,3 +1,4 @@
+import { GeoapifyGeoProvider } from "./geoapify/geoapify-geo-provider";
 import type { GeoProvider } from "../../domain/geo";
 import type { GeoConfig } from "../../config/env";
 import { GoogleGeoProvider } from "./google/google-geo-provider";
@@ -5,6 +6,7 @@ import { OsmGeoProvider } from "./osm/osm-geo-provider";
 
 /** Construct the configured GeoProvider implementation. */
 export function createGeoProvider(config: GeoConfig): GeoProvider {
+  if (config.provider === "geoapify") return new GeoapifyGeoProvider({ apiKey: config.geoapifyApiKey ?? "", timeoutMs: config.timeoutMs, cacheTtlMs: config.cacheTtlMs });
   if (config.provider === "google") {
     return new GoogleGeoProvider({
       apiKey: config.googleMapsApiKey ?? "",

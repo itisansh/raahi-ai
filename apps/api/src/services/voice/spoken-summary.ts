@@ -27,7 +27,7 @@ const warnings: Record<string, [string, string]> = {
   return_travel_unverified: ["Return travel has not been verified.", "वापसी की यात्रा की पुष्टि नहीं हुई है।"],
 };
 
-/** No model-generated narration or client-supplied text: summarize the saved evidence. */
+/** Read owner-scoped replies; older proposal snapshots retain their original summary contract. */
 export class SpokenSummaryService {
   constructor(
     private read: (id: string, ownerId: string) => Promise<StoredProposal | null>,
@@ -38,13 +38,18 @@ export class SpokenSummaryService {
     const stored = await this.read(id, ownerId);
     if (!stored || stored.ownerId !== ownerId) throw new NotFoundError("proposal_not_found", "Proposal not found");
     if (stored.expiresAt.getTime() <= Date.now()) throw new DomainError("proposal_expired", "Generate a fresh proposal");
+    const reply = z.object({
+      status: z.enum(["clarification", "preview"]),
+      reply: z.object({ text: z.string().min(1).max(2500), language: z.enum(["en", "hi"]) }),
+    }).safeParse(stored.payload);
+    if (reply.success) return reply.data.reply;
     const p = snapshot.parse(stored.payload);
     const cities = [...new Set(p.days.map(day => day.city))];
     const route = cities.slice(0, 3).join(", ");
     const budget = (p.budget.groupBudgetPaise / 100).toLocaleString(language === "hi" ? "hi-IN" : "en-IN", { maximumFractionDigits: 2 });
     const text = language === "hi"
-      ? `यह प्रस्तावित यात्रा है। ${p.intent.origin} से ${p.intent.partySize} यात्रियों के लिए ${p.intent.dayCount} दिन। मुख्य स्थान: ${route}। समूह का बजट ${budget} रुपये है। खर्च अनुमानित हैं। किराए, समय सारिणी और बुकिंग की पुष्टि नहीं है।`
-      : `This is a proposed trip from ${p.intent.origin} for ${p.intent.partySize} travellers over ${p.intent.dayCount} days. Main destinations: ${route}. Your group budget is ${budget} rupees. Costs are estimates. Fares, timetables and bookings are unconfirmed.`;
+      ? `यह प्रस्तावित यात्रा है। ${p.intent.origin} से ${p.intent.partySize} यात्रियों के लिए ${p.intent.dayCount} दिन। मुख्य स्थान: ${route}। समूह का बजट ${budget} रुपये है। खर्च अनुमानित हैं। किराए, समय सारिणी और बुकिंग की पुष्टि नहीं है। मौसमी सलाह सामान्य जानकारी है; निकलने से पहले आधिकारिक स्थितियाँ जाँचें।`
+      : `This is a proposed trip from ${p.intent.origin} for ${p.intent.partySize} travellers over ${p.intent.dayCount} days. Main destinations: ${route}. Your group budget is ${budget} rupees. Costs are estimates. Fares, timetables and bookings are unconfirmed. Seasonal suitability is general guidance; check official conditions before departure.`;
     const caveats = p.issues.map(issue => warnings[issue]?.[language === "hi" ? 1 : 0] ?? (language === "hi" ? "यात्रा विवरण की समीक्षा आवश्यक है।" : "Additional itinerary details need review."));
     return { text: [text, ...caveats].join(" "), language };
   }
@@ -57,6 +62,6 @@ export class SpokenSummaryService {
       if (error instanceof SpeechError) throw error;
       throw new SpeechError("speech_unavailable");
     }
-    return this.provider.synthesize(summary.text, language, signal);
+    return this.provider.synthesize(summary.text, summary.language, signal);
   }
 }

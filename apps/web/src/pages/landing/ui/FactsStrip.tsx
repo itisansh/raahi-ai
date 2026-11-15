@@ -9,8 +9,7 @@ function Sep() {
   );
 }
 
-/** Slim factual band drawn from the seeded Japan · Autumn trip — texture
- * without fabricated metrics. */
+/** Travel themes across India. */
 export function FactsStrip() {
   const { t } = useTranslation("landing");
   return (

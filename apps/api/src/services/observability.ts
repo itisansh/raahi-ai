@@ -1,4 +1,4 @@
-export type RuntimeName = "cloudflare" | "node";
+export type RuntimeName = "node";
 
 export interface ObservabilityFields {
   [key: string]: unknown;

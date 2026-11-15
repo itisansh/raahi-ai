@@ -8,34 +8,23 @@ title: "Architecture"
 
 ```mermaid
 flowchart TD
-  browser[Browser] --> web[apps/web React SPA]
-  wechat[WeChat] --> miniapp[apps/miniapp Taro client]
-  web -->|"/api/*"| api[apps/api Express / Worker Hono]
-  web -->|"/api/auth/*"| api
-  miniapp -->|"wx.login + Bearer"| api
-  api --> app[Application use cases]
-  app --> domain[Domain aggregates]
-  app --> ports[Repository ports]
-  ports --> pg[PostgreSQL adapters]
-  api --> auth[Better Auth]
-  auth --> pg
-  subgraph cf [Cloudflare runtime]
-    pages[Pages] --> web
-    worker[Workers] --> api
-    worker --> hyperdrive[Hyperdrive] --> extpg[External PostgreSQL]
-  end
-  subgraph dk [Docker runtime]
-    webc[web container] --> web
-    apic[api container] --> api
-    apic --> pgc[postgres container]
-  end
+  browser[Browser / PWA] --> web[apps/web React SPA]
+  web -->|HTTP and WebSocket| api[apps/api Express Node]
+  api --> services[Services]
+  services --> domain[Domain aggregates]
+  services --> ports[Repository ports]
+  ports --> mongoose[Mongoose repositories]
+  mongoose --> mongo[MongoDB replica set]
+  api --> auth[Better Auth Mongo adapter]
+  auth --> mongo
+  api --> storage[Filesystem or S3 storage]
 ```
 
 ## Layers
 
 - **apps/web** — React SPA (FSD). Renders Trips and the Planner, talks to the
   API over `fetch`, and delegates auth to the Better Auth client.
-- **apps/api** — Express Node app with a retained Hono Worker transport (DDD + Hexagonal). `interfaces/http` routes call
+- **apps/api** — Express Node app with isolated legacy Worker reference code (DDD + Hexagonal). `interfaces/http` routes call
   `services` use cases, which operate on `domain` aggregates through
   repository ports implemented in `repositories` and `integrations`.
 - **packages/agent-ui-catalog** — framework-neutral json-render catalog,
@@ -55,36 +44,33 @@ flowchart TD
 ## Auth flow
 
 - The SPA uses the Better Auth React client against `/api/auth/*`.
-- The mini program calls the same auth surface, captures the bearer plugin's
-  `set-auth-token` response header, and sends `Authorization: Bearer`.
 - The API mounts `auth.handler` on `/api/auth/*`. Sessions are cookie-based;
   the bearer plugin converts mobile credentials to the same session model;
   business routes read the session through shared middleware.
 
 ## Data flow
 
-- All persistence is PostgreSQL. Better Auth and the domain repositories share
-  one connection pool.
-- Seed data mirrors the prototype (members, days, 22 stops, 8 expenses).
-- After committed trip mutations, the Workers runtime publishes change events
-  through a Durable Object so connected planner sessions refresh. See
-  [../backend/realtime.md](../backend/realtime.md).
+- Node uses MongoDB/Mongoose and a transaction-capable replica set. Better Auth
+  owns its collections through the pinned Mongo adapter.
+- New users receive a private Indian sample trip. Mongo schema/index versions
+  live in `apps/api/src/config/migrations/`.
+- Committed mutations publish through the single-process Node WebSocket server.
+  Reconnect forces authoritative refetch; presence and rate limits reset on
+  restart. Multiple instances require shared coordination first.
 
-## Runtime differences (Cloudflare vs Docker)
+## Deployment and legacy tooling
 
-| Concern | Cloudflare | Docker |
-| --- | --- | --- |
-| Frontend | Pages (`apps/web/dist`) | static container |
-| API | Workers (`fetch` entry) | Node (Express 5) |
-| DB connection | Hyperdrive binding `connectionString` | `DATABASE_URL` |
-| Realtime | Trip Durable Object WebSocket | HTTP-only; use Workers for full realtime |
-| Secrets | `wrangler secret` / vars | env file |
-| Avatar storage | S3-compatible API configured by env (R2) | persistent filesystem volume or S3-compatible API |
+Native Node deployment on Render is prepared but deferred. The frontend can be
+served by Express on the same origin. Uploads need persistent filesystem storage
+or S3. See [the Render guide](../../deploy/render/README.md).
 
-Both runtimes import the same `services`/`domain`/`repositories` and `integrations` code; only
-the entry point and the connection-string source differ. See
-[../operations/cloudflare.md](../operations/cloudflare.md) and
-[../operations/docker.md](../operations/docker.md).
+Historical Worker entry, Hono transport and SQL composition are isolated under
+`apps/api/src/legacy/`. SQL repositories, Prisma snapshots and migration tools
+remain available for historical compatibility. They are not imported by the
+Node runtime. The Cloudflare deployment workflow is disabled.
+
+See [M6 cleanup](../raahi/M6_MIGRATION_CLEANUP.md) for validation and recovery.
+The requested final controllers/routes/db folder layout is a later step.
 
 ## Internationalization
 

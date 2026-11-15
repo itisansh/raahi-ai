@@ -1,36 +1,21 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 
-COMPOSE_FILE ?= deploy/docker/compose.yaml
-POSTGRES_PORT ?= 5430
-POSTGRES_USER ?= opentrip
-POSTGRES_DB ?= opentrip
-
-.PHONY: help install env setup postgres-up postgres-down dev dev-nodb dev-web dev-api dev-docs
+.PHONY: help install env setup dev dev-nodb dev-web dev-api dev-docs
 .PHONY: db-init db-reset db-migrate db-seed db-generate db-pull db-push db-studio db-snapshot
-.PHONY: deploy-up deploy-down deploy-logs
 .PHONY: build test lint typecheck check docs clean deploy
 
 help:
-	@echo "OpenTrip Makefile targets:"
+	@echo "Raahi AI Makefile targets:"
 	@echo ""
 	@echo "Setup:"
 	@echo "  make install         Install dependencies with pnpm"
 	@echo "  make env             Create .env from .env.example if missing"
-	@echo "  make setup           Full setup: install + env + postgres + migrate + seed"
-	@echo ""
-	@echo "Docker (local Postgres):"
-	@echo "  make postgres-up     Start Postgres via docker compose (postgres service only)"
-	@echo "  make postgres-down   Stop Postgres container"
-	@echo ""
-	@echo "Docker (full stack):"
-	@echo "  make deploy-up       Build and start postgres + api + web"
-	@echo "  make deploy-down     Stop full docker compose stack"
-	@echo "  make deploy-logs     Follow api container logs"
+	@echo "  make setup           Setup: install + env (configure MONGO_URI)"
 	@echo ""
 	@echo "Development:"
-	@echo "  make dev             Start Postgres + migrate + web + api dev servers"
-	@echo "  make dev-nodb        Start web + api only (skip Postgres startup)"
+	@echo "  make dev             Start Mongo-backed web + API dev servers"
+	@echo "  make dev-nodb        Alias: start web + API"
 	@echo "  make dev-web         Start Vite only (http://localhost:5170)"
 	@echo "  make dev-api         Start API only (http://localhost:8780)"
 	@echo "  make dev-docs        Start Fumadocs only (http://localhost:5171)"
@@ -47,47 +32,23 @@ env: install
 		echo ".env already exists"; \
 	fi
 
-setup: install env postgres-up db-init
+setup: install env
 	@echo "Setup complete! Run 'make dev' to start development."
 
-postgres-up:
-	@if node -e 'const net=require("net");const port=parseInt(process.env.POSTGRES_PORT||"$(POSTGRES_PORT)",10);const s=net.connect({port,host:"127.0.0.1"});s.setTimeout(500);s.on("connect",()=>{s.end();process.exit(0)});s.on("timeout",()=>{s.destroy();process.exit(1)});s.on("error",()=>{process.exit(1)});' >/dev/null 2>&1; then \
-		echo "Postgres already reachable on port $(POSTGRES_PORT); skipping container startup."; \
-	else \
-		echo "Starting Postgres (docker compose)..."; \
-		docker compose -f $(COMPOSE_FILE) up -d postgres; \
-		echo "Waiting for Postgres to become ready..."; \
-		for i in $$(seq 1 30); do \
-			if docker compose -f $(COMPOSE_FILE) exec -T postgres pg_isready -U $(POSTGRES_USER) -d $(POSTGRES_DB) >/dev/null 2>&1; then \
-				echo "Postgres is ready."; \
-				break; \
-			fi; \
-			if [ $$i -eq 30 ]; then \
-				echo "Postgres did not become ready in time."; \
-				exit 1; \
-			fi; \
-			sleep 1; \
-		done; \
-	fi
-
-postgres-down:
-	@docker compose -f $(COMPOSE_FILE) stop postgres 2>/dev/null || true
-	@echo "Postgres stopped."
-
-dev: env postgres-up db-migrate
+dev: env
 	@echo "Starting web + api dev servers (Ctrl+C to stop)..."
 	@echo "  web  → http://localhost:5170  (proxies /api to :8780)"
 	@echo "  api  → http://localhost:8780"
 	pnpm dev
 
 dev-nodb: env
-	@echo "Starting web + api dev servers without Postgres startup (Ctrl+C to stop)..."
+	@echo "Starting web + api dev servers with MongoDB (Ctrl+C to stop)..."
 	pnpm dev
 
 dev-web: env
 	pnpm --filter @opentrip/web dev
 
-dev-api: env postgres-up db-migrate
+dev-api: env
 	pnpm --filter @opentrip/api dev
 
 dev-docs:
@@ -123,20 +84,6 @@ db-reset:
 db-studio:
 	pnpm db:studio
 
-deploy-up:
-	@if [ ! -f deploy/docker/.env ]; then \
-		cp deploy/docker/.env.example deploy/docker/.env; \
-		echo "Created deploy/docker/.env — set BETTER_AUTH_SECRET before production use."; \
-	fi
-	docker compose -f $(COMPOSE_FILE) --env-file deploy/docker/.env up -d --build
-
-deploy-down:
-	docker compose -f $(COMPOSE_FILE) --env-file deploy/docker/.env down 2>/dev/null \
-		|| docker compose -f $(COMPOSE_FILE) down
-
-deploy-logs:
-	docker compose -f $(COMPOSE_FILE) logs -f api
-
 build:
 	pnpm build
 
@@ -164,11 +111,4 @@ clean:
 	@echo "Cleaned build artifacts."
 
 deploy:
-	@echo "Cloudflare (git push to main auto-deploys):"
-	@echo "  Web  https://opentrip.im"
-	@echo "  API  https://api.opentrip.im"
-	@echo "  Docs https://docs.opentrip.im"
-	@echo "  Docs deploy/cloudflare/README.md"
-	@echo "  Manual: CLOUDFLARE_API_TOKEN=… node deploy/cloudflare/scripts/deploy-web.mjs"
-	@echo "          CLOUDFLARE_API_TOKEN=… node deploy/cloudflare/scripts/deploy-docs.mjs"
-	@echo "Docker:     see deploy/docker/README.md"
+	@echo "Render deployment setup: deploy/render/README.md"

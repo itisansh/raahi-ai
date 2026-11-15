@@ -19,7 +19,7 @@ const PLACE_SEARCH_LIMIT = 5;
 /**
  * Max distance from the trip destination center for a same-named local
  * candidate to replace Nominatim's global top result. Keeps explicit
- * far-away lookups (e.g. the Eiffel Tower on a Tokyo trip) intact.
+ * far-away lookups (e.g. the Taj Mahal on a Kochi trip) intact.
  */
 const DESTINATION_OVERRIDE_RADIUS_METERS = 50_000;
 const MAX_REQUEST_TEXT_LENGTH = 240;
@@ -53,8 +53,8 @@ function textFromParts(parts: AgentMessage["parts"]): string {
     .trim();
 }
 
-function languageOf(text: string): AgentLanguage {
-  return /\p{Script=Han}/u.test(text) ? "zh" : "en";
+function languageOf(): AgentLanguage {
+  return "en";
 }
 
 function normalizedPlaceQuery(text: string): string {
@@ -149,7 +149,7 @@ export function parseStreetViewRequest(
   const text = textFromParts(history[latestUserIndex]!.parts)
     .normalize("NFKC")
     .trim();
-  const language = languageOf(text);
+  const language = languageOf();
   if (CHINESE_ORDINAL_PATTERN.test(text) || ENGLISH_ORDINAL_PATTERN.test(text)) {
     const previous = previousGroundingRequest(history, latestUserIndex);
     if (!previous) return { kind: "not_street_view" };
@@ -208,27 +208,10 @@ function coordinateLabel(lat: number, lng: number): string {
 
 function groundingText(
   outcome: AgentStreetViewGrounding["outcome"],
-  language: AgentLanguage,
+  _language: AgentLanguage,
   placeLabel?: string,
   selectionIndex = 0,
 ): string {
-  if (language === "zh") {
-    if (outcome === "found") {
-      return `${placeLabel ?? "该位置"}附近找到了街景，已显示第${selectionIndex + 1}个结果。`;
-    }
-    if (outcome === "empty") {
-      return selectionIndex > 0
-        ? `${placeLabel ?? "该位置"}附近没有可用的第${selectionIndex + 1}个街景结果。`
-        : `${placeLabel ?? "该位置"}附近暂未找到街景。`;
-    }
-    if (outcome === "place_not_found") {
-      return "没有找到这个地点，请换一个更明确的地点。";
-    }
-    if (outcome === "invalid_request") {
-      return "请提供明确的地点名称或有效坐标。";
-    }
-    return "街景服务暂时不可用，请稍后重试。";
-  }
   if (outcome === "found") {
     return `Street view was found near ${placeLabel ?? "this location"}; showing result ${selectionIndex + 1}.`;
   }
@@ -311,7 +294,7 @@ export class StreetViewGroundingService {
     observability?: {
       requestId?: string;
       turnId?: string;
-      runtime?: "cloudflare" | "node";
+      runtime?: "node";
     };
   }): Promise<AgentStreetViewGrounding | null> {
     const parsed = parseStreetViewRequest(input.history);

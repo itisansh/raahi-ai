@@ -13,6 +13,8 @@ claims about the current product.
 - [M3 Mongo persistence](M3_MONGODB_PERSISTENCE.md) — Node wiring, collection mapping, transactions and verification scope.
 - [M4 migration and fresh start](M4_DATA_MIGRATION.md) — optional offline tooling and the user decision to start with an empty Mongo database.
 - [M5 Node platform parity](M5_NODE_PLATFORM.md) — current implementation and remaining realtime/staging work.
+- [India-wide product cleanup](INDIA_WIDE_PRODUCT_CLEANUP.md) — varied regional previews, retired media and nationwide guidance.
+- [Voice-first guided planning](VOICE_FIRST_PLANNING_FLOW.md) — prompts, follow-up answers, mobile behavior and speech acceptance limits.
 - [Build progress](../../BUILD_PROGRESS.md) — actual checks, results and blockers.
 - [Local implementation gaps](IMPLEMENTATION_GAPS.md) — inspected source map and remaining work.
 - [Agent rules](RAAHI_AGENT_RULES.md) — architecture, privacy and verification constraints.

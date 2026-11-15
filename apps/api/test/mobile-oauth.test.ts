@@ -21,7 +21,6 @@ function baseConfig(googleOAuth: AppConfig["googleOAuth"]): AppConfig {
       publicUrl: "https://api.example.test/api/uploads",
     },
     googleOAuth,
-    captcha: null,
     email: {
       provider: "console",
       from: "OpenTrip <noreply@localhost>",

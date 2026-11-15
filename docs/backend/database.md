@@ -227,7 +227,7 @@ docker compose -f deploy/docker/compose.yaml --profile mysql up -d mysql
   chrome such as the travel-planner resizable sidebar and agent panel collapsed
   state. Preference **updates** return the written snapshot and must not
   re-`SELECT` after UPSERT (Hyperdrive may serve a stale cached row — see
-  [../operations/cloudflare.md](../operations/cloudflare.md#hyperdrive-read-after-write)).
+  [../operations/cloudflare.md](../../deploy/render/README.md)).
 
 Amounts are stored as integers in their selected currency. The current budget
 algorithm does not convert FX; mixed-currency expenses are persisted/displayed
@@ -241,3 +241,14 @@ regenerate for Postgres with the Better Auth CLI, pull into `schema.prisma`,
 create a Prisma migration, **and** update `prisma/mysql/schema.sql`. The `user`
 table also carries a `defaultCurrency` column (a Better Auth `additionalField`)
 surfaced on every session. See [auth.md](auth.md).
+
+### Optional trip finance (Mongo migration 002)
+
+Trips can contain `finance.repayments` (immutable transfer details plus optional
+void audit fields) and `finance.caps` (member ID to integer minor-unit limit).
+No existing trip requires a backfill. Mongoose validates integer amounts and
+strict embedded records; service/domain rules enforce membership, permissions,
+exact balances and request identity under the trip transaction. These records
+are separate from expenses, so recorded or voided repayments never alter group
+spending. Proposal rollback snapshots live in the existing mixed proposal payload;
+rollback restores stops/forecast only and requires the applied revision.

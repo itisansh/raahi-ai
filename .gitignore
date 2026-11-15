@@ -5,6 +5,19 @@ build/
 .wrangler/
 .turbo/
 coverage/
+.vite/
+.cache/
+*.tsbuildinfo
+.eslintcache
+
+# Browser test output and local acceptance entry points
+test-results/
+playwright-report/
+blob-report/
+/apps/web/.live-review.html
+/apps/web/.live-review.tsx
+/apps/web/.phase-review.html
+/apps/web/.phase-review.tsx
 
 # WeChat DevTools per-user config (never committed)
 apps/miniapp/project.private.config.json
@@ -14,6 +27,8 @@ apps/miniapp/project.private.config.json
 .env.*
 !.env.example
 .dev.vars
+.dev.vars.*
+!.dev.vars.example
 deploy/**/secrets.json
 deploy/**/.secrets*.json
 deploy/**/.env.production
@@ -28,6 +43,9 @@ pnpm-debug.log*
 
 # os
 .DS_Store
+Thumbs.db
+*.swp
+*.swo
 
 # generated
 worker-configuration.d.ts
@@ -35,6 +53,7 @@ apps/api/src/integrations/cloudflare/worker-configuration.d.ts
 .workspace/
 .pnpm-store/
 apps/api/uploads
+/uploads/
 
 # agent runtime state
 .agents/scheduled_tasks.lock

@@ -1,3 +1,5 @@
+import { MongoHistoryStore } from "../repositories/mongo/history";
+import { MongoFinanceStore } from "../repositories/mongo/finance";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { connectMongo } from "./db";
 import { initializeMongo } from "./migrations/001-mongo-indexes";
@@ -19,7 +21,9 @@ export async function createMongoContainer(config: AppConfig & { mongoUri: strin
     return assembleContainer(config, storage, {
       trips: new MongoTripRepository(db), invites: new MongoTripInviteRepository(db),
       reservations: new MongoReservationRepository(db), preferences: new MongoUserPreferenceRepository(db),
-      agent: new MongoAgentSessionRepository(db), proposals: new MongoProposalStore(db),
+      agent: new MongoAgentSessionRepository(db), proposals: new MongoProposalStore(db, options?.tripChangePublisher),
+      history: new MongoHistoryStore(db, options?.tripChangePublisher),
+      finance: new MongoFinanceStore(db, options?.tripChangePublisher),
       budget: new MongoBudgetStore(db, options?.tripChangePublisher),
       authDatabase: mongodbAdapter(db.connection.db!, { client: db.connection.getClient() }),
       stringAuthIds: true, dispose: db.close,

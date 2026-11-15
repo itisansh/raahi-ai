@@ -6,7 +6,7 @@ const { background, card, foreground, muted, border, brand, fontSans, maxWidth }
   EMAIL_BRAND;
 
 export interface EmailLayoutContent {
-  /** BCP-47-ish lang for the document (`en` | `zh`). */
+  /** Language tag for the English email document. */
   locale?: EmailLocale;
   /** Preheader shown in inbox preview; keep short. */
   preview: string;

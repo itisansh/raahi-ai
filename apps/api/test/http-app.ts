@@ -1,7 +1,7 @@
 import { afterEach } from "vitest";
 import type { Server } from "node:http";
 import { createExpressApp } from "../src/interfaces/http/express-app";
-import { createApp as createWorkerApp, type CreateAppOptions } from "../src/interfaces/http/app";
+import type { CreateAppOptions } from "../src/interfaces/http/app";
 import type { Container } from "../src/config/container";
 
 const servers = new Set<Server>();
@@ -14,9 +14,8 @@ afterEach(async () => {
   servers.clear();
 });
 
-/** Run the identical HTTP assertions against either transport. */
+/** Run HTTP assertions against the Express transport. */
 export function createApp(container: Container, options?: CreateAppOptions) {
-  if (process.env.HTTP_TEST_TRANSPORT === "worker") return createWorkerApp(container, options);
   const app = createExpressApp(container, options);
   let server: Server | undefined;
   let ready: Promise<void> | undefined;

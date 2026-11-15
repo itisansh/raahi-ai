@@ -1,3 +1,4 @@
+import type { ExistingPlan } from "./existing-plan";
 import { z } from "zod";
 
 const text = z.string().trim().min(1).max(200);
@@ -8,7 +9,7 @@ const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => {
 });
 
 export const planningRequestSchema = z.object({
-  prompt: z.string().trim().min(10).max(4000),
+  prompt: z.string().trim().min(1).max(4000),
   tripId: z.string().trim().min(1).max(120).optional(),
 }).strict();
 
@@ -23,12 +24,18 @@ export const tripIntentSchema = z.object({
   destinationHints: z.array(text).max(8),
   startDate: date.nullable(),
   language: z.enum(["en", "hi", "hinglish"]),
+  travelPreferences: z.string().trim().min(1).max(1000).optional(),
 }).strict();
 export type TripIntent = z.infer<typeof tripIntentSchema>;
 
 const estimate = z.object({ minRupees: money, maxRupees: money }).strict().nullable();
 export const candidateSchema = z.object({
   title: text,
+  guidance: z.object({
+    response: z.string().trim().min(1).max(1200),
+    timing: z.string().trim().min(1).max(1200),
+    questions: z.array(text).max(5),
+  }).strict().optional(),
   days: z.array(z.object({
     day: z.number().int().min(1).max(14),
     city: text,
@@ -36,7 +43,7 @@ export const candidateSchema = z.object({
       name: text,
       startMinute: z.number().int().min(0).max(1439),
       durationMinutes: z.number().int().min(15).max(720),
-    }).strict()).min(1).max(3),
+    }).strict()).max(3),
   }).strict()).min(1).max(14),
   /** Whole-trip, per-person estimates; never quoted fares or availability. */
   costs: z.object({
@@ -65,6 +72,8 @@ export interface PlanningContext {
   title: string;
   intake: unknown;
   days: unknown;
+  existingPlan?: ExistingPlan;
+  canEdit?: boolean;
 }
 
 export interface PlanningModel {

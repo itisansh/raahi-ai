@@ -465,7 +465,7 @@ export class Trip {
   }
 
   budget(): Budget {
-    return computeBudget(this.snapshot.members, this.snapshot.expenses, this.snapshot.currency);
+    return computeBudget(this.snapshot.members, this.snapshot.expenses, this.snapshot.currency, this.snapshot.finance?.repayments);
   }
 
   private requireStop(stopId: string): StopSnapshot {

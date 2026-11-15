@@ -1,3 +1,7 @@
+import { HistoryService, type HistoryStore } from "../services/history/history-service";
+import { FinanceService, type FinanceStore } from "../services/finance/finance-service";
+import type { AuthRateLimitStorage } from "../integrations/auth/auth-rate-limit";
+import type { Pool } from "../repositories/pool";
 import {
   TripService,
   TripInviteService,
@@ -15,17 +19,10 @@ import {
 } from "../services";
 import { AvatarService } from "../services/avatar";
 import type { FileStorage } from "../services/storage";
-import { createDatabaseHandles, type Pool } from "../repositories/pool";
-import { SqlTripRepository } from "../repositories/trip-repository.db";
-import { SqlTripInviteRepository } from "../repositories/invite-repository.db";
-import { SqlUserPreferenceRepository } from "../repositories/user-preference-repository.db";
-import { SqlAgentSessionRepository } from "../repositories/agent-repository.db";
-import { SqlReservationRepository } from "../repositories/reservation-repository.db";
 import {
   createAuth,
   type Auth,
-  type AuthRateLimitStorage,
-} from "../integrations/auth";
+} from "../integrations/auth/auth";
 import { createSampleTripTemplateLoader } from "../repositories/sample-trip-template";
 import { CachedWeatherClient } from "../integrations/weather/cached-weather-client";
 import { OpenWeatherMapClient } from "../integrations/weather/openweather-client";
@@ -46,7 +43,6 @@ import { MedicalService } from "../services/medical/medical-service";
 import { IndiaTravelService } from "../services/travel/india-travel-service";
 import { OpenMeteoTravelProvider } from "../integrations/travel/open-meteo-provider";
 import { BudgetService } from "../services/budget/budget-service";
-import { SqlBudgetStore } from "../repositories/budget-store.db";
 import { AiSdkBudgetModel } from "../integrations/ai/budget-model.ai-sdk";
 import { VoiceExpenseService } from "../services/expenses/voice-expense";
 import { AiSdkExpenseModel } from "../integrations/ai/expense-model.ai-sdk";
@@ -56,7 +52,6 @@ import { ElevenLabsTokenProvider } from "../integrations/voice/elevenlabs-token-
 import { createVoiceTokenLimiter } from "../integrations/voice/voice-token-limiter";
 import { PlanningService } from "../services/planning/planning-service";
 import { AiSdkPlanningModel } from "../integrations/ai/planning-model.ai-sdk";
-import { SqlProposalStore } from "../repositories/proposal-store.db";
 import { ProposalApprovalService } from "../services/planning/approval-service";
 
 import type { TripRepository } from "../domain/trip";
@@ -76,6 +71,8 @@ export interface Persistence {
   agent: AgentSessionRepository;
   proposals?: ProposalStore & { read(id: string, ownerId: string): Promise<StoredProposal | null> };
   budget?: BudgetStore;
+  finance?: FinanceStore;
+  history?: HistoryStore;
   authDatabase: unknown;
   stringAuthIds?: boolean;
   pool?: Pool;
@@ -103,15 +100,17 @@ export interface CreateContainerOptions {
    * `config.databaseUrl`, a single shared pool is used (Node/direct DB).
    */
   freshDatabaseUrl?: string;
-  /** Cloudflare Durable Object publisher. Omitted outside the Worker runtime. */
+  /** Publisher supplied by the selected runtime. */
   tripChangePublisher?: TripChangePublisher;
-  /** Cloudflare-global Better Auth limiter. Omitted outside Workers. */
+  /** Atomic rate-limit storage supplied by the selected runtime. */
   authRateLimitStorage?: AuthRateLimitStorage;
   /** Trusted client-IP headers used to partition authentication limits. */
   authIpAddressHeaders?: string[];
 }
 
 export interface Container {
+  historyService?: HistoryService;
+  financeService?: FinanceService;
   medicalService?: MedicalService;
   indiaTravelService?: IndiaTravelService;
   budgetService?: BudgetService;
@@ -156,55 +155,6 @@ export interface Container {
   disposeAfterDeferred: () => Promise<void>;
   /** Close SQL + auth driver pools immediately (Node shutdown / tests). */
   dispose: () => Promise<void>;
-}
-
-/** Wire the runtime-neutral object graph around a selected storage adapter. */
-export function createContainer(
-  config: AppConfig,
-  fileStorage: FileStorage,
-  options?: CreateContainerOptions,
-): Container {
-  const poolMax = options?.poolMax ?? 5;
-  const poolMaxFresh = options?.poolMaxFresh ?? 2;
-  const freshUrl = options?.freshDatabaseUrl?.trim();
-  const sharePool =
-    !freshUrl || freshUrl === config.databaseUrl.trim();
-
-  const cached = createDatabaseHandles(config, { max: poolMax });
-  const poolCached = cached.pool;
-
-  let poolFresh: Pool;
-  let authDriver: unknown;
-  let endAuthSide: () => Promise<void>;
-  let endCachedSide: () => Promise<void>;
-
-  if (sharePool) {
-    poolFresh = poolCached;
-    authDriver = cached.authDatabase.driver;
-    endAuthSide = cached.authDatabase.end;
-    endCachedSide = async () => {};
-  } else {
-    const freshConfig: AppConfig = { ...config, databaseUrl: freshUrl };
-    const fresh = createDatabaseHandles(freshConfig, { max: poolMaxFresh });
-    poolFresh = fresh.pool;
-    authDriver = fresh.authDatabase.driver;
-    endAuthSide = fresh.authDatabase.end;
-    endCachedSide = cached.authDatabase.end;
-  }
-
-  const dispose = async () => {
-    await Promise.allSettled([poolCached.end(), endAuthSide(), ...(sharePool ? [] : [poolFresh.end(), endCachedSide()])]);
-  };
-  return assembleContainer(config, fileStorage, {
-    trips: new SqlTripRepository(poolFresh),
-    invites: new SqlTripInviteRepository(poolFresh),
-    reservations: new SqlReservationRepository(poolFresh),
-    preferences: new SqlUserPreferenceRepository(poolFresh),
-    agent: new SqlAgentSessionRepository(poolFresh),
-    proposals: config.databaseProvider === "postgres" ? new SqlProposalStore(poolFresh) : undefined,
-    budget: config.databaseProvider === "postgres" ? new SqlBudgetStore(poolFresh, options?.tripChangePublisher) : undefined,
-    authDatabase: authDriver, pool: poolCached, poolFresh, dispose,
-  }, options);
 }
 
 /** Shared service composition; database adapters are selected by the entry point. */
@@ -304,6 +254,8 @@ export function assembleContainer(config: AppConfig, fileStorage: FileStorage, p
       await tripService.assertReadable(id, actor);
       return (await tripRepository.findById(id))!.toSnapshot();
     }, geoService, config.geo.provider, config.travelWeatherProvider ? new OpenMeteoTravelProvider() : null, createVoiceTokenLimiter(options?.authRateLimitStorage, Date.now, "india-travel")),
+    historyService: persistence.history ? new HistoryService(persistence.history) : undefined,
+    financeService: persistence.finance ? new FinanceService(persistence.finance) : undefined,
     budgetService: persistence.budget ? new BudgetService(persistence.budget, config.ai ? new AiSdkBudgetModel(config.ai) : null, createVoiceTokenLimiter(options?.authRateLimitStorage, Date.now, "budget-replan")) : undefined,
     proposalApprovalService: proposalStore ? new ProposalApprovalService(proposalStore) : null,
     voiceExpenseService: new VoiceExpenseService(config.ai ? new AiSdkExpenseModel(config.ai) : null, (id, userId) => tripService.assertEditable(id, userId), createVoiceTokenLimiter(options?.authRateLimitStorage, Date.now, "expense-voice")),

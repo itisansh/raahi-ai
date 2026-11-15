@@ -23,7 +23,9 @@ export function createMongoModels(connection: Connection) {
     const schema = new Schema<T>({ ...definition, _id: { type: String, default: () => crypto.randomUUID() } } as SchemaDefinition<T>, { collection: name, strict: "throw", versionKey: false, autoIndex: false, autoCreate: false });
     return connection.model<T>(name, schema);
   }
-  const trips = model<TripRecord>("trips", { id: key, title: key, status: { type: String, enum: ["active", "planning", "settled"], required: true }, currency: key, version: nonnegative, startDate: text, endDate: text, ownerId: text, coverUrl: nullable, intake: { type: Schema.Types.Mixed, default: null }, agentSeedPending: Boolean, createdAt: { type: Date, default: Date.now }, coverColor: text });
+  const repaymentSchema = new Schema({ id: key, requestId: key, from: key, to: key, amountMinor: { ...integer, min: 1 }, currency: key, createdBy: key, createdAt: key, voidedAt: String, voidedBy: String }, { _id: false, strict: "throw" });
+  const financeSchema = new Schema({ repayments: { type: [repaymentSchema], default: [] }, caps: { type: Map, of: nonnegative, default: {} } }, { _id: false, strict: "throw" });
+  const trips = model<TripRecord>("trips", { finance: { type: financeSchema, default: undefined }, id: key, title: key, status: { type: String, enum: ["active", "planning", "settled"], required: true }, currency: key, version: nonnegative, startDate: text, endDate: text, ownerId: text, coverUrl: nullable, intake: { type: Schema.Types.Mixed, default: null }, agentSeedPending: Boolean, createdAt: { type: Date, default: Date.now }, coverColor: text });
   trips.schema.index({ id: 1 }, { unique: true });
   trips.schema.index({ createdAt: -1 });
   const members = model<MemberRecord>("trip_members", { id: key, tripId: key, name: key, shortName: text, initials: text, avatarBg: text, avatarFg: text, image: nullable, userId: nullable, role: { type: String, enum: ["owner", "editor", "viewer"], required: true }, canInvite: Boolean, isCurrentUser: Boolean, order: nonnegative });

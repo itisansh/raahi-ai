@@ -52,7 +52,7 @@ list via `toTripSummary`) and navigate to the planner. Do **not** rely on an
 immediate `GET /api/trips` after create — Hyperdrive may serve a stale cached
 SELECT for up to ~60s (same pattern as agent message echo; see
 [data-caching.md](../../frontend/data-caching.md) and
-[cloudflare.md](../../operations/cloudflare.md#hyperdrive-read-after-write)).
+[cloudflare.md](../../../deploy/render/README.md)).
 
 ### `GET /api/trips/:id`
 

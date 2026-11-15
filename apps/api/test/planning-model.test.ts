@@ -28,6 +28,8 @@ describe("planning AI SDK adapter with mocked HTTP", () => {
     expect(call[0]).toBe("https://model.example.test/v1/chat/completions");
     const body = JSON.parse(call[1].body as string);
     expect(body.tools).toBeUndefined();
+    expect(body.messages[0].content).toContain("live weather");
+    expect(body.messages[0].content).toContain("Never invent missing answers");
     expect(body.response_format.type).toBe("json_object");
   });
   it.each(["not JSON", JSON.stringify({ ...intent, partySize: -1 })])("rejects malformed or schema-invalid output", async (content) => {

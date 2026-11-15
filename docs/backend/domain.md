@@ -110,7 +110,7 @@ allowed range at the edge.
 Update methods (`updatePlannerSidebar`, `updateAgentPanel`) return the **written**
 snapshot (command result), not a post-write `findByUserId`. Re-SELECT after UPSERT
 is unsafe under Hyperdrive query caching — see
-[../operations/cloudflare.md](../operations/cloudflare.md#hyperdrive-read-after-write).
+[../operations/cloudflare.md](../../deploy/render/README.md).
 
 ## Repository ports
 

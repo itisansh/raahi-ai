@@ -1,50 +1,65 @@
-# Render staging (native Node, no Docker)
+# Render free demo — native Node
 
-Run one Render Web Service serving both the Vite frontend and Express API.
-This keeps cookies, HTTP streaming and WebSockets on one origin. MongoDB must
-support replica-set transactions (Atlas does). The database starts fresh; no
-SQL migration or PostgreSQL server is needed.
+One free Render Web Service serves the Vite frontend and Express API on the
+same HTTPS origin, including session cookies, streaming and WebSockets. MongoDB
+must support replica-set transactions (for example, Atlas). No SQL server,
+Docker, Worker or Cloudflare account is required.
 
-## Setup
+## Required accounts and secrets
 
-1. Push the reviewed project to your GitHub repository. Check existing
-   Cloudflare workflow triggers before pushing; retiring them is M6 work.
-2. Create a Render Blueprint from `deploy/render/render.yaml` (select this
-   Blueprint path). Review charges: the template selects a paid Starter service
-   with a 1 GB persistent disk. Nothing is deployed by adding these files.
-3. Supply `MONGO_URI` privately in Render, and allow the service's documented
-   outbound IPs in Atlas Network Access. Local `.env` is not uploaded.
-4. Set `BASE_URL` and `TRUSTED_ORIGINS` to the exact HTTPS service origin, without
-   a trailing slash. Use that same value during the frontend build. If the final
-   service URL changes, update both values and rebuild.
-5. Configure `RESEND_API_KEY` and `EMAIL_FROM` using a verified sender for account
-   verification/reset emails. Keep the generated `BETTER_AUTH_SECRET` stable.
-6. Copy enabled AI/voice/provider settings from your private environment into
-   Render. See `.env.example` and `docs/raahi/RAAHI_API_ACCOUNTS_AND_KEYS.md` for
-   supported names. Do not commit credentials.
-7. Deploy manually. Verify `/api/health`, registration/login, streaming chat,
-   two-browser trip edits, reconnect/refetch, upload/read and upload persistence
-   after a restart. Check database documents and service logs for errors.
+- Render connected to the GitHub repository containing this checkout.
+- MongoDB replica-set URI (`MONGO_URI`); allow Render's documented outbound IPs
+  in the database network rules.
+- Geoapify (`GEOAPIFY_API_KEY`), the configured AI provider (`AI_MODEL`,
+  `AI_BASE_URL`, `AI_API_KEY`), and ElevenLabs (API key and both voice IDs).
+- S3-compatible external storage: bucket, region, endpoint, access key and secret.
+  Use a private bucket with object read/write/delete permissions. The API proxies
+  file reads; public bucket access and browser credentials are unnecessary.
+- Resend API key and verified sender (`EMAIL_FROM`) for account verification and
+  password reset. Console email is for local development, not a public demo.
 
-Build: `bash deploy/render/build.sh`. Start:
-`corepack pnpm --filter @opentrip/api start`. Repository root is the service root.
-Node 24 is selected. `WEB_DIST_PATH=../web/dist` resolves from the API workspace.
-Uploads use `/var/data/uploads` on the persistent disk; the temporary filesystem
-is unsuitable for uploaded files. S3 is an alternative supported by existing
-storage configuration.
+These provider accounts have their own quotas and pricing; the free Render plan
+only covers Render compute within its limits. Do not commit keys or upload the
+local `.env`. The Blueprint prompts for private values in Render.
 
-## Limits and acceptance
+## Deploy
 
-Keep exactly one process/instance. Rate limits, presence and sequence counters
-are in memory. Restart/reconnect requests authoritative refetch; event history
-is not durable. Multiple instances require shared coordination first.
+1. Push the reviewed changes to your GitHub repository.
+2. In Render choose **New → Blueprint**, connect the repository, and select
+   `deploy/render/render.yaml` as the Blueprint path. It selects `plan: free`,
+   with no paid disk and automatic deployment turned off.
+3. Supply the required variables. Set `BASE_URL` and `TRUSTED_ORIGINS` to the
+   exact HTTPS service origin, with no trailing slash. `BASE_URL` is embedded
+   during the frontend build, so changing the service URL requires a rebuild.
+   The Blueprint generates a stable `BETTER_AUTH_SECRET`; do not rotate it on
+   every deployment. `GEO_PROVIDER=geoapify` is already selected.
+4. Configure the external S3 bucket. Do not change storage to `fs`: uploaded
+   files on a free service disappear on restart, redeploy or idle shutdown.
+   `S3_FORCE_PATH_STYLE=true` is included; adjust only if your provider needs
+   virtual-host addressing. Keep the API/storage credentials server-side.
+5. Deploy manually and complete the checks below.
 
-`TRUST_PROXY_CIDRS` accepts comma-separated trusted proxy IP ranges. Default is
-empty: forwarded addresses are ignored, so users behind a proxy share its auth
-rate-limit bucket. Verify the hosting proxy chain and ranges before setting
-this; never trust arbitrary forwarded headers or use an unrestricted range.
-Proxy identity remains a staging acceptance item.
+Build: `bash deploy/render/build.sh`.
+Start: `corepack pnpm --filter @opentrip/api start`.
+Service root: repository root. Node: 24.
+`WEB_DIST_PATH=../web/dist` resolves from the API workspace.
 
-The supplied CI workflow runs checks with disposable Mongo replica sets; it
-does not access your Atlas database or deploy. Live staging acceptance is still
-pending until a service exists. No Docker is required.
+## Acceptance
+
+Verify `/api/health`, registration/OTP/login/reset, browser voice permissions,
+transcript → Send → model → spoken reply, medical listings and directions,
+streaming chat, two-browser trip updates and reconnect/refetch. Upload a file,
+restart the service, and confirm it remains readable. Inspect logs for errors.
+Use a separate staging database; do not reset an existing user database.
+
+Free services sleep after inactivity and may take about a minute to wake up.
+There is no persistent disk or dashboard shell. Rate limits, presence and live
+sequence counters are process-local; retain one instance. Reconnect refetches
+current trip state. This is a demo, not a production availability guarantee.
+
+`TRUST_PROXY_CIDRS` is optional and defaults to ignoring forwarded IP headers.
+Only set verified proxy ranges; never trust arbitrary headers. Until verified,
+clients behind the hosting proxy share an auth rate-limit bucket.
+
+References: [Render free service limits](https://render.com/docs/free),
+[Blueprint specification](https://render.com/docs/blueprint-spec).

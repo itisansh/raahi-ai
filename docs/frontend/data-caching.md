@@ -10,7 +10,7 @@ consistency-critical repositories through the cache-disabled binding, while the
 SPA still uses mutation echo to avoid an unnecessary request and response race.
 
 Canonical ops detail:
-[../operations/cloudflare.md#hyperdrive-read-after-write](../operations/cloudflare.md#hyperdrive-read-after-write).
+[../operations/cloudflare.md#hyperdrive-read-after-write](../../deploy/render/README.md).
 ADR: [../decisions/0006-mutation-echo-over-refetch.md](../decisions/0006-mutation-echo-over-refetch.md).
 
 ## Rule

@@ -10,7 +10,8 @@ export interface StoredProposal {
 }
 
 export interface ProposalStore {
+  readonly supportsExisting?: boolean;
   save(proposal: StoredProposal): Promise<void>;
   /** Lock proposal, create trip and record approval in a single transaction. */
-  approve(id: string, ownerId: string, build: (proposal: StoredProposal) => Trip): Promise<string>;
+  approve(id: string, ownerId: string, build: (proposal: StoredProposal, existing?: Trip) => Trip): Promise<string>;
 }

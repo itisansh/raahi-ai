@@ -1,3 +1,4 @@
+import { ExistingTripPlanning } from "@/widgets/trip-planning";
 import { Button } from "@/shared/ui/button";
 import { MedicalHelp } from "@/features/medical-help";
 import { OfflineItinerary, offlineCopy } from "@/features/offline-itinerary";
@@ -714,6 +715,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
           onRename={(title) => rename.mutate(title)}
           onOpenAgent={agentEnabled ? () => setAgentPanel(false) : undefined}
         />
+        {trip.permissions.canEdit && online && <div className="flex justify-end border-b px-3 py-2"><ExistingTripPlanning tripId={trip.id} /></div>}
         <main className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           {panes}
           {!noteEditingStop && tab === "map" ? (
@@ -802,6 +804,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
                   onRename={(title) => rename.mutate(title)}
                 />
               </div>
+              {trip.permissions.canEdit && online && <ExistingTripPlanning tripId={trip.id} />}
               <Tabs
                 items={tabItems}
                 value={tab}

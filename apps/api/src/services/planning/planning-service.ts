@@ -1,3 +1,5 @@
+import { durationMinutes, scheduleMinute } from "./existing-plan";
+import { clarificationReply, previewReply } from "./reply";
 import type { GeoService } from "../geo/geo-service";
 import type { GeoPlaceDto } from "../geo/geo-data";
 import type { ProposalStore } from "./proposal-store";
@@ -40,13 +42,17 @@ export class PlanningService {
     if (!extracted.success) throw new PlanningError("planning_invalid_output");
     const intent = extracted.data;
     const missing = requiredIntentFields.filter((key) => intent[key] == null || (key === "currency" && intent.currency !== "INR"));
-    if (missing.length) return { status: "clarification" as const, intent, missing };
+    if (!missing.length && rupeesToPaise(intent.budgetRupees!) === 0) missing.push("budgetRupees");
+    if (missing.length) {
+      const clarification = { status: "clarification" as const, proposalId: crypto.randomUUID(), intent, missing, reply: clarificationReply(intent, missing) };
+      if (this.proposals) await this.proposals.save({ id: clarification.proposalId, ownerId: userId, payload: clarification, contextTripId: request.tripId ?? null, baseRevision: context?.revision ?? null, expiresAt: new Date(Date.now() + 30 * 60_000) });
+      return clarification;
+    }
     const budget = rupeesToPaise(intent.budgetRupees!);
-    if (budget === 0) return { status: "clarification" as const, intent, missing: ["budgetRupees" as const] };
     const parsed = candidateSchema.safeParse(await this.model.propose(intent, context));
     if (!parsed.success) throw new PlanningError("planning_invalid_output");
     const candidate = parsed.data;
-    if (candidate.days.length !== intent.dayCount || candidate.days.some((day, i) => day.day !== i + 1)) {
+    if (candidate.days.length !== intent.dayCount || candidate.days.some((day, i) => day.day !== i + 1 || (!context && day.stops.length === 0)) || !candidate.days.some(day => day.stops.length > 0)) {
       throw new PlanningError("planning_invalid_output");
     }
     const issues = new Set<string>();
@@ -123,13 +129,53 @@ export class PlanningService {
       endOfPreviousDay = previousEnd;
       days.push({ ...day, stops });
     }
-    const returnMinutes = await travelTime(previous, origin);
+    let returnMinutes = await travelTime(previous, origin);
     if (returnMinutes == null) issues.add("return_travel_unverified");
     else if (endOfPreviousDay + returnMinutes > 1440) issues.add("schedule_infeasible");
+    const existing = context?.existingPlan;
+    if (existing) {
+      let combinedPrevious = origin;
+      let combinedEnd = 0;
+      if (existing.currency !== "INR" || intent.startDate !== (existing.startDate || null) || intent.dayCount !== existing.days.length) issues.add("existing_trip_constraints");
+      for (const day of days) {
+        if (!existing.days.some(item => item.number === day.day)) { issues.add("existing_trip_constraints"); continue; }
+        const retained = existing.stops.filter(stop => stop.day === day.day);
+        const combined = [
+          ...retained.map(stop => ({ start: scheduleMinute(stop.time), duration: durationMinutes(stop.duration), evidence: {
+            status: "matched" as const, source: "saved_trip", checkedAt: new Date().toISOString(),
+            place: { id: stop.id, name: stop.name, label: stop.name, lat: stop.lat, lng: stop.lng },
+          } })),
+          ...day.stops.map(stop => ({ start: stop.startMinute, duration: stop.durationMinutes, evidence: stop.evidence })),
+        ];
+        if (combined.some(stop => stop.start == null || stop.duration == null)) { issues.add("existing_schedule_unverified"); continue; }
+        combined.sort((a, b) => a.start! - b.start!);
+        let previousEnd = day.day === 1 ? 0 : Math.max(0, combinedEnd + 480 - 1440);
+        for (const stop of combined) {
+          const minutes = await travelTime(combinedPrevious, stop.evidence);
+          const addition = day.stops.find(item => item.evidence === stop.evidence);
+          if (addition) addition.travel = { status: minutes == null ? "unavailable" : "road_estimate", minutes, source: this.source };
+          if (minutes == null) issues.add("routes_unverified");
+          if (stop.start! < previousEnd + (minutes ?? 0) || stop.start! + stop.duration! > 1440) issues.add("schedule_infeasible");
+          previousEnd = stop.start! + stop.duration!;
+          combinedPrevious = stop.evidence;
+        }
+        combinedEnd = previousEnd;
+        if (day.stops.some(stop => retained.some(old => normalize(old.name) === normalize(stop.name)))) issues.add("existing_stop_duplicate");
+      }
+      const combinedReturn = await travelTime(combinedPrevious, origin);
+      returnMinutes = combinedReturn;
+      if (combinedReturn == null) issues.add("return_travel_unverified");
+      else if (combinedEnd + combinedReturn > 1440) issues.add("schedule_infeasible");
+    }
     const preview = {
       status: "preview" as const, proposalId: crypto.randomUUID(), saved: false as const,
-      approvable: !!this.proposals && !request.tripId && [...issues].every((issue) => issue === "dates_unknown"),
+      approvable: !!this.proposals && (!request.tripId || (!!this.proposals.supportsExisting && !!context?.canEdit && !!existing)) && [...issues].every((issue) => issue === "dates_unknown"),
+      changeMode: request.tripId ? "append_stops" as const : "create_trip" as const,
+      costScope: request.tripId ? "additions" as const : "whole_trip" as const,
+      retainedStops: existing?.stops.map(({ id, day, name, time, duration }) => ({ id, day, name, time, duration })) ?? [],
       contextRevision: context?.revision ?? null, intent, title: candidate.title, days,
+      guidance: candidate.guidance ?? null,
+      reply: previewReply(intent, candidate, [...issues]),
       returnTravel: { status: returnMinutes == null ? "unavailable" : "road_estimate", minutes: returnMinutes, source: this.source },
       origin, budget: {
         currency: "INR", groupBudgetPaise, estimates,

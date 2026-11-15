@@ -28,7 +28,7 @@ export class MongoTripRepository implements TripRepository {
       const votes = await m.votes.find({ tripId: id }).session(session).lean();
       const comments = await m.comments.find({ tripId: id }).sort({ order: 1 }).session(session).lean();
       const expenses = await m.expenses.find({ tripId: id }).sort({ createdOrder: 1 }).session(session).lean();
-      return Trip.fromSnapshot({ id: base.id, title: base.title, status: base.status, currency: base.currency, version: base.version, startDate: base.startDate, endDate: base.endDate, ownerId: base.ownerId, coverUrl: base.coverUrl, intake: base.intake, agentSeedPending: base.agentSeedPending, members, days,
+      return Trip.fromSnapshot({ ...(base.finance ? { finance: base.finance } : {}), id: base.id, title: base.title, status: base.status, currency: base.currency, version: base.version, startDate: base.startDate, endDate: base.endDate, ownerId: base.ownerId, coverUrl: base.coverUrl, intake: base.intake, agentSeedPending: base.agentSeedPending, members, days,
         stops: stops.map(s => ({ ...s, votes: votes.filter(v => v.stopId === s.id).map(v => v.memberId), comments: comments.filter(c => c.stopId === s.id).map(c => ({ author: c.author, timeLabel: c.timeLabel, text: c.text })) })),
         expenses: expenses.map(e => ({ id: e.id, description: e.description, payer: e.payer, amount: e.amountMinor / e.scale, currency: e.currency, category: e.category, participants: e.participants, whenLabel: e.whenLabel, createdOrder: e.createdOrder, ...(e.allocations ? { allocations: Object.fromEntries(Object.entries(e.allocations).map(([id, value]) => [id, value / e.scale])) } : {}) })),
       });

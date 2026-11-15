@@ -25,7 +25,7 @@ function trip(id: string, title: string): Trip {
 describe("upsertTripSummary", () => {
   it("prepends a new mutation echo without mutating the previous list", () => {
     const previous: TripSummary[] = [];
-    const result = upsertTripSummary(previous, trip("t1", "Kyoto"));
+    const result = upsertTripSummary(previous, trip("t1", "Jaipur"));
 
     expect(result).toHaveLength(1);
     expect(result?.[0]?.id).toBe("t1");
@@ -45,6 +45,6 @@ describe("upsertTripSummary", () => {
   });
 
   it("does not create a list cache that has never been loaded", () => {
-    expect(upsertTripSummary(undefined, trip("t1", "Kyoto"))).toBeUndefined();
+    expect(upsertTripSummary(undefined, trip("t1", "Jaipur"))).toBeUndefined();
   });
 });

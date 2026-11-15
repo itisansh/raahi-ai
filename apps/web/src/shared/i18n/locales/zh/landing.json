@@ -5,16 +5,16 @@
   },
   "hero": {
     "title": "每一场难忘的旅行，都始于群聊。",
-    "subtitle": "与朋友一起规划印度旅行，共享路线、每日行程和费用，并借助 AI 助手探索旅行选择。",
-    "primary": "开始规划",
+    "subtitle": "与朋友一起探索印度各地：从拉贾斯坦、喀拉拉、果阿到东北地区和喜马拉雅山，共享路线、每日行程与费用。",
+    "primary": "语音规划",
     "secondary": "看看怎么用",
-    "imageAlt": "OpenTrip 原始示例：五天日本行程"
+    "imageAlt": "印度旅行计划示例"
   },
   "facts": {
-    "label": "原始示例 · 演示数据",
-    "days": "5 天",
-    "stops": "25 个地点",
-    "route": "东京 → 京都 → 大阪"
+    "label": "探索印度各地",
+    "days": "城市与文化遗产",
+    "stops": "海岸与山地",
+    "route": "规划自己的路线"
   },
   "features": {
     "map": {
@@ -52,12 +52,73 @@
   },
   "cta": {
     "title": "队友都就位了，你呢？",
-    "subtitle": "与朋友一起创建旅行。当前示例仅供演示；印度示例行程与语音规划正在开发中。",
+    "subtitle": "选择印度目的地，邀请朋友，一起制定旅行计划。",
     "button": "开始规划"
   },
   "footer": {
     "tagline": "为结伴旅行的人而做。",
     "license": "基于 OpenTrip · Apache 2.0"
   },
-  "legacyPreview": "截图展示 OpenTrip 原始示例。Raahi AI 的印度示例行程与语音工作流正在开发中。"
+  "preview": {
+    "label": "旅行示例 · 非预订或实时报价",
+    "day": "天",
+    "budget": "团队预算",
+    "people": "4 位朋友",
+    "cost": "₹24,000",
+    "map": "路线概览",
+    "schedule": "每日计划",
+    "agent": "规划请求",
+    "collaborate": "团队决策",
+    "question": "可以留一个下午自由活动吗？",
+    "answer": "保存前请审核建议。",
+    "vote": "与团队投票讨论",
+    "budgetNote": "旅行时记录实际费用。",
+    "routes": [
+      {
+        "title": "Rajasthan cities",
+        "route": "Jaipur → Jodhpur → Udaipur",
+        "stops": [
+          "Jaipur old city",
+          "Jodhpur blue city",
+          "Udaipur lakes"
+        ]
+      },
+      {
+        "title": "Kerala together",
+        "route": "Kochi → Munnar → Alappuzha",
+        "stops": [
+          "Kochi waterfront",
+          "Munnar hills",
+          "Alappuzha backwaters"
+        ]
+      },
+      {
+        "title": "A Goa break",
+        "route": "Panaji → Old Goa → South Goa",
+        "stops": [
+          "Panaji neighbourhoods",
+          "Old Goa heritage",
+          "South Goa coast"
+        ]
+      },
+      {
+        "title": "Meghalaya trails",
+        "route": "Shillong → Sohra → Dawki",
+        "stops": [
+          "Shillong markets",
+          "Sohra landscapes",
+          "Dawki riverside"
+        ]
+      },
+      {
+        "title": "A Himalayan trip",
+        "route": "Rishikesh → Chopta → Haridwar",
+        "stops": [
+          "Rishikesh riverside",
+          "Chopta trails",
+          "Haridwar ghats"
+        ]
+      }
+    ]
+  }
 }

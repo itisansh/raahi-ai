@@ -47,7 +47,7 @@ export interface AgentObservabilityContext {
   requestId?: string;
   turnId: string;
   trigger: "chat" | "ambient" | "addressed_check" | "operation";
-  runtime?: "cloudflare" | "node";
+  runtime?: "node";
 }
 
 /** Result returned by write tools after the user approves them.

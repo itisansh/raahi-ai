@@ -17,7 +17,7 @@ import {
 } from "@/shared/ui/select";
 import { toastManager } from "@/shared/ui/toast";
 
-const FALLBACK_CURRENCY = "JPY";
+const FALLBACK_CURRENCY = "INR";
 
 export function CurrencySelect(): React.ReactElement {
   const { t, i18n } = useTranslation("common");

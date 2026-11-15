@@ -20,6 +20,19 @@ describe("medical listings", () => {
     expect(result.places[0]!.distanceMeters).toBeGreaterThan(0);
     expect(f.placeNearby).toHaveBeenCalledWith(expect.objectContaining({ categories: ["amenity=hospital", "healthcare=hospital"], radiusMeters: 5000 }));
   });
+  it.each([
+    ["Jaipur", 26.9124, 75.7873], ["Kochi", 9.9312, 76.2673],
+    ["Panaji", 15.4909, 73.8278], ["Shillong", 25.5788, 91.8933],
+    ["Port Blair", 11.6234, 92.7265],
+  ])("searches near saved stops across India: %s", async (name, lat, lng) => {
+    const f = fixture();
+    const stop = f.trip.toSnapshot().stops[0]!;
+    Object.assign(stop, { name, lat, lng });
+    f.placeNearby.mockResolvedValueOnce([]);
+    const result = await f.service.search("trip", "owner", f.request);
+    expect(result.status).toBe("empty");
+    expect(f.placeNearby).toHaveBeenCalledWith(expect.objectContaining({ lat, lng }));
+  });
   it("checks trip permission before places access", async () => {
     const f = fixture(); f.load.mockRejectedValueOnce(new Error("forbidden"));
     await expect(f.service.search("trip", "outsider", f.request)).rejects.toThrow("forbidden"); expect(f.placeNearby).not.toHaveBeenCalled();

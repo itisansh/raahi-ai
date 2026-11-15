@@ -234,7 +234,7 @@ export class TripService {
   async getPlanningContext(tripId: string, userId: string) {
     const trip = await this.loadReadable(tripId, userId);
     const snapshot = trip.toSnapshot();
-    return { tripId, revision: snapshot.version, title: snapshot.title, intake: snapshot.intake, days: snapshot.days };
+    return { tripId, revision: snapshot.version, title: snapshot.title, intake: snapshot.intake, days: snapshot.days, canEdit: trip.permissionsFor(userId).canEdit, existingPlan: { days: snapshot.days, stops: snapshot.stops, startDate: snapshot.startDate, currency: snapshot.currency } };
   }
 
   /** Backfill intake.destinationLat/Lng for older trips that only stored a label. */

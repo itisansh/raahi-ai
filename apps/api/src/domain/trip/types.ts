@@ -1,3 +1,4 @@
+import type { TripFinance } from "./finance";
 export type TripStatus = "active" | "planning" | "settled";
 
 export type StopCategory =
@@ -95,6 +96,7 @@ export interface ExpenseSnapshot {
 }
 
 export interface TripSnapshot {
+  finance?: TripFinance;
   id: string;
   title: string;
   status: TripStatus;

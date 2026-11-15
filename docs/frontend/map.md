@@ -98,7 +98,7 @@ tracks the user with `watchPosition` while active.
   (via GeoService). `TripMapView` uses those as `fallbackCenter` so the first
   view opens near the destination. If coords are missing, it falls back to a
   Photon geocode of the destination label. Trips with no destination open on a
-  neutral world view (not a Japan-centric default).
+  neutral world view.
 - **Day filter**: `day = 0` shows all; otherwise only that day's stops/routes.
 - **Selection event**: clicking a marker calls `onSelectStop(id)`.
 

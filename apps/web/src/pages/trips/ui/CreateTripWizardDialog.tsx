@@ -7,8 +7,7 @@ import { createTrip, type CreateTripInput } from "@/shared/api";
 import { queryKeys } from "@/shared/config";
 import { useSession } from "@/shared/auth";
 import { VoiceInput } from "@/features/voice-input";
-import { TripProposalPanel } from "./TripProposalPanel";
-import { proposalCopy } from "../model/proposal-copy";
+import { TripProposalPanel, proposalCopy } from "@/widgets/trip-planning";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Spinner } from "@/shared/ui/spinner";
@@ -148,7 +147,7 @@ export function CreateTripWizardDialog({
       // Echo the POST body into caches — do not invalidate/refetch GET /api/trips
       // immediately (Hyperdrive may serve a stale SELECT for up to ~60s).
       // See TanStack Query "Updates from Mutation Responses" and
-      // docs/operations/cloudflare.md (Hyperdrive read-after-write).
+      // docs/frontend/data-caching.md (mutation response consistency).
       queryClient.setQueryData(queryKeys.trip(trip.id), trip);
       queryClient.setQueryData<TripSummary[]>(queryKeys.trips, (prev) => {
         const summary = toTripSummary(trip);
@@ -297,7 +296,7 @@ export function CreateTripWizardDialog({
       <DialogPortal>
         <DialogBackdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-[opacity] duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
         <DialogSheetViewport>
-          <DialogSheetPopup size="sm">
+          <DialogSheetPopup size={planning ? "lg" : "sm"} className={planning ? "h-full max-h-full rounded-none md:h-[85%] md:max-h-[760px] md:rounded-2xl" : undefined}>
             <DialogHeader>
               <div className="flex items-center justify-between gap-3">
                 <DialogTitle className="text-lg font-semibold tracking-tight text-balance">
@@ -325,8 +324,8 @@ export function CreateTripWizardDialog({
               </div>}
             </DialogHeader>
 
-            <DialogPanel>
-              {planning ? (open && <TripProposalPanel />) : <div key={stepKey} className="wf-enter flex flex-col gap-3">
+            <DialogPanel className={planning ? "flex min-h-0 flex-1 flex-col overflow-hidden p-0" : undefined}>
+              {planning ? (open && <TripProposalPanel onSaved={id => { handleOpenChange(false); navigate(`/trips/${id}`); }} />) : <div key={stepKey} className="wf-enter flex flex-col gap-3">
                 {step === "destination" ? (
                   <>
                   <Input
@@ -528,7 +527,7 @@ export function CreateTripWizardDialog({
               </div>}
             </DialogPanel>
 
-            <DialogFooter className="flex flex-wrap items-center justify-between gap-2 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-6">
+            <DialogFooter className={planning ? "flex flex-wrap items-center justify-between gap-2 px-4 py-2 md:px-6" : "flex flex-wrap items-center justify-between gap-2 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-6"}>
               {planning ? <>
                 <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>{tc("actions.cancel")}</Button>
                 <Button type="button" variant="outline" onClick={() => setPlanning(false)}>{proposalCopy.manual}</Button>

@@ -28,8 +28,6 @@ const required = [
   "docs/backend/database.md",
   "docs/backend/auth.md",
   "docs/operations/README.md",
-  "docs/operations/cloudflare.md",
-  "docs/operations/docker.md",
   "docs/quality/README.md",
   "docs/decisions/README.md",
   "docs/reference/README.md",

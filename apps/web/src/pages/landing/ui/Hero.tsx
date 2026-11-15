@@ -1,7 +1,7 @@
+import { MicIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/shared/ui/button";
-import { BrowserFrame } from "./DeviceFrames";
-import heroShot from "../assets/pc-map.jpg";
+import { IndiaTripPreview } from "./IndiaTripPreview";
 
 function scrollToFeatures() {
   const target = document.getElementById("features");
@@ -27,7 +27,7 @@ export function Hero({ onGetStarted }: { onGetStarted: () => void }) {
 
           <div className="wf-enter mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button size="lg" onClick={onGetStarted}>
-              {t("hero.primary")}
+              <MicIcon className="size-4" aria-hidden />{t("hero.primary")}
             </Button>
             <Button size="lg" variant="outline" onClick={scrollToFeatures}>
               {t("hero.secondary")}
@@ -36,10 +36,7 @@ export function Hero({ onGetStarted }: { onGetStarted: () => void }) {
         </div>
 
         <div className="wf-enter mx-auto mt-14 max-w-5xl">
-          <BrowserFrame src={heroShot} alt={t("hero.imageAlt")} priority />
-          <p className="mt-3 text-center text-sm text-muted-foreground">
-            {t("legacyPreview")}
-          </p>
+          <IndiaTripPreview variant="map" />
         </div>
       </div>
     </section>

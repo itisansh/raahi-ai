@@ -78,7 +78,7 @@ describe("loadConfig storage", () => {
       STORAGE_PUBLIC_URL: "https://cdn.example.test/files/",
       S3_BUCKET: "opentrip",
       S3_REGION: "auto",
-      S3_ENDPOINT: "https://account.r2.cloudflarestorage.com",
+      S3_ENDPOINT: "https://storage.example.test",
       S3_ACCESS_KEY_ID: "access-key",
       S3_SECRET_ACCESS_KEY: "secret-key",
       S3_FORCE_PATH_STYLE: "true",
@@ -94,23 +94,9 @@ describe("loadConfig storage", () => {
     });
   });
 
-  it("loads native R2 binding storage without API credentials", () => {
-    const config = loadConfig({
-      ...BASE_ENV,
-      STORAGE_BACKEND: "r2",
-      STORAGE_ROOT: "/uploads/",
-    });
-
-    expect(config.storage).toEqual({
-      backend: "r2",
-      root: "uploads",
-      publicUrl: "https://api.example.test/api/uploads",
-    });
-  });
-
   it("rejects unknown backends and invalid booleans", () => {
     expect(() => loadConfig({ ...BASE_ENV, STORAGE_BACKEND: "unknown" })).toThrow(
-      'STORAGE_BACKEND must be "fs", "s3", or "r2"',
+      'STORAGE_BACKEND must be "fs" or "s3"',
     );
     expect(() =>
       loadConfig({
@@ -177,35 +163,6 @@ describe("loadConfig email", () => {
         RESEND_API_KEY: "re_test",
       }),
     ).toThrow("EMAIL_FROM is required when EMAIL_PROVIDER=resend");
-  });
-});
-
-describe("loadConfig captcha", () => {
-  it("supports Cloudflare Turnstile with a server secret", () => {
-    const config = loadConfig({
-      ...BASE_ENV,
-      STORAGE_BACKEND: "fs",
-      STORAGE_ROOT: "/data",
-      CAPTCHA_PROVIDER: "cloudflare-turnstile",
-      CAPTCHA_SECRET_KEY: "turnstile-secret",
-    });
-
-    expect(config.captcha).toEqual({
-      provider: "cloudflare-turnstile",
-      secretKey: "turnstile-secret",
-    });
-  });
-
-  it("rejects captcha providers without a browser implementation", () => {
-    expect(() =>
-      loadConfig({
-        ...BASE_ENV,
-        STORAGE_BACKEND: "fs",
-        STORAGE_ROOT: "/data",
-        CAPTCHA_PROVIDER: "hcaptcha",
-        CAPTCHA_SECRET_KEY: "secret",
-      }),
-    ).toThrow("CAPTCHA_PROVIDER must be one of cloudflare-turnstile");
   });
 });
 

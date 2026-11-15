@@ -22,8 +22,7 @@
     "db:snapshot": "prisma db pull --force",
     "db:mysql-schema": "tsx --env-file-if-exists=../../.env prisma/mysql/apply-schema.ts",
     "db:mysql-init": "tsx --env-file-if-exists=../../.env prisma/mysql/init.ts",
-    "test:express": "HTTP_TEST_TRANSPORT=express vitest run",
-    "test:worker": "HTTP_TEST_TRANSPORT=worker vitest run"
+    "test:express": "HTTP_TEST_TRANSPORT=express vitest run"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -34,31 +33,20 @@
     "@ai-sdk/openai-compatible": "^3.0.6",
     "@ai-sdk/otel": "1.0.18",
     "@aws-sdk/client-s3": "^3.850.0",
-    "@hono/node-server": "^1.13.7",
     "@opentelemetry/api": "^1.9.1",
     "@opentrip/agent-ui-catalog": "workspace:*",
     "@opentrip/observability-contract": "workspace:*",
-    "@prisma/adapter-mariadb": "^7.8.0",
-    "@prisma/adapter-pg": "^7.8.0",
-    "@prisma/client": "^7.8.0",
-    "@sentry/cloudflare": "^10.65.0",
-    "@sentry/hono": "^10.65.0",
     "@sentry/node": "^10.65.0",
     "ai": "^7.0.18",
     "better-auth": "1.6.23",
     "express": "^5.3.0",
-    "hono": "^4.6.15",
     "mongoose": "9.11.4",
-    "mysql2": "^3.22.6",
-    "pg": "^8.13.1",
     "tsx": "^4.19.2",
     "ws": "^8.22.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20241230.0",
     "@eslint/js": "^9.17.0",
-    "@sentry/cli": "^3.6.0",
     "@types/express": "^5.0.6",
     "@types/mysql": "^2.15.27",
     "@types/node": "^22.10.5",
@@ -71,6 +59,11 @@
     "prisma": "^7.8.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.19.0",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "@prisma/adapter-mariadb": "^7.8.0",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "mysql2": "^3.22.6",
+    "pg": "^8.13.1"
   }
 }

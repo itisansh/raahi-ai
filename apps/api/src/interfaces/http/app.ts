@@ -1,5 +1,4 @@
-import { Hono } from "hono";
-import { RouteTable, cors, bodyLimit, dispatch, type HttpContext } from "./transport";
+import { RouteTable, cors, bodyLimit, type HttpContext } from "./transport";
 import { VoiceError } from "../../services/voice/voice-token-service";
 import { ExpenseVoiceError } from "../../services/expenses/voice-expense";
 import { SpeechError } from "../../services/voice/spoken-summary";
@@ -44,7 +43,6 @@ export interface AppEnv {
 
 export interface CreateAppOptions {
   runtime: RuntimeName;
-  instrument?: (app: Hono<AppEnv>) => void;
   setRequestContext?: (fields: { requestId: string }) => void;
 }
 
@@ -151,8 +149,7 @@ const MAX_AVATAR_REQUEST_BYTES = MAX_AVATAR_BYTES + MAX_MULTIPART_OVERHEAD_BYTES
 const MAX_TRIP_MEDIA_REQUEST_BYTES =
   MAX_TRIP_MEDIA_BYTES + MAX_MULTIPART_OVERHEAD_BYTES;
 
-/** Build the Hono app for a wired container. Shared by the Node and Workers
- * entry points. */
+/** Shared request schemas for the route table. */
 const preferenceSchema = z.object({
   plannerSidebarWidth: z.number().min(0).max(100),
   plannerSidebarCollapsed: z.boolean(),
@@ -508,6 +505,26 @@ export function createRouteTable(
     const { stopIds } = z.object({ stopIds: z.array(z.string().min(1).max(150)).min(1).max(6) }).strict().parse(await c.req.json().catch(() => null));
     if (!container.indiaTravelService) return fail(c, "travel_unavailable", "Travel services unavailable", 503);
     return ok(c, await container.indiaTravelService.inspect(c.req.param("id"), c.get("user")!.id, stopIds));
+  });
+
+  guard.get("/trips/:id/history", async c => {
+    if (!container.historyService) return fail(c, "history_unavailable", "History requires Mongo runtime", 503);
+    return ok(c, await container.historyService.list(c.req.param("id"), c.get("user")!.id));
+  });
+  guard.post("/trips/:id/history/rollback", bodyLimit({ maxSize: 1000, onError: c => fail(c, "request_too_large", "Request too large", 413) }), async c => {
+    if (!config.trustedOrigins.includes(c.req.header("origin") ?? "")) return fail(c, "forbidden_origin", "Origin is not allowed", 403);
+    if (!container.historyService) return fail(c, "history_unavailable", "History requires Mongo runtime", 503);
+    return ok(c, await container.historyService.rollback(c.req.param("id"), c.get("user")!.id, await c.req.json()));
+  });
+  guard.get("/trips/:id/finance", async c => {
+    if (!container.financeService) return fail(c, "finance_unavailable", "Finance requires Mongo runtime", 503);
+    return ok(c, await container.financeService.status(c.req.param("id"), c.get("user")!.id));
+  });
+  guard.post("/trips/:id/finance/:action", bodyLimit({ maxSize: 2000, onError: c => fail(c, "request_too_large", "Request too large", 413) }), async c => {
+    if (!config.trustedOrigins.includes(c.req.header("origin") ?? "")) return fail(c, "forbidden_origin", "Origin is not allowed", 403);
+    if (!container.financeService) return fail(c, "finance_unavailable", "Finance requires Mongo runtime", 503);
+    const action = z.enum(["repay", "void", "cap"]).parse(c.req.param("action"));
+    return ok(c, await container.financeService[action](c.req.param("id"), c.get("user")!.id, await c.req.json()));
   });
 
   guard.get("/trips/:id/budget", async (c) => {
@@ -1268,19 +1285,4 @@ function parseRevisionHeader(value: string | undefined): number | null {
   if (!/^\d+$/.test(normalized)) return null;
   const revision = Number(normalized);
   return Number.isSafeInteger(revision) ? revision : null;
-}
-
-/** Worker transport retained until Node platform parity (M5). */
-export function createApp(container: Container, options: CreateAppOptions = { runtime: "node" }) {
-  const table = createRouteTable(container, options);
-  const app = new Hono<AppEnv>();
-  options.instrument?.(app);
-  // Hono supplies the same Web request/response context contract at this boundary.
-  for (const endpoint of table.endpoints) {
-    app.on([endpoint.method], endpoint.path, context =>
-      dispatch(table, [...table.middleware, ...endpoint.handlers], context as unknown as HttpContext));
-  }
-  app.use("*", context => dispatch(table, table.middleware, context as unknown as HttpContext));
-  app.onError((error, context) => table.errorHandler(error, context as unknown as HttpContext));
-  return app;
 }

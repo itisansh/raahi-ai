@@ -153,9 +153,15 @@ members, days, stops and approval timestamp commit together. Failed approval
 rolls back. The stored proposal retains intent, cost/source evidence and approval
 history. Unknown dates remain unknown and no guessed coordinates are persisted.
 
-Only new-trip proposals with no issues other than unknown dates can be approved.
-Expired proposals and proposals with existing-trip context are rejected. Existing
-trip replacement/revision checks remain pending; no existing itinerary is changed.
+Proposals with no issues other than unknown dates can be approved. On Mongo,
+existing-trip proposals append stops to current days after checking current edit
+permission and the preview revision. Existing stops, dates, expenses and bookings
+are preserved. Duplicate approval applies once; stale revisions and expired
+proposals are rejected. Retained SQL storage supports new-trip approval only.
+Existing previews include `retainedStops`, `changeMode: "append_stops"` and
+`costScope: "additions"`; their budget covers additions, not existing spending.
+Combined retained/new schedules are checked for overlaps, travel and overnight
+rest. Unknown saved times/durations block approval; unchanged days may be empty.
 MySQL approval is unavailable (503) pending a corresponding storage migration;
 its previews remain ephemeral. PostgreSQL deployments must apply Prisma migrations.
 The response is `{ "data": { "tripId": "..." } }`; the UI navigates to the existing
@@ -396,3 +402,71 @@ still require connectivity. Downloaded files are snapshots and do not update wit
 shared changes. No authenticated API or medical/GPS response is cached by the
 service worker. Offline fresh app authentication and a complete persistent
 IndexedDB trip cache are not implemented or claimed.
+
+### Voice-first planning follow-up
+
+The client retains the original request and appends reviewed follow-up answers
+in the same bounded `prompt` field. It never submits partial speech. The model
+receives the same combined input for extraction; missing core constraints still
+return `clarification` before itinerary generation.
+
+Extracted intent may include optional `travelPreferences` for stated budget
+flexibility, month/season, timing, pace and accessibility. Preview responses may
+include nullable `guidance` with `response`, `timing` and `questions`. These are
+model-generated general guidance, separate from independently matched places
+and route estimates. Older stored proposals without guidance remain readable.
+No schema/index migration is required for these optional proposal payload fields.
+Current weather, closures, permits and opening status are not verified by this
+planning model. Dates may remain undecided; no date or year is silently assumed.
+
+### Conversational planning replies
+
+`POST /api/planning/preview` accepts 1–4,000 trimmed prompt characters. Both
+`clarification` and `preview` results now include `proposalId` and
+`reply: { text: string, language: "en" | "hi" }`. These replies are retained for
+30 minutes in owner-scoped proposal payloads. Clarification IDs cannot be approved.
+`POST /api/voice/summary/text` returns the stored reply, and `/audio` synthesizes
+that exact text in its stored language. The requested language remains supported
+for older preview snapshots without `reply`; new replies use their original
+language to keep visible and spoken content identical. Client-supplied narration
+is still rejected. See [voice planning](../../raahi/VOICE_FIRST_PLANNING_FLOW.md).
+
+### Mongo finance and proposal history
+
+`GET /api/trips/:id/finance` returns the current revision, trip currency,
+repayment audit records, recomputed balances and optional member caps. Amounts
+in these endpoints are integer minor units (INR paise; retained whole-unit
+semantics for other currencies). Caps compare allocated actual expenses against
+an individual limit; repayments never reduce trip spending or allocated cost.
+
+Authenticated trip editors may POST to:
+
+- `/finance/repay`: `{ requestId, from, to, amountMinor, currency, revision,
+  confirm: true }`. Records an already-completed transfer between distinct trip
+  members, bounded by current debtor/creditor balances. This does not send money.
+  Same actor/request/details replay once; different details reject. A stale new
+  request rejects. Permission is rechecked even for retries.
+- `/finance/void`: `{ repaymentId, revision, confirm: true }`. Audits a mistaken
+  record without deleting it. Repeated void is harmless. Balances are recomputed.
+- `/finance/cap`: `{ memberId, capMinor, revision }`. Positive optional cap in the
+  trip currency; `null` removes it. This is a displayed spending limit, not a
+  payment restriction or an allocation of future group estimates.
+
+All writes require trusted Origin and run in a Mongo transaction with the trip
+revision. `finance` is an optional embedded trip field; migration
+`002-trip-finance` records the additive schema version without backfilling or
+reinterpreting existing money. SQL runtime does not expose these new writes.
+
+`GET /api/trips/:id/history` lists up to 50 approved existing-trip planning or
+budget proposals for authorized members. New approvals retain before/after stop
+snapshots; budget reductions also retain the prior forecast. Existing-trip
+planning continues to **append** reviewed stops, as requested by the user.
+
+`POST /api/trips/:id/history/rollback` accepts
+`{ proposalId, revision, confirm: true }`. An editor can restore the immediate
+pre-approval itinerary only if no later trip mutation has occurred. Linked added
+stops are also protected explicitly. Expenses, finance records, membership and
+bookings are preserved. Rollback and its actor/timestamp are atomic and retryable;
+the reverted proposal cannot be applied again. Older approvals without snapshots
+are visible but cannot be rolled back. After intervening edits, generate a new
+proposal rather than overwriting newer work.

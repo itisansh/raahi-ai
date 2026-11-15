@@ -280,7 +280,7 @@ See [MiniMax AI SDK docs](https://platform.minimaxi.com/docs/api-reference/text-
 and the [AI SDK MiniMax provider](https://ai-sdk.dev/providers/community-providers/minimax).
 
 On Cloudflare, set the same variables as Worker vars/secrets (see
-[../operations/cloudflare.md](../operations/cloudflare.md)).
+[../operations/cloudflare.md](../../deploy/render/README.md)).
 
 ## Frontend
 
@@ -310,7 +310,7 @@ production. Avatars resolve members by
 collapsed state persists via
 `PUT /api/users/preferences/agent-panel` (response is the written preference
 snapshot — not a post-write re-read; see
-[../operations/cloudflare.md](../operations/cloudflare.md#hyperdrive-read-after-write)).
+[../operations/cloudflare.md](../../deploy/render/README.md)).
 
 On Workers, Better Auth and `SqlAgentSessionRepository` use the
 `HYPERDRIVE_CACHE_DISABLED` binding (`poolFresh`) so history/events polls see

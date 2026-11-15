@@ -7,7 +7,7 @@ import {
 
 const ENTRY: LocalJournalEntry = {
   id: "entry-1",
-  title: "Rain in Kyoto",
+  title: "Rain in Jaipur",
   body: "We waited under the temple gate.",
   occurredAt: "2026-07-19T08:00:00.000Z",
   updatedAt: "2026-07-19T08:00:00.000Z",

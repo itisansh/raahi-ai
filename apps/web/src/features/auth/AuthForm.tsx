@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/shared/api";
@@ -17,7 +17,6 @@ import {
 } from "@/shared/ui/otp-field";
 import { toastManager } from "@/shared/ui/toast";
 import { config } from "@/shared/config";
-import { CaptchaField, type CaptchaFieldRef } from "./ui/CaptchaField";
 import { credentialErrorKey } from "./auth-error";
 
 type Mode = "signIn" | "signUp";
@@ -67,9 +66,6 @@ function isEmailNotVerified(error: { code?: string; message?: string } | null | 
     );
 }
 
-function captchaHeaders(token: string | null): Record<string, string> {
-    return { "x-captcha-response": token ?? "" };
-}
 
 const linkButtonClassName =
     "inline-flex min-h-10 items-center justify-center text-sm text-muted-foreground transition-[color,scale] duration-[var(--dur-base)] ease-[var(--ease-out)] hover:text-foreground hover:underline active:scale-[var(--press-scale)]";
@@ -97,11 +93,6 @@ export function AuthForm() {
         useState<TwoFactorMethod>("totp");
     const [pending, setPending] = useState(false);
     const [resendIn, setResendIn] = useState(0);
-    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-    const captchaRef = useRef<CaptchaFieldRef>(null);
-    const captchaEnabled =
-        config.captchaProvider === "cloudflare-turnstile" &&
-        !!config.turnstileSiteKey;
 
     const isSignUp = mode === "signUp";
     const ns = isSignUp ? "signUp" : "signIn";
@@ -111,7 +102,6 @@ export function AuthForm() {
         setTwoFactorMethod("totp");
         setStep("twoFactor");
         setPending(false);
-        captchaRef.current?.reset();
     };
 
     useEffect(() => {
@@ -137,7 +127,6 @@ export function AuthForm() {
         setOtp("");
         setStep("otp");
         setResendIn(RESEND_COOLDOWN_SECONDS);
-        captchaRef.current?.reset();
     }
 
     function enterForgotEmail() {
@@ -147,7 +136,6 @@ export function AuthForm() {
         setNewPassword("");
         setConfirmPassword("");
         setResendIn(0);
-        captchaRef.current?.reset();
     }
 
     function enterForgotReset() {
@@ -159,17 +147,12 @@ export function AuthForm() {
     }
 
     async function sendOtp(options?: { announce?: boolean }) {
-        if (captchaEnabled && !captchaToken) return false;
 
         const result = await authClient.emailOtp.sendVerificationOtp({
             email,
             type: "email-verification",
-            fetchOptions: {
-                headers: captchaHeaders(captchaToken),
-            },
         });
 
-        captchaRef.current?.reset();
 
         if (result.error) {
             showAuthError(t("errors.otpSend"));
@@ -208,7 +191,6 @@ export function AuthForm() {
 
     async function submitCredentials(e: React.FormEvent) {
         e.preventDefault();
-        if (captchaEnabled && !captchaToken) return;
         if (isSignUp && password.length < MIN_PASSWORD_LENGTH) {
             showAuthError(t("errors.passwordTooShort"));
             return;
@@ -221,13 +203,9 @@ export function AuthForm() {
                     name,
                     email,
                     password,
-                    fetchOptions: {
-                        headers: captchaHeaders(captchaToken),
-                    },
                 });
                 if (result.error) {
                     showAuthError(t(`errors.${credentialErrorKey(result.error)}`, { origin: config.baseUrl }));
-                    captchaRef.current?.reset();
                     return;
                 }
                 // requireEmailVerification: account created, OTP emailed via
@@ -239,9 +217,6 @@ export function AuthForm() {
             const result = await signIn.email({
                 email,
                 password,
-                fetchOptions: {
-                    headers: captchaHeaders(captchaToken),
-                },
             });
             if (result.error) {
                 if (isEmailNotVerified(result.error)) {
@@ -250,11 +225,9 @@ export function AuthForm() {
                     return;
                 }
                 showAuthError(t(`errors.${credentialErrorKey(result.error)}`, { origin: config.baseUrl }));
-                captchaRef.current?.reset();
             }
         } catch (error) {
             showAuthError(t(error instanceof TypeError ? "errors.connection" : "errors.generic", { origin: config.baseUrl }));
-            captchaRef.current?.reset();
         } finally {
             setPending(false);
         }
@@ -353,7 +326,6 @@ export function AuthForm() {
 
     async function resendOtp() {
         if (resendIn > 0 || pending) return;
-        if (captchaEnabled && !captchaToken) return;
 
         setPending(true);
         try {
@@ -417,7 +389,6 @@ export function AuthForm() {
         setNewPassword("");
         setConfirmPassword("");
         setResendIn(0);
-        captchaRef.current?.reset();
     }
 
     function backToCredentials() {
@@ -427,7 +398,6 @@ export function AuthForm() {
         setNewPassword("");
         setConfirmPassword("");
         setResendIn(0);
-        captchaRef.current?.reset();
     }
 
     if (step === "twoFactor") {
@@ -673,13 +643,7 @@ export function AuthForm() {
                     </OTPField>
                 </div>
 
-                <div className="wf-enter">
-                    <CaptchaField
-                        key="otp-resend"
-                        ref={captchaRef}
-                        onTokenChange={setCaptchaToken}
-                    />
-                </div>
+                
 
                 <div className="wf-enter flex flex-col gap-2">
                     <Button
@@ -695,8 +659,7 @@ export function AuthForm() {
                         size="lg"
                         disabled={
                             pending ||
-                            resendIn > 0 ||
-                            (captchaEnabled && !captchaToken)
+                            resendIn > 0
                         }
                         onClick={resendOtp}
                     >
@@ -781,17 +744,12 @@ export function AuthForm() {
                 />
             </div>
 
-            <CaptchaField
-                key={mode}
-                ref={captchaRef}
-                onTokenChange={setCaptchaToken}
-            />
-            {captchaEnabled && !captchaToken && <p role="status" className="text-sm text-muted-foreground">{t("captcha.waiting")}</p>}
+            
 
             <Button
                 type="submit"
                 size="lg"
-                disabled={pending || (captchaEnabled && !captchaToken)}
+                disabled={pending}
             >
                 {t(`${ns}.submit`)}
             </Button>

@@ -22,11 +22,10 @@ export async function fetchJson<T>(options: FetchJsonOptions): Promise<T> {
       signal: controller.signal,
     });
     if (!res.ok) {
-      const body = await res.text().catch(() => "");
+      await res.body?.cancel();
       console.error("[geo] upstream error", {
         url: redactUrl(options.url),
         status: res.status,
-        body: body.slice(0, 500),
       });
       throw new GeoError(
         options.errorCode ?? "geo_failed",
@@ -50,7 +49,7 @@ export async function fetchJson<T>(options: FetchJsonOptions): Promise<T> {
 
 function redactUrl(url: string | URL): string {
   const parsed = new URL(typeof url === "string" ? url : url.toString());
-  for (const key of ["key", "api_key", "apikey", "access_token"]) {
+  for (const key of ["key", "api_key", "apikey", "apiKey", "access_token"]) {
     if (parsed.searchParams.has(key)) parsed.searchParams.set(key, "[redacted]");
   }
   return parsed.toString();

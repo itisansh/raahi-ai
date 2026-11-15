@@ -42,6 +42,7 @@ export class MongoBudgetStore implements BudgetStore {
       if (!row) throw new NotFoundError("proposal_not_found", "Proposal not found");
       const context = await this.context(tripId, actor, true, session);
       if ((row.payload as { kind?: string }).kind !== "budget_replan") throw new DomainError("budget_invalid_proposal", "Not a budget replan");
+      if ((row.payload as { rolledBackAt?: string } | null)?.rolledBackAt) throw new DomainError("proposal_rolled_back", "Generate a fresh proposal after rollback");
       if (row.resultTripId) return { tripId: row.resultTripId, revision: null };
       if (row.expiresAt.getTime() <= Date.now()) throw new DomainError("proposal_expired", "Generate a fresh proposal");
       const removed = mutate(context, row.payload, Number(row.baseRevision));
@@ -52,7 +53,7 @@ export class MongoBudgetStore implements BudgetStore {
       const costs = { ...intake.budgetForecast!.costs };
       removed.forEach(stopId => { delete costs[stopId]; });
       await this.db.models.trips.updateOne({ id: tripId }, { $set: { intake: { ...intake, budgetForecast: { ...intake.budgetForecast, costs } } } }, { session, runValidators: true });
-      await this.db.models.proposals.updateOne({ id, ownerId: actor }, { $set: { resultTripId: tripId, approvedAt: new Date(), payload: { ...row.payload as object, appliedRevision: revision, approvedBy: actor } } }, { session, runValidators: true });
+      await this.db.models.proposals.updateOne({ id, ownerId: actor }, { $set: { resultTripId: tripId, approvedAt: new Date(), payload: { ...row.payload as object, appliedRevision: revision, approvedBy: actor, beforeStops: context.trip.stops, afterStops: context.trip.stops.filter(stop => !removed.includes(stop.id)), beforeForecast: intake.budgetForecast } } }, { session, runValidators: true });
       return { tripId, revision };
     });
     if (result.revision !== null) await this.notify(tripId, actor, result.revision);

@@ -36,7 +36,7 @@ title: "Reference: deployment sources"
 - Frontend deploys to Pages (build `apps/web`, publish `apps/web/dist`).
 - `BETTER_AUTH_SECRET` is a Worker secret; `BASE_URL` is a Worker var, never
   committed. `deploy/cloudflare/secrets.example.json` lists key names only.
-  See [../operations/cloudflare.md](../operations/cloudflare.md).
+  See [../operations/cloudflare.md](../../deploy/render/README.md).
 
 ## Docker Compose
 
@@ -56,4 +56,4 @@ title: "Reference: deployment sources"
   and `web` (static build served by a lightweight server). The API uses a plain
   `DATABASE_URL` pointing at the `postgres` service — no Hyperdrive locally.
   `deploy/docker/.env.example` documents required env.
-  See [../operations/docker.md](../operations/docker.md).
+  See [../operations/docker.md](../../deploy/render/README.md).

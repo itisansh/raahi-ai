@@ -1,3 +1,4 @@
+import { initializeTripFinance } from "./002-trip-finance";
 import type { MongoDatabase } from "../db";
 
 /** Additive and repeatable. Never syncIndexes(): existing indexes are not dropped. */
@@ -21,4 +22,5 @@ export async function initializeMongo(database: MongoDatabase) {
   await database.models.counters.updateOne({ name: "agent_messages" }, { $setOnInsert: { value: 0 } }, { upsert: true, runValidators: true });
   await db.collection("mongo_migrations").createIndex({ name: 1 }, { unique: true });
   await db.collection("mongo_migrations").updateOne({ name: "001-mongo-indexes" }, { $setOnInsert: { appliedAt: new Date() } }, { upsert: true });
+  await initializeTripFinance(database);
 }
