@@ -142,7 +142,8 @@
       "now": "Just now",
       "minutesAgo": "{{count}} min ago",
       "hoursAgo": "{{count}}h ago"
-    }
+    },
+    "routeHint": "Dashed lines show stop order, not road or walking directions."
   },
   "streetView": {
     "open": "Open street view",
@@ -279,5 +280,6 @@
   },
   "nav": {
     "label": "Trip sections"
-  }
+  },
+  "navigation": "Trip views"
 }

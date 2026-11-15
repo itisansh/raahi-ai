@@ -4,14 +4,15 @@
     "close": "收起行程助手"
   },
   "panel": {
-    "title": "行程助手",
+    "title": "Raahi AI",
     "empty": "助手会安静地关注这次行程。@agent 可以向它提问。",
-    "inputPlaceholder": "聊聊这次行程…(@agent 让助手回复)",
+    "inputPlaceholder": "向 Raahi 询问行程…",
     "send": "发送",
     "agentName": "助手",
     "systemName": "系统",
     "operationBy": "{{name}}",
-    "thinking": "思考中…"
+    "thinking": "思考中…",
+    "description": "询问行程、调整计划或查询费用。"
   },
   "attach": {
     "add": "添加附件",

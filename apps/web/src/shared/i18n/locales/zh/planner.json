@@ -141,7 +141,8 @@
       "now": "刚刚",
       "minutesAgo": "{{count}} 分钟前",
       "hoursAgo": "{{count}} 小时前"
-    }
+    },
+    "routeHint": "虚线表示游览顺序，并非道路或步行路线。"
   },
   "streetView": {
     "open": "展开街景",
@@ -277,5 +278,6 @@
   },
   "nav": {
     "label": "行程导航"
-  }
+  },
+  "navigation": "行程视图"
 }

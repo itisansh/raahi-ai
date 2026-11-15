@@ -210,11 +210,17 @@ describe("Mongo replica-set persistence", () => {
       try {
         const signup = await app.request("/api/auth/sign-up/email", { method: "POST", headers: { "content-type": "application/json", Origin: "http://localhost:8780" }, body: JSON.stringify({ name: "New Traveler", email: "new@example.test", password: "New-Synthetic-Password-123!" }) });
         expect(signup.status).toBe(200);
-        const newUser = await signup.json() as { user: { id: string }; token: null };
-        expect(typeof newUser.user.id).toBe("string"); expect(newUser.token).toBeNull();
+        const newUser = await signup.json() as { user: { id: string }; token: string };
+        expect(typeof newUser.user.id).toBe("string"); expect(typeof newUser.token).toBe("string");
+        const signupCookie = signup.headers.getSetCookie().map(c => c.split(";")[0]).join("; ");
+        expect((await app.request("/api/trips", { headers: { cookie: signupCookie } })).status).toBe(200);
+        const immediateLogin = await app.request("/api/auth/sign-in/email", { method: "POST", headers: { "content-type": "application/json", Origin: "http://localhost:8780" }, body: JSON.stringify({ email: "new@example.test", password: "New-Synthetic-Password-123!" }) });
+        expect(immediateLogin.status).toBe(200);
         const provisioned = await new MongoTripRepository(connection).findSummaries(newUser.user.id);
         expect(provisioned.length).toBe(1);
         expect(provisioned[0]!.currency).toBe("INR");
+        const sendOtp = await app.request("/api/auth/email-otp/send-verification-otp", { method: "POST", headers: { "content-type": "application/json", Origin: "http://localhost:8780" }, body: JSON.stringify({ email: "new@example.test", type: "email-verification" }) });
+        expect(sendOtp.status).toBe(200);
         const otpMail = log.mock.calls.flat().find(value => typeof value === "string" && value.includes("verification code is"));
         const otp = String(otpMail).match(/verification code is (\d{6})/)?.[1];
         expect(otp).toBeDefined();

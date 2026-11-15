@@ -33,6 +33,10 @@ local `.env`. The Blueprint prompts for private values in Render.
    during the frontend build, so changing the service URL requires a rebuild.
    The Blueprint generates a stable `BETTER_AUTH_SECRET`; do not rotate it on
    every deployment. `GEO_PROVIDER=geoapify` is already selected.
+   Set `GEO_OSM_USER_AGENT` privately to `RaahiAI/0.1 (<service-origin>; geo-agent)`.
+   The service name does not guarantee the hostname; copy the assigned URL from
+   Render. The build rejects missing/non-HTTPS origins, localhost, paths and
+   trailing slashes, and requires `TRUSTED_ORIGINS` to include `BASE_URL`.
 4. Configure the external S3 bucket. Do not change storage to `fs`: uploaded
    files on a free service disappear on restart, redeploy or idle shutdown.
    `S3_FORCE_PATH_STYLE=true` is included; adjust only if your provider needs
@@ -43,6 +47,27 @@ Build: `bash deploy/render/build.sh`.
 Start: `corepack pnpm --filter @opentrip/api start`.
 Service root: repository root. Node: 24.
 `WEB_DIST_PATH=../web/dist` resolves from the API workspace.
+
+## Updating an existing service
+
+Keep service-specific URLs and credentials in Render, not Git. For an existing
+Blueprint service, set newly added `sync: false` variables in its Environment
+page; Blueprint sync does not prompt for them again. Remove manually copied
+local `PORT` and `WEB_PORT` entries and let Render supply its port. Confirm
+`STORAGE_BACKEND=s3`, all five S3 connection values, and `EMAIL_PROVIDER=resend`
+with `EMAIL_FROM` and `RESEND_API_KEY`. Console email can allow boot but does not
+deliver account verification emails.
+
+After changing `BASE_URL`, choose **Save, rebuild, and deploy**, or save and use
+**Manual Deploy → Deploy latest commit** after pushing the repository changes.
+**Save and deploy** reuses the existing frontend build; **Save only** does not
+deploy. See [Render environment settings](https://render.com/docs/configure-environment-variables).
+
+Weather has two separate integrations: `TRAVEL_WEATHER_PROVIDER=open-meteo`
+enables travel evidence, while `/api/weather` and the trip assistant's
+`checkWeather` use `OPENWEATHERMAP_API_KEY`. The latter return
+`weather_not_configured` without that key; a successful health check does not
+verify weather or email delivery. See [weather configuration](../../docs/backend/weather.md).
 
 ## Acceptance
 

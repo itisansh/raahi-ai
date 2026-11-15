@@ -4,14 +4,15 @@
     "close": "Close trip agent"
   },
   "panel": {
-    "title": "Trip agent",
-    "empty": "The agent watches this trip quietly. Mention @agent to ask something.",
-    "inputPlaceholder": "Ask about this trip… (@agent for a reply)",
+    "title": "Raahi AI",
+    "empty": "Ask Raahi to suggest stops, adjust a day or explain your trip budget. Your group can see this conversation.",
+    "inputPlaceholder": "Ask Raahi about your trip…",
     "send": "Send",
     "agentName": "Agent",
     "systemName": "System",
     "operationBy": "{{name}}",
-    "thinking": "Thinking…"
+    "thinking": "Thinking…",
+    "description": "Ask about this trip, change plans or check costs."
   },
   "attach": {
     "add": "Attach a file",

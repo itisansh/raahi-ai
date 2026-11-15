@@ -56,3 +56,7 @@ server cache.
 
 `OPENWEATHERMAP_API_KEY` (see `.env.example`). When unset, weather requests fail
 with `weather_not_configured` (`503`).
+
+`TRAVEL_WEATHER_PROVIDER=open-meteo` configures the separate travel-evidence
+provider used by `IndiaTravelService`. It does not select the provider for
+`GET /api/weather` or `checkWeather`; those still use OpenWeatherMap.

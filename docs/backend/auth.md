@@ -9,22 +9,23 @@ Reference: [../reference/backend-sources.md](../reference/backend-sources.md).
 ## Configuration
 
 `apps/api/src/integrations/auth/auth.ts` builds Better Auth with the shared
-`pg.Pool`:
+Mongo adapter on Node (SQL pools are retained only for legacy tooling):
 
 ```ts
 export const auth = betterAuth({
-  database: pool,               // pg.Pool
-  appName: "OpenTrip",
+  database: adapter,            // Mongo adapter on Node
+  appName: "Raahi AI",
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: false,
+    autoSignIn: true,
     sendResetPassword: async ({ user, url }) => {
       // Link email via EMAIL_PROVIDER (console | resend)
     },
   },
   emailVerification: {
-    sendOnSignUp: true,
-    sendOnSignIn: true,
+    sendOnSignUp: false,
+    sendOnSignIn: false,
     autoSignInAfterVerification: true,
   },
   socialProviders: config.googleOAuth
@@ -75,24 +76,18 @@ export const auth = betterAuth({
 });
 ```
 
-### Email OTP registration
+### Registration and immediate sign-in
 
-Email/password sign-up creates the user with `emailVerified=false` and does
-**not** issue a session until the user verifies with a 6-digit OTP. The
-`emailOTP` plugin overrides Better Auth's default verification link so
-`emailVerification.sendOnSignUp` / `sendOnSignIn` send an OTP instead.
+Email/password signup creates an account and issues a session cookie immediately.
+The SPA refreshes its session and enters the authenticated home (or resumes a
+trip/invite deep link). `emailVerified` remains false; signup does not establish
+inbox ownership. Password sign-in also accepts existing unverified accounts.
 
-Flow:
-
-1. `POST /api/auth/sign-up/email` — create account (captcha when enabled).
-2. OTP emailed via the configured provider.
-3. `POST /api/auth/email-otp/verify-email` — mark verified and auto sign-in
-   (`autoSignInAfterVerification`).
-4. Unverified password sign-in returns `EMAIL_NOT_VERIFIED` and triggers a
-   fresh OTP (`sendOnSignIn`); the SPA shows the same OTP step.
-
-Resend uses `POST /api/auth/email-otp/send-verification-otp` (also captcha-
-protected when captcha is enabled).
+No verification email is automatically sent at signup or sign-in. Explicit email
+verification, email changes and password recovery retain the OTP plugin and
+configured email provider. Two-factor challenges still apply to enrolled accounts.
+`POST /api/auth/email-otp/send-verification-otp` requests verification explicitly;
+`POST /api/auth/email-otp/verify-email` marks the address verified.
 
 ### Change email
 
@@ -404,8 +399,8 @@ sign-in and sign-up use the standard Better Auth endpoints and persist the
 returned session token. Subsequent requests send
 `Authorization: Bearer <session-token>`; browser cookie sessions are unchanged.
 
-Email sign-up on native must also complete
-`POST /api/auth/email-otp/verify-email` before a session exists.
+Email signup on native also returns an immediate session token. Email verification
+is a separate action, not a prerequisite for signing in.
 
 Google OAuth uses the following bridge so a long-lived session token never
 appears in a callback URL. The native client must open the start URL inside

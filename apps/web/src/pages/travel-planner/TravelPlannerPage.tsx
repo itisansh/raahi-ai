@@ -65,7 +65,7 @@ type Tab = "map" | "schedule" | "reservations" | "budget";
 
 const MIN_SIDEBAR_WIDTH = 0;
 const MAX_SIDEBAR_WIDTH = 55;
-const DEFAULT_SIDEBAR_WIDTH = 30;
+const DEFAULT_SIDEBAR_WIDTH = 44;
 const SIDEBAR_STEP = 1;
 
 export function TravelPlannerPage({ tripId }: { tripId: string }) {
@@ -119,8 +119,9 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
 
   useEffect(() => {
     if (!preferences) return;
+    const preferredWidth = preferences.plannerSidebar?.width;
     const width = clamp(
-      preferences.plannerSidebar?.width ?? DEFAULT_SIDEBAR_WIDTH,
+      preferredWidth === 30 ? DEFAULT_SIDEBAR_WIDTH : preferredWidth ?? DEFAULT_SIDEBAR_WIDTH,
       MIN_SIDEBAR_WIDTH,
       MAX_SIDEBAR_WIDTH,
     );
@@ -209,8 +210,11 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
   );
 
   // Open the agent panel once when a create-wizard prompt draft is waiting.
+  const openedSeedTrip = useRef<string | null>(null);
   useEffect(() => {
     if (!agentEnabled || !trip?.agentSeedPending) return;
+    if (openedSeedTrip.current === trip.id) return;
+    openedSeedTrip.current = trip.id;
     if (!agentCollapsed) return;
     setAgentPanel(false);
   }, [agentEnabled, trip?.agentSeedPending, trip?.id, agentCollapsed, setAgentPanel]);
@@ -593,12 +597,31 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
     ? trip.stops.find((s) => s.id === selectedStopId)
     : undefined;
 
+  const floatingMembers = noteEditingStop ? null : (
+    <FloatingMembers
+      tripId={trip.id}
+      members={trip.members}
+      canInvite={trip.permissions.canInvite}
+      onlineUserIds={realtime.presence.map((member) => member.userId)}
+      onLocateMe={() => {
+        if (tab !== "map") setTab("map");
+        setLocateSignal((n) => n + 1);
+      }}
+    />
+  );
+
   // All four mode panes stay mounted so switching modes preserves each pane's
   // scroll position and keeps the MapLibre canvas alive; only the active pane
   // is visible. The note editor overlays them all while open.
   const panes = (
-    <div className="relative min-h-0 flex-1 overflow-hidden">
-      <div className="absolute left-3 top-3 z-20"><MedicalHelp tripId={trip.id} stops={trip.stops} selectedStopId={selectedStopId} /></div>
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="relative z-20 m-3 flex w-fit max-w-[calc(100%-1.5rem)] flex-none flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-2 shadow-md">
+        {!isMobile && <Tabs items={tabItems} value={tab} alwaysShowLabels onValueChange={value => { setNoteEditingStopId(null); setTab(value as Tab); }} aria-label={t("navigation")} />}
+        <MedicalHelp tripId={trip.id} stops={trip.stops} selectedStopId={selectedStopId} />
+        {floatingMembers}
+        {!isMobile && agentEnabled && agentCollapsed && <AgentToggle onOpen={() => setAgentPanel(false)} />}
+      </div>
+      <div className="relative min-h-0 flex-1">
       {(!online || tripError instanceof TypeError) && <div role="status" className="absolute bottom-3 left-3 right-3 z-20 rounded-lg border border-border bg-background p-3 text-sm">{offlineCopy.offline}<Button type="button" variant="outline" size="sm" onClick={() => void refetch()}>{offlineCopy.retry}</Button></div>}
       <PlannerPane active={!noteEditingStop && tab === "map"}>
         <TripMapView
@@ -606,7 +629,10 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
           numbers={numbers}
           day={day}
           activeStopId={selectedStopId}
-          onSelectStop={selectStop}
+          onSelectStop={(id) => {
+            selectStop(id);
+            if (sidebarCollapsed) { setSidebarWidth(DEFAULT_SIDEBAR_WIDTH); persistSidebar(DEFAULT_SIDEBAR_WIDTH); }
+          }}
           picking={picking}
           onPick={handleMapPick}
           onAddStopHere={addStopAt}
@@ -688,21 +714,10 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
           />
         </div>
       ) : null}
+      </div>
     </div>
   );
 
-  const floatingMembers = noteEditingStop ? null : (
-    <FloatingMembers
-      tripId={trip.id}
-      members={trip.members}
-      canInvite={trip.permissions.canInvite}
-      onlineUserIds={realtime.presence.map((member) => member.userId)}
-      onLocateMe={() => {
-        if (tab !== "map") setTab("map");
-        setLocateSignal((n) => n + 1);
-      }}
-    />
-  );
 
   if (isMobile) {
     return (
@@ -721,7 +736,6 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
           {!noteEditingStop && tab === "map" ? (
             <MobileItinerarySheet {...sidebarProps} />
           ) : null}
-          {floatingMembers}
         </main>
         <MobileTabBar
           items={tabItems}
@@ -805,16 +819,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
                 />
               </div>
               {trip.permissions.canEdit && online && <ExistingTripPlanning tripId={trip.id} />}
-              <Tabs
-                items={tabItems}
-                value={tab}
-                onValueChange={(v) => {
-                  setNoteEditingStopId(null);
-                  setTab(v as Tab);
-                }}
-                aria-label={t("tabs.map")}
-                className="mt-0.5 shrink-0"
-              />
+
             </div>
           }
         >
@@ -832,8 +837,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
         >
           <main className="relative flex min-w-0 flex-1 flex-col">
             {panes}
-            {floatingMembers}
-          </main>
+            </main>
       </div>
 
           {agentEnabled ? (
@@ -853,9 +857,7 @@ export function TravelPlannerPage({ tripId }: { tripId: string }) {
         </div>
       </Splitter>
 
-      {agentEnabled && agentCollapsed ? (
-        <AgentToggle onOpen={() => setAgentPanel(false)} />
-      ) : null}
+
 
       {agentEnabled ? (
         <AgentInterventionToasts

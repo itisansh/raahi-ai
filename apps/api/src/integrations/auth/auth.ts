@@ -46,14 +46,9 @@ export interface CreateAuthOptions {
 const OTP_EXPIRES_IN_SECONDS = 300;
 
 
-/** Build Better Auth over the selected database adapter. Email + password (OTP-verified
- * sign-up) plus optional Google OAuth, change-email / password reset mail,
- * and TOTP two-factor authentication.
- *
- * Email registration requires OTP verification before a session is issued
- * (`requireEmailVerification` + `emailOTP` with
- * `overrideDefaultEmailVerification`). The outbound mail adapter is selected
- * via `EMAIL_PROVIDER` (`console` | `resend`).
+/** Build Better Auth with immediate email/password signup sessions, optional
+ * Google OAuth, email-change verification, password reset and TOTP.
+ * Signup does not claim inbox ownership: emailVerified stays false until verified.
  *
  * `defaultCurrency` is a user preference surfaced on every session; the planner
  * uses it as the default currency when composing a stop cost.
@@ -92,7 +87,8 @@ export function createAuth(
         },
         emailAndPassword: {
             enabled: true,
-            requireEmailVerification: true,
+            requireEmailVerification: false,
+            autoSignIn: true,
             sendResetPassword: async ({ user, url }, request) => {
                 const message = buildLinkEmail({
                     to: user.email,
@@ -109,11 +105,9 @@ export function createAuth(
             },
         },
         emailVerification: {
-            // With emailOTP.overrideDefaultEmailVerification, this sends an OTP
-            // instead of a magic link. sendOnSignIn covers unverified password
-            // sign-in attempts so the client can show the OTP step.
-            sendOnSignUp: true,
-            sendOnSignIn: true,
+            // Explicit verification and account-recovery flows still use email OTP.
+            sendOnSignUp: false,
+            sendOnSignIn: false,
             autoSignInAfterVerification: true,
         },
         socialProviders:

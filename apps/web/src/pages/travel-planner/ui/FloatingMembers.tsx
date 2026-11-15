@@ -21,8 +21,8 @@ export function FloatingMembers({
   const { t } = useTranslation("planner");
   const online = new Set(onlineUserIds);
   return (
-    <div className="pointer-events-none absolute right-3 bottom-3 z-20 flex items-center gap-2.5">
-      <div className="pointer-events-auto flex items-center">
+    <div className="flex min-w-0 max-w-full items-center gap-2.5">
+      <div className="flex min-w-0 max-w-40 items-center overflow-x-auto">
         {members.map((m, i) => {
           const locateSelf = Boolean(m.isCurrentUser && onLocateMe);
           return (

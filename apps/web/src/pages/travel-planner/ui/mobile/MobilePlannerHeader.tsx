@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { PanelToggleIcon } from "@/widgets/app-sidebar";
+import { MessageCircle } from "lucide-react";
 import { cn, interactive } from "@/shared/lib";
 import { BackButton } from "../BackButton";
 
@@ -36,11 +36,11 @@ export function MobilePlannerHeader({
           aria-label={ta("toggle.open")}
           title={ta("toggle.open")}
           className={cn(
-            "flex size-10 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground",
+            "flex min-h-10 gap-2 px-3 flex-none items-center justify-center rounded-md bg-brand text-brand-foreground hover:bg-accent hover:text-foreground",
             interactive,
           )}
         >
-          <PanelToggleIcon className="size-4" />
+          <MessageCircle className="size-4" aria-hidden /><span className="text-sm">{ta("panel.title")}</span>
         </button>
       ) : null}
     </header>

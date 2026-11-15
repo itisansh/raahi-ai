@@ -9,7 +9,7 @@ vi.mock("@/shared/api", () => ({ apiFetch: mocks.fetch, ApiError: class extends 
 vi.mock("@/app/router", () => ({ useRouter: () => ({ navigate: vi.fn() }) }));
 vi.mock("@tanstack/react-query", () => ({ useQueryClient: () => ({ invalidateQueries: vi.fn() }) }));
 vi.mock("@/features/spoken-summary", () => ({ useReplySpeech: () => ({ state: "idle", play: mocks.play, stop: mocks.stop, resume: mocks.resume }) }));
-vi.mock("@/features/voice-input", () => ({ VoiceInput: ({ onUse, onStart }: { onUse: (text: string) => void; onStart: () => void }) => <button onClick={() => { onStart(); onUse("Two friends from Jaipur for three days"); }}>Test microphone</button> }));
+vi.mock("@/features/voice-input", () => ({ VoiceInput: ({ onUse, onStart, onSend }: { onUse: (text: string) => void; onStart: () => void; onSend: (text: string) => void }) => <><button onClick={() => { onStart(); onUse("Two friends from Jaipur for three days"); }}>Test microphone</button><button onClick={() => onSend("Two friends from Jaipur for three days")}>Send finalized voice</button></> }));
 let host: HTMLDivElement;
 let root: Root;
 const response = { status: "clarification", proposalId: "reply-1", reply: { text: "What is your budget?", language: "en" }, intent: {}, missing: ["budgetRupees"] };
@@ -70,4 +70,12 @@ it("sends existing trip context without creating or approving a trip automatical
   await type("Add a museum in the afternoon"); await click("Send trip request");
   expect(JSON.parse(mocks.fetch.mock.calls[0]![1].body)).toMatchObject({ tripId: "existing-trip" });
   expect(mocks.fetch).toHaveBeenCalledTimes(1);
+});
+
+it("submits finalized voice directly without needing a second Send click", async () => {
+  mocks.fetch.mockResolvedValue(response); await render();
+  await click("Send finalized voice");
+  expect(mocks.fetch).toHaveBeenCalledOnce();
+  expect(JSON.parse(mocks.fetch.mock.calls[0]![1].body).prompt).toBe("Two friends from Jaipur for three days");
+  expect(host.textContent).toContain(response.reply.text);
 });

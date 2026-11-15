@@ -1691,3 +1691,25 @@ success is newly claimed; no secrets were displayed or changed.
   (place search returning real Indian hospital/clinic/pharmacy listings and
   directions to returned facilities). The adapter is ready; the gate is a live
   network test, not a code gap.
+
+## 50. Render deployment configuration follow-up (2026-11-15)
+
+- User reports Blueprint deployment now boots and `/api/health` returns 200 after
+  configuring S3 and resolving email configuration. Private Render values and
+  live user journeys have not been independently verified.
+- Confirmed unsupported shutdown override is already absent. Changed
+  `GEO_OSM_USER_AGENT` to `sync: false` so the Blueprint does not impose an
+  incorrect service hostname; configure the existing service in its dashboard.
+- Hardened `deploy/render/build.sh`: require a public HTTPS origin without path,
+  credentials or trailing slash, reject loopback, and require `TRUSTED_ORIGINS`
+  to include the origin. Actual assigned hostname still needs operator checking.
+- Diagnosed weather: `TRAVEL_WEATHER_PROVIDER` only selects travel evidence;
+  `/api/weather` and `checkWeather` still require `OPENWEATHERMAP_API_KEY`.
+  Documented this separation without changing provider contracts.
+- Updated Render guide with existing-service environment repair and rebuild
+  steps. No deployed hostname, credentials or private environment values added.
+- Validation PASS: `bash -n deploy/render/build.sh`, 10 isolated Node origin
+  validation cases (via Python harness), `pnpm docs:check`, `git diff --check`.
+  Full application build/tests not run: changes are deployment validation and
+  documentation only. No push, deploy, remote environment mutation or live
+  weather/email verification performed.

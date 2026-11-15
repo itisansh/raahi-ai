@@ -1,3 +1,5 @@
+import { Button } from "@/shared/ui/button";
+import { Dialog, DialogTrigger, DialogPortal, DialogBackdrop, DialogSheetViewport, DialogSheetPopup, DialogClose, DialogFooter, DialogTitle, DialogDescription, DialogHeader, DialogPanel } from "@/shared/ui/dialog";
 import { medicalCopy as copy, emergencyContacts } from "../model/copy";
 export function EmergencyContactLinks() {
   return <div className="flex flex-col gap-2 text-sm">
@@ -6,8 +8,11 @@ export function EmergencyContactLinks() {
   </div>;
 }
 export function EmergencyContacts() {
-  return <details className="fixed bottom-4 left-4 z-40 max-w-[min(24rem,calc(100vw-2rem))] rounded-lg border border-border bg-background p-3 shadow-sm">
-    <summary className="cursor-pointer text-sm font-medium">{copy.contacts}</summary>
-    <div className="pt-3"><EmergencyContactLinks /></div>
-  </details>;
+  return <Dialog>
+    <DialogTrigger render={<Button variant="outline" className="min-h-10" />}>{copy.emergency}</DialogTrigger>
+    <DialogPortal><DialogBackdrop className="fixed inset-0 z-50 bg-black/40" /><DialogSheetViewport><DialogSheetPopup><DialogHeader><DialogTitle>{copy.contacts}</DialogTitle><DialogDescription>{copy.region}</DialogDescription></DialogHeader>
+      <DialogPanel><EmergencyContactLinks /></DialogPanel>
+      <DialogFooter><DialogClose render={<Button variant="outline" />}>{copy.close}</DialogClose></DialogFooter>
+    </DialogSheetPopup></DialogSheetViewport></DialogPortal>
+  </Dialog>;
 }

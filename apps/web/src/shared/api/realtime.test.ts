@@ -19,6 +19,9 @@ class FakeSocket implements SocketLike {
   }
 
   close(code?: number, reason?: string): void {
+    if (code !== undefined && code !== 1000 && (code < 3000 || code > 4999)) {
+      throw new DOMException("Invalid client WebSocket close code", "InvalidAccessError");
+    }
     this.closed.push({ code, reason });
   }
 
@@ -64,6 +67,20 @@ function fixture() {
 }
 
 describe("TripRealtimeClient", () => {
+  it("closes browser connection errors with a valid code and reconnects", () => {
+    const f = fixture();
+    const client = new TripRealtimeClient({
+      tripId: "trip-1", onStatus: vi.fn(), onPresence: vi.fn(),
+      onChange: vi.fn(), onResync: vi.fn(),
+    }, f.dependencies);
+    client.start();
+    expect(() => f.sockets[0]!.onerror?.()).not.toThrow();
+    f.sockets[0]!.onclose?.();
+    expect(f.scheduled).toHaveLength(1);
+    f.scheduled[0]!();
+    expect(f.sockets).toHaveLength(2);
+    client.stop();
+  });
   it("resyncs the initial GET/WebSocket race and applies ordered changes", () => {
     const f = fixture();
     const onResync = vi.fn();

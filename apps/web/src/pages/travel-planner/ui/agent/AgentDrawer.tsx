@@ -35,8 +35,9 @@ export function AgentDrawer({
   return (
     <aside
       aria-hidden={!open}
+      inert={!open}
       className={cn(
-        "relative flex h-dvh flex-none flex-col overflow-hidden bg-sidebar transition-[width] duration-[var(--dur-slow)] ease-[var(--ease-out)]",
+        "absolute right-0 top-0 z-30 xl:relative flex h-dvh flex-none flex-col overflow-hidden bg-card shadow-lg transition-[width] duration-[var(--dur-slow)] ease-[var(--ease-out)]",
         open ? "w-[min(360px,85vw)]" : "w-0",
       )}
     >
@@ -46,13 +47,14 @@ export function AgentDrawer({
           !open && "pointer-events-none opacity-0",
         )}
       >
-        <div className="flex flex-none items-center px-3 pt-4 pb-2">
+        <div className="flex flex-none items-center justify-between gap-2 border-b border-border bg-brand-muted px-4 py-3">
+          <div><h2 className="font-semibold">{t("panel.title")}</h2><p className="text-xs text-muted-foreground">{t("panel.description")}</p></div>
           <button
             type="button"
             onClick={onClose}
             aria-label={t("toggle.close")}
             title={t("toggle.close")}
-            className="wf-interactive wf-pressable -ml-1 flex size-7 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="wf-interactive wf-pressable -ml-1 flex size-10 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             <PanelToggleIcon className="size-4" />
           </button>

@@ -4,15 +4,29 @@ set -euo pipefail
 # BASE_URL is embedded into the frontend bundle at build time (__WETRAVEL_BASE_URL__).
 # Deploying with a localhost value means the browser will call localhost instead of
 # the live service. Fail fast so this is never silently deployed.
-if [[ "${BASE_URL:-}" =~ ^https?://localhost ]]; then
-  echo "ERROR: BASE_URL is set to a localhost address (${BASE_URL})." >&2
-  echo "       Set BASE_URL to the production HTTPS origin in the Render environment before building." >&2
-  exit 1
-fi
-if [[ -z "${BASE_URL:-}" ]]; then
-  echo "ERROR: BASE_URL is not set. Set it to the production HTTPS origin (e.g. https://raahi.onrender.com)." >&2
-  exit 1
-fi
+node --input-type=module <<'NODE'
+const fail = (message) => {
+  console.error(`ERROR: ${message}`);
+  process.exit(1);
+};
+const value = process.env.BASE_URL ?? '';
+let url;
+try {
+  url = new URL(value);
+} catch {
+  fail('BASE_URL must be the public HTTPS service origin.');
+}
+const hostname = url.hostname;
+if (url.protocol !== 'https:' || value !== url.origin ||
+    hostname === 'localhost' || hostname.endsWith('.localhost') ||
+    hostname === '[::1]' || hostname === '0.0.0.0' || hostname.startsWith('127.')) {
+  fail('BASE_URL must be a public HTTPS origin without a path, trailing slash, or credentials.');
+}
+const trustedOrigins = (process.env.TRUSTED_ORIGINS ?? '').split(',').map(value => value.trim());
+if (!trustedOrigins.includes(url.origin)) {
+  fail('TRUSTED_ORIGINS must include the exact BASE_URL origin.');
+}
+NODE
 
 corepack enable
 corepack pnpm install --frozen-lockfile --prod=false

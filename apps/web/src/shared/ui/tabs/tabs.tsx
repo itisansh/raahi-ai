@@ -15,6 +15,7 @@ export interface TabsProps {
   className?: string;
   "aria-label"?: string;
   static?: boolean;
+  alwaysShowLabels?: boolean;
 }
 
 /**
@@ -33,6 +34,7 @@ export function Tabs({
   className,
   "aria-label": ariaLabel,
   static: isStatic,
+  alwaysShowLabels = false,
 }: TabsProps) {
   return (
     <div
@@ -54,7 +56,7 @@ export function Tabs({
             aria-selected={selected}
             onClick={() => onValueChange(item.value)}
             className={cn(
-              "relative flex h-8 min-w-8 items-center justify-center overflow-hidden rounded-md px-2 text-xs font-medium",
+              "relative flex h-10 min-w-10 items-center justify-center overflow-hidden rounded-md px-2 text-xs font-medium",
               "transition-[background-color,color,box-shadow,scale] duration-[var(--dur-slow)] ease-[var(--ease-out)]",
               "after:absolute after:-inset-y-1 after:content-['']",
               selected
@@ -69,7 +71,7 @@ export function Tabs({
                 "overflow-hidden whitespace-nowrap",
                 "transition-[max-width,opacity,margin] duration-[var(--dur-slow)] ease-[var(--ease-out)]",
                 Icon
-                  ? selected
+                  ? selected || alwaysShowLabels
                     ? "ml-1.5 max-w-[120px] opacity-100"
                     : "max-w-0 opacity-0"
                   : "max-w-[160px] opacity-100",

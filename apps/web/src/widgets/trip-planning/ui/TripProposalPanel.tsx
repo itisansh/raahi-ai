@@ -42,17 +42,21 @@ export function TripProposalPanel({ tripId, onSaved }: { tripId?: string; onSave
     if (!enabled) speech.stop();
   };
   const cancel = () => { active.current?.abort(); active.current = null; setBusy(false); speech.stop(); };
-  const generate = async () => {
-    if (!canSend || active.current) return;
+  const generate = async (voiceText?: string) => {
+    const submitted = voiceText ? [draft.trim(), voiceText.trim()].filter(Boolean).join(" ") : draft.trim();
+    const prompt = [...turns.map(turn => turn.request), submitted].join("\n\n");
+    if (!submitted || prompt.length > 4000 || busy || saving || (!voiceText && recording) || active.current) {
+      if (voiceText) setDraft(submitted);
+      return;
+    }
     speech.stop();
-    const submitted = draft.trim();
     const controller = new AbortController();
     active.current = controller;
     setBusy(true); setError(null);
     const timeout = setTimeout(() => controller.abort(), 180_000);
     try {
       const next = await apiFetch<PlanningResult>("/api/planning/preview", {
-        method: "POST", body: JSON.stringify({ prompt: requestText, ...(tripId ? { tripId } : {}) }), signal: controller.signal,
+        method: "POST", body: JSON.stringify({ prompt, ...(tripId ? { tripId } : {}) }), signal: controller.signal,
       });
       if (active.current !== controller) return;
       setTurns(current => [...current, { id: next.proposalId, request: submitted, result: next }]);
@@ -147,6 +151,7 @@ export function TripProposalPanel({ tripId, onSaved }: { tripId?: string; onSave
         {error && <p role="alert" className="mb-2 text-sm text-destructive">{error}</p>}
         {requestText.length > 4000 && <p role="alert" className="mb-2 text-xs text-destructive">{copy.tooLong}</p>}
         <VoiceInput compact={turns.length > 0 || draft.length > 0} variant="orb" disabled={busy || saving} agentState={busy ? "thinking" : speech.state === "speaking" ? "speaking" : "idle"}
+          onSend={text => { void generate(text); }}
           statusLabel={busy ? copy.generating : speech.state === "speaking" ? copy.speaking : undefined} onStart={speech.stop} onActivityChange={setRecording} onUse={text => {
             setDraft(current => current.trim() ? `${current} ${text}` : text);
             draftRef.current?.focus();

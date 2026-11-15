@@ -208,9 +208,8 @@ export function AuthForm() {
                     showAuthError(t(`errors.${credentialErrorKey(result.error)}`, { origin: config.baseUrl }));
                     return;
                 }
-                // requireEmailVerification: account created, OTP emailed via
-                // sendOnSignUp + overrideDefaultEmailVerification.
-                enterOtpStep();
+                // Refresh the reactive session immediately after the signup cookie is issued.
+                await authClient.getSession({ query: { disableCookieCache: true } });
                 return;
             }
 

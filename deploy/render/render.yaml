@@ -49,7 +49,7 @@ services:
       - key: GEO_PROVIDER
         value: geoapify
       - key: GEO_OSM_USER_AGENT
-        value: "RaahiAI/0.1 (https://raahi.onrender.com; geo-agent)"
+        sync: false
       - key: GEOAPIFY_API_KEY
         sync: false
       - key: AI_PROVIDER

@@ -119,8 +119,8 @@ export function AgentComposer({
     });
   }, []);
 
-  const submit = useCallback(async () => {
-    const text = composeWithQuote(quote, draft);
+  const submit = useCallback(async (voiceText?: string) => {
+    const text = composeWithQuote(quote, [draft, voiceText].filter(Boolean).join("\n"));
     if ((!text && attachments.length === 0) || sending) return;
     const files = attachments.map((a) => a.file);
     setDraft("");
@@ -157,7 +157,7 @@ export function AgentComposer({
 
   return (
     <div className="relative flex flex-none flex-col gap-1.5 px-3 py-2.5">
-      <VoiceInput disabled={sending} onUse={(text) => {
+      <VoiceInput variant="orb" compact disabled={sending} onSend={text => { void submit(text); }} onUse={(text) => {
         setDraft((current) => current.trim() ? `${current}\n${text}` : text);
         textareaRef.current?.focus();
       }} />

@@ -212,6 +212,8 @@
         }
     },
   "voice": {
+    "sendNow": "Send now",
+    "stopEdit": "Stop & edit",
   "start": "Use microphone",
   "stop": "Stop recording",
   "cancel": "Cancel",

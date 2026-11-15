@@ -1,4 +1,3 @@
-import { EmergencyContacts } from "@/features/medical-help";
 import { useEffect, useState } from "react";
 import { AppProviders } from "./providers";
 import { RouterProvider, useRouter, matchTripId, matchInviteToken, isKnownPath } from "./router";
@@ -91,7 +90,6 @@ export function App() {
   return (
     <AppProviders>
       <RouterProvider>
-        <EmergencyContacts />
         <AppErrorBoundary>
           <AppContent />
         </AppErrorBoundary>

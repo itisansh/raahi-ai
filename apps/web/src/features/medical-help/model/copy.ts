@@ -1,6 +1,7 @@
 export const medicalCopy = {
   title: "Medical help", description: "Find healthcare listings near a saved stop, or choose to share your current location for this search.",
   reviewed: "Contacts reviewed: 7 November 2026",
+  emergency: "Emergency help",
   contacts: "India emergency contacts", india: "Call 112 — India emergency services", source: "Official source", region: "112 is the nationwide emergency number. Local response and dispatch availability vary.",
   stop: "Search near this itinerary stop", gps: "Use my current location", gpsExplain: "Requests browser permission. Your location is sent to the server and places provider only for this search; it is not saved to the trip or shared with members.",
   locating: "Waiting for location permission…", denied: "Location permission was denied or the location could not be obtained. Select a saved stop instead.",

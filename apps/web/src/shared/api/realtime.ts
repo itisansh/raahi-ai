@@ -125,7 +125,7 @@ export class TripRealtimeClient {
       this.options.onStatus("connected");
     };
     socket.onmessage = (event) => this.receive(socket, event.data);
-    socket.onerror = () => socket.close(1011, "Connection error");
+    socket.onerror = () => socket.close(4000, "Connection error");
     socket.onclose = () => {
       if (this.socket === socket) this.socket = null;
       if (!this.stopped) this.scheduleReconnect();

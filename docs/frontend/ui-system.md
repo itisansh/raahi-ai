@@ -15,11 +15,9 @@ The cossUI token CSS is ported from the handoff into
 - `colors.css` — `--ink-*` (cool blue-grey) and `--corn-*` (cornflower) ramps
   plus semantic aliases (`--background`, `--foreground`, `--card`, `--primary`,
   `--brand`, `--muted`, `--border`, status colors) and a `.dark` scope.
-  The light theme preserves the handoff's cool blue-grey composition. Dark mode
-  uses true black for the canvas, neutral raised surfaces for cards/sidebar,
-  and keeps cornflower only as an accent. The handoff shipped dark token values
-  but its final compositions were light-only; copying the navy tokens into the
-  later three-pane planner flattened the shell and competed with the black map.
+  The light theme uses warm paper with saffron actions. Dark mode uses deep
+  teal surfaces and the same saffron actions; cornflower remains for links and
+  information states.
 - `spacing.css` — radius scale (base 10px, card `2xl`), spacing steps,
   elevation shadows, top-highlight, shadow-as-border, focus-ring, and motion
   tokens (`--press-scale: 0.96`, `--ease-out`, `--enter-stagger`).
@@ -206,3 +204,22 @@ and manual replay for browsers that block autoplay. See
 The Markdown editor's fixed TopBar and floating Toolbar are disabled to remove
 formatting chrome from notes and journal writing. Existing formatted documents
 and image/attachment behavior remain supported by the editor.
+
+## Raahi usability update
+
+- Signup enters a session immediately; inbox verification remains separate.
+- Trip navigation uses labelled, touch-sized controls above the map and boards.
+  The itinerary starts at 44% of the desktop layout; the previous 30% default
+  is promoted to this allocation while other saved widths remain respected.
+- Map stops are keyboard-operable buttons with place names. Selecting one opens
+  its itinerary details, reopening a collapsed sidebar. Dashed connections show
+  stop order, including day boundaries; they do not claim road directions.
+- Raahi AI has a labelled launcher and explanatory panel header. Explicit sends
+  from this composer always use the streaming assistant; no mention is needed.
+- Voice supports explicit **Send now** after transcription finalizes or **Stop &
+  edit** before sending. Saffron/teal activity animation respects reduced motion.
+- Emergency contacts open in a dialog from the sidebar or mobile home header;
+  planner medical help also includes them. No global fixed button covers content.
+- Travel journal descriptions explain their purpose and browser-only storage.
+- Warm paper and saffron tokens replace monochrome actions; dark surfaces use
+  deep teal while retaining the user's selected theme.

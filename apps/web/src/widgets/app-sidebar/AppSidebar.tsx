@@ -1,3 +1,4 @@
+import { EmergencyContacts } from "@/features/medical-help";
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { UserMenu } from "@/widgets/user-menu";
@@ -83,7 +84,7 @@ export function AppSidebar({
           onClick={() => setCollapsed(false)}
           aria-label={t("actions.expandSidebar")}
           title={t("actions.expandSidebar")}
-          className="wf-enter wf-interactive wf-pressable fixed left-3 top-3 z-20 flex size-8 items-center justify-center rounded-lg border border-border bg-card/85 text-muted-foreground shadow-sm backdrop-blur-md hover:bg-accent hover:text-foreground max-md:hidden"
+          className="wf-enter wf-interactive wf-pressable fixed left-3 bottom-24 z-20 flex size-10 items-center justify-center rounded-lg border border-border bg-card/85 text-muted-foreground shadow-sm backdrop-blur-md hover:bg-accent hover:text-foreground max-md:hidden"
         >
           <PanelToggleIcon className="size-4" />
         </button>
@@ -122,7 +123,7 @@ export function AppSidebar({
               onClick={() => setCollapsed(true)}
               aria-label={t("actions.collapseSidebar")}
               title={t("actions.collapseSidebar")}
-              className="wf-interactive wf-pressable -mr-1 flex size-7 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+              className="wf-interactive wf-pressable -mr-1 flex size-10 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
             >
               <PanelToggleIcon className="size-4" />
             </button>
@@ -132,6 +133,7 @@ export function AppSidebar({
             {children}
           </div>
 
+          <div className="shrink-0 px-3 pb-2"><EmergencyContacts /></div>
           <UserMenu />
         </div>
       </aside>

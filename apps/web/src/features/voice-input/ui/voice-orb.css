@@ -5,12 +5,12 @@
   width: 88px;
   height: 88px;
   border-radius: 50%;
-  background: var(--foreground);
-  color: var(--background);
+  background: var(--brand);
+  color: var(--brand-foreground);
   box-shadow: 0 8px 20px color-mix(in srgb, var(--foreground) 12%, transparent);
   cursor: pointer;
   transition: transform 180ms ease-out, background-color 180ms ease-out;
-  animation: raahi-float 4s ease-in-out infinite;
+
 }
 .raahi-voice-orb::before {
   content: "";
@@ -35,3 +35,14 @@
 .raahi-voice-orb[data-compact="true"] { width: 48px; height: 48px; animation: none; }
 .raahi-voice-orb[data-compact="true"]::before { inset: -4px; }
 .raahi-voice-orb[data-compact="true"] svg { width: 22px; height: 22px; }
+
+.raahi-voice-orb[data-state="thinking"],
+.raahi-voice-orb[data-state="finalizing"] { background: #7fc9bc; color: #142c27; }
+.raahi-voice-orb[data-state="thinking"]::before,
+.raahi-voice-orb[data-state="finalizing"]::before { border: 2px dashed var(--brand); animation: raahi-turn 3s linear infinite; }
+.raahi-voice-wave { display: flex; align-items: center; gap: 5px; height: 26px; }
+.raahi-voice-wave span { width: 5px; height: 18px; border-radius: 4px; background: var(--brand); animation: raahi-wave 900ms ease-in-out infinite alternate; }
+.raahi-voice-wave span:nth-child(even) { background: #64ae9f; }
+@keyframes raahi-wave { from { transform: scaleY(.35); } to { transform: scaleY(1); } }
+@keyframes raahi-turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .raahi-voice-wave span { animation: none; } }

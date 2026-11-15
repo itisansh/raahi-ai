@@ -85,7 +85,8 @@ function installTripRouteLayers(map: MlMap, theme: MapTheme): void {
       layout: { "line-cap": "round", "line-join": "round" },
       paint: {
         "line-color": ["get", "color"],
-        "line-width": 2.5,
+        "line-width": 3.5,
+        "line-dasharray": [2, 1.5],
         "line-opacity": 0.9,
       },
     });
@@ -387,7 +388,15 @@ export function TripMap({
     map.on("load", handleStyleReady);
     map.on("style.load", handleStyleReady);
     mapRef.current = map;
+    // Sidebar and chat widths change without a browser resize event.
+    const resizeObserver = new ResizeObserver(() => {
+      map.resize();
+      lastFitRef.current = null;
+      syncRef.current();
+    });
+    resizeObserver.observe(containerRef.current);
     return () => {
+      resizeObserver.disconnect();
       clearUserMarkerRef.current();
       geolocateRef.current = null;
       trackingRef.current = false;
@@ -428,10 +437,17 @@ export function TripMap({
     }
 
     for (const s of visible) {
-      const el = document.createElement("div");
+      const el = document.createElement("button");
+      el.type = "button";
+      el.title = s.name;
+      el.setAttribute("aria-label", `${s.num}. ${s.name}`);
       el.className = "trip-map-marker";
       el.style.background = s.color;
       el.textContent = String(s.num);
+      const label = document.createElement("span");
+      label.className = "trip-map-marker-label";
+      label.textContent = s.name;
+      el.appendChild(label);
       el.dataset.active = s.id === active ? "true" : "false";
       if (s.transit) el.dataset.transit = "true";
       el.addEventListener("click", (ev) => {
@@ -444,22 +460,15 @@ export function TripMap({
       markersRef.current.push(marker);
     }
 
-    const byDay = new Map<number, MapStop[]>();
-    for (const s of visible) {
-      const list = byDay.get(s.day) ?? [];
-      list.push(s);
-      byDay.set(s.day, list);
-    }
-    const features = [...byDay.values()]
-      .filter((pts) => pts.length > 1)
-      .map((pts) => ({
-        type: "Feature" as const,
-        properties: { color: pts[0]!.color },
-        geometry: {
-          type: "LineString" as const,
-          coordinates: pts.map((p) => [p.lng, p.lat]),
-        },
-      }));
+    const ordered = [...visible].sort((a, b) => a.num - b.num);
+    const features = ordered.slice(1).map((stop, index) => ({
+      type: "Feature" as const,
+      properties: { color: stop.color },
+      geometry: {
+        type: "LineString" as const,
+        coordinates: [[ordered[index]!.lng, ordered[index]!.lat], [stop.lng, stop.lat]],
+      },
+    }));
     const src = map.getSource("trip-route") as GeoJSONSource | undefined;
     src?.setData({ type: "FeatureCollection", features });
 

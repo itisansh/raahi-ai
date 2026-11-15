@@ -11,7 +11,6 @@ import {
 import type { Trip } from "@/entities/trip";
 import {
   fetchAgentMessages,
-  postAgentMessage,
   type AgentFilePart,
   type AgentHistory,
   type AgentMessage,
@@ -21,7 +20,6 @@ import {
 } from "@/shared/api";
 import { uploadTripMedia } from "@/shared/api/media";
 import { config, queryKeys } from "@/shared/config";
-import { looksLikeAgentThreadFollowUp } from "../lib/agentThreadFollowUp";
 import { mergeTripToolEcho } from "./mergeTripToolEcho";
 import type { AgentUIMessage } from "./agent-ui-message";
 
@@ -184,8 +182,8 @@ function mediaTypeOf(file: File): string {
 /** Shared-session chat for the agent panel.
  *
  * Persisted history lives in a React Query cache (shared across members via
- * polling); `useChat` is the streaming buffer for `@agent` turns and for
- * thread follow-ups (e.g. “确认”) that need write tools + approval.
+ * polling); `useChat` streams every explicit send from the Raahi AI composer.
+ * Write tools still require approval.
  * On settle, live turns are write-echoed into history (same UIMessage ids the
  * server persists) and the buffer is cleared — no invalidate/refetch race. */
 export function useAgentChat(tripId: string, enabled: boolean) {
@@ -268,49 +266,19 @@ export function useAgentChat(tripId: string, enabled: boolean) {
     setMessages([]);
   }, [status, liveMessages, queryClient, tripId, setMessages]);
 
-  /** Route input: `@agent` and agent-thread follow-ups stream (write tools);
-   * other plain messages land in the shared session and the server decides
-   * whether the agent was addressed (ambient replies arrive via polling). */
+  /** The Raahi AI composer is a direct conversation: every explicit send streams
+   * a reply. Shared stop comments retain their separate mention-based behavior. */
   const send = async (text: string, files: File[] = []) => {
     const trimmed = text.trim();
     if (!trimmed && files.length === 0) return;
-
-    const fileParts =
-      files.length > 0 ? await uploadFilesAsParts(tripId, files) : [];
-
-    const threadForFollowUp = [
-      ...(history.data?.messages ?? []),
-      ...chat.messages,
-    ];
-    const useStream =
-      MENTION_PATTERN.test(trimmed) ||
-      looksLikeAgentThreadFollowUp(threadForFollowUp, trimmed);
-
-    if (useStream) {
-      await chat.sendMessage({
-        role: "user",
-        parts: [
-          ...fileParts,
-          ...(trimmed ? [{ type: "text" as const, text: trimmed }] : []),
-        ],
-      });
-      return;
-    }
-
-    // Cancel in-flight history GETs so a stale Hyperdrive-cached response
-    // cannot overwrite the write echo we are about to merge.
-    await queryClient.cancelQueries({
-      queryKey: queryKeys.agentMessages(tripId),
+    const fileParts = files.length > 0 ? await uploadFilesAsParts(tripId, files) : [];
+    await chat.sendMessage({
+      role: "user",
+      parts: [
+        ...fileParts,
+        ...(trimmed ? [{ type: "text" as const, text: trimmed }] : []),
+      ],
     });
-    const { message } = await postAgentMessage(tripId, {
-      text: trimmed || undefined,
-      files: fileParts.length > 0 ? fileParts : undefined,
-    });
-    queryClient.setQueryData(
-      queryKeys.agentMessages(tripId),
-      (old: AgentHistory | undefined) =>
-        appendAgentMessageToHistory(old, message),
-    );
   };
 
   return {

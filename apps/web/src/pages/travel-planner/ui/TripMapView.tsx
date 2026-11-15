@@ -212,6 +212,7 @@ export function TripMapView({
         ) : null}
         {day === 0 ? (
           <div className="absolute bottom-4 left-4 flex flex-col gap-1.5 rounded-xl bg-card/90 p-3 shadow-[var(--shadow-border),var(--shadow-md)] backdrop-blur-sm max-md:hidden">
+            <p className="max-w-52 text-xs text-muted-foreground">{t("map.routeHint")}</p>
             {trip.days.map((d) => (
               <div key={d.number} className="flex items-center gap-2 text-xs">
                 <span

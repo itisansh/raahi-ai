@@ -1,3 +1,4 @@
+import { EmergencyContacts } from "@/features/medical-help";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -126,6 +127,7 @@ export function TripsPage() {
 
       <main className="min-w-0 flex-1 overflow-y-auto rounded-l-2xl border border-r-0 border-border bg-background shadow-[-8px_0_24px_-16px_rgba(15,23,42,0.25)] max-md:rounded-none max-md:border-0 max-md:shadow-none">
         <div className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-border/70 bg-background/88 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 backdrop-blur-xl md:hidden">
+          <EmergencyContacts />
           <span className="font-heading text-lg font-semibold">
             {tc("appName")}
           </span>

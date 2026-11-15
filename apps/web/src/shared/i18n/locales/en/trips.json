@@ -1,6 +1,6 @@
 {
   "title": "Trips",
-  "subtitle": "From the next departure to every moment worth keeping.",
+  "subtitle": "Plan your route, organise each day and split costs with your group.",
   "newTrip": "New trip",
   "beta": "beta",
   "home": {
@@ -8,9 +8,9 @@
       "label": "Home navigation",
       "today": "Today",
       "trips": "Trips",
-      "journal": "Travelogue"
+      "journal": "Travel journal"
     },
-    "record": "Record now",
+    "record": "Write a journal entry",
     "recentTrips": "Recent trips",
     "recentJournal": "Recent travelogues"
   },
@@ -47,8 +47,8 @@
     },
     "quickCapture": {
       "label": "Quick capture",
-      "title": "What is happening right now?",
-      "description": "Write it down first. Add a title, trip, and audience while you capture it.",
+      "title": "Save a travel note",
+      "description": "Keep a tip, memory or reflection in your personal travel journal. Saved in this browser.",
       "action": "Start writing"
     },
     "ai": {
@@ -72,9 +72,9 @@
     }
   },
   "journal": {
-    "title": "Travelogues",
-    "subtitle": "Turn places, impressions, and honest moments from the road into stories.",
-    "newEntry": "Write a travelogue",
+    "title": "Travel journal",
+    "subtitle": "Your travel journal: write notes and stories about a trip or place. Entries are saved only in this browser.",
+    "newEntry": "Write an entry",
     "read": "Read",
     "card": {
       "coverAlt": "Cover for {{title}}",
@@ -135,16 +135,16 @@
       "aiPreviewAnswer": "About “{{question}}”: this travelogue records “{{excerpt}}…”. Once AI is connected, this area will answer using the full story and linked trip."
     },
     "empty": {
-      "title": "Start with one small moment",
-      "description": "It does not need to be an essay. A scene, a café, or one honest sentence is enough.",
+      "title": "Keep a travel journal",
+      "description": "Save a memory, useful tip or trip reflection. These notes stay on this device and are separate from your shared itinerary.",
       "action": "Write the first entry"
     },
     "composer": {
-      "title": "Record this moment",
+      "title": "Write a journal entry",
       "editTitle": "Edit travelogue",
-      "description": "Capture it first. You can organize it later.",
+      "description": "Add a note or story, and optionally link it to a trip. Saved in this browser only.",
       "titleLabel": "Title (optional)",
-      "titlePlaceholder": "Name this moment",
+      "titlePlaceholder": "Give your entry a title",
       "bodyPlaceholder": "What is happening right now?",
       "tripLabel": "Related trip",
       "noTrip": "No related trip",
