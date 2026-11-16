@@ -73,7 +73,7 @@ export function InvitePage({
   if (!isAuthenticated) {
     return (
       <Shell>
-        <Card className="wf-enter p-6">
+        <Card className="wf-enter p-5 sm:p-6">
           <p className="mb-4 text-sm text-pretty text-muted-foreground">
             {t("accept.signInPrompt", { trip: data.tripTitle })}
           </p>

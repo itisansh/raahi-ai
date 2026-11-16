@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
@@ -15,8 +15,10 @@ import {
   OTPFieldInput,
   OTPFieldSeparator,
 } from "@/components/ui/otp-field";
+import { Spinner } from "@/components/ui/spinner";
 import { toastManager } from "@/components/ui/toast";
 import { config } from "@/lib/config";
+import { useRouter } from "@/lib/router";
 import { credentialErrorKey } from "./auth-error";
 
 type Mode = "signIn" | "signUp";
@@ -72,6 +74,8 @@ const linkButtonClassName =
 
 export function AuthForm() {
     const { t } = useTranslation("auth");
+    const { navigate } = useRouter();
+    const signUpPromiseRef = useRef<Promise<unknown> | null>(null);
     const capabilities = useQuery({
         queryKey: ["auth", "capabilities"],
         queryFn: () => apiFetch<{
@@ -79,7 +83,7 @@ export function AuthForm() {
             emailDelivery: "console" | "email";
         }>("/api/auth/capabilities"),
     });
-    const socialProviders = capabilities.data?.socialProviders ?? [];
+    const socialProviders = capabilities.data?.socialProviders ?? ["google"];
     const [mode, setMode] = useState<Mode>("signIn");
     const [step, setStep] = useState<Step>("credentials");
     const [name, setName] = useState("");
@@ -196,23 +200,36 @@ export function AuthForm() {
             return;
         }
 
-        setPending(true);
-        try {
-            if (isSignUp) {
-                const result = await signUp.email({
-                    name,
-                    email,
-                    password,
-                });
+        if (isSignUp) {
+            // Instantly transition to OTP step so the verification card opens with zero delay.
+            // The OTP email often arrives before the full server response finishes.
+            enterOtpStep();
+            setPending(true);
+            const promise = signUp.email({
+                name,
+                email,
+                password,
+            });
+            signUpPromiseRef.current = promise;
+            try {
+                const result = await promise;
                 if (result.error) {
+                    backToCredentials();
                     showAuthError(t(`errors.${credentialErrorKey(result.error)}`, { origin: config.baseUrl }));
                     return;
                 }
-                // Signup sends a code; a session is issued only after verification.
-                enterOtpStep();
+            } catch (error) {
+                backToCredentials();
+                showAuthError(t(error instanceof TypeError ? "errors.connection" : "errors.generic", { origin: config.baseUrl }));
                 return;
+            } finally {
+                setPending(false);
             }
+            return;
+        }
 
+        setPending(true);
+        try {
             const result = await signIn.email({
                 email,
                 password,
@@ -224,6 +241,13 @@ export function AuthForm() {
                     return;
                 }
                 showAuthError(t(`errors.${credentialErrorKey(result.error)}`, { origin: config.baseUrl }));
+                return;
+            }
+
+            // Successfully signed in! Refresh session immediately so Gate mounts the app without needing a page refresh.
+            await authClient.getSession({ query: { disableCookieCache: true } });
+            if (window.location.pathname === "/signin") {
+                navigate("/");
             }
         } catch (error) {
             showAuthError(t(error instanceof TypeError ? "errors.connection" : "errors.generic", { origin: config.baseUrl }));
@@ -308,6 +332,12 @@ export function AuthForm() {
 
         setPending(true);
         try {
+            if (signUpPromiseRef.current) {
+                const signUpResult = (await signUpPromiseRef.current) as { error?: unknown } | undefined;
+                if (signUpResult?.error) {
+                    return;
+                }
+            }
             const result = await authClient.emailOtp.verifyEmail({
                 email,
                 otp,
@@ -319,6 +349,9 @@ export function AuthForm() {
             }
             // Refresh the session so the app opens as soon as verification succeeds.
             await authClient.getSession({ query: { disableCookieCache: true } });
+            if (window.location.pathname === "/signin") {
+                navigate("/");
+            }
         } catch {
             showAuthError(t("errors.otpInvalid"));
             setOtp("");
@@ -377,7 +410,11 @@ export function AuthForm() {
                 setTwoFactorCode("");
                 return;
             }
-            // Session cookie is set; Gate re-renders via useSession.
+            // Session cookie is set; refresh session so Gate mounts the app immediately.
+            await authClient.getSession({ query: { disableCookieCache: true } });
+            if (window.location.pathname === "/signin") {
+                navigate("/");
+            }
         } catch {
             showAuthError(t("errors.twoFactorInvalid"));
             setTwoFactorCode("");
@@ -387,6 +424,7 @@ export function AuthForm() {
     }
 
     function switchMode() {
+        signUpPromiseRef.current = null;
         setMode(isSignUp ? "signIn" : "signUp");
         setStep("credentials");
         setOtp("");
@@ -397,6 +435,7 @@ export function AuthForm() {
     }
 
     function backToCredentials() {
+        signUpPromiseRef.current = null;
         setStep("credentials");
         setOtp("");
         setTwoFactorCode("");
@@ -444,7 +483,9 @@ export function AuthForm() {
                         type="submit"
                         size="lg"
                         disabled={pending || !twoFactorCode.trim()}
+                        className="w-full gap-2"
                     >
+                        {pending ? <Spinner className="size-4 animate-spin" /> : null}
                         {t("twoFactor.submit")}
                     </Button>
                     <button
@@ -504,7 +545,9 @@ export function AuthForm() {
                         type="submit"
                         size="lg"
                         disabled={pending || !email.trim()}
+                        className="w-full gap-2"
                     >
+                        {pending ? <Spinner className="size-4 animate-spin" /> : null}
                         {t("forgotPassword.submit")}
                     </Button>
                     <button
@@ -587,7 +630,9 @@ export function AuthForm() {
                             !newPassword ||
                             !confirmPassword
                         }
+                        className="w-full gap-2"
                     >
+                        {pending ? <Spinner className="size-4 animate-spin" /> : null}
                         {t("forgotPassword.submitReset")}
                     </Button>
                     <Button
@@ -635,7 +680,7 @@ export function AuthForm() {
                         value={otp}
                         onValueChange={(value) => setOtp(value)}
                         autoSubmit
-                        disabled={pending}
+                        disabled={pending && !signUpPromiseRef.current}
                         aria-label={t("otp.label")}
                     >
                         <OTPFieldInput />
@@ -655,7 +700,9 @@ export function AuthForm() {
                         type="submit"
                         size="lg"
                         disabled={pending || otp.length !== OTP_LENGTH}
+                        className="w-full gap-2"
                     >
+                        {pending ? <Spinner className="size-4 animate-spin" /> : null}
                         {t("otp.submit")}
                     </Button>
                     <Button
@@ -755,28 +802,39 @@ export function AuthForm() {
                 type="submit"
                 size="lg"
                 disabled={pending}
+                className="w-full gap-2"
             >
+                {pending ? <Spinner className="size-4 animate-spin" /> : null}
                 {t(`${ns}.submit`)}
             </Button>
 
-            {socialProviders.length > 0 && <div className="relative flex items-center gap-3">
-                <span className="h-px flex-1 bg-border" />
-                <span className="text-xs text-muted-foreground">
-                    {t("social.divider")}
-                </span>
-                <span className="h-px flex-1 bg-border" />
-            </div>}
+            {socialProviders.length > 0 ? (
+                <div className="relative flex items-center gap-3">
+                    <span className="h-px flex-1 bg-border" />
+                    <span className="text-xs text-muted-foreground">
+                        {t("social.divider")}
+                    </span>
+                    <span className="h-px flex-1 bg-border" />
+                </div>
+            ) : null}
 
-            {socialProviders.includes("google") && <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                disabled={pending}
-                onClick={() => void signInWithSocial("google")}
-            >
-                <GoogleIcon className="size-5" />
-                {t("social.google")}
-            </Button>}
+            {socialProviders.includes("google") ? (
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    disabled={pending}
+                    onClick={() => void signInWithSocial("google")}
+                    className="w-full gap-2"
+                >
+                    {pending ? (
+                        <Spinner className="size-4 animate-spin" />
+                    ) : (
+                        <GoogleIcon className="size-5 shrink-0" />
+                    )}
+                    <span>{t("social.google")}</span>
+                </Button>
+            ) : null}
 
 
             <button

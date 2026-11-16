@@ -110,6 +110,12 @@ export function createAuth(
             sendOnSignIn: true,
             autoSignInAfterVerification: true,
         },
+        account: {
+            accountLinking: {
+                enabled: true,
+                updateUserInfoOnLink: true,
+            },
+        },
         socialProviders:
             config.googleOAuth
             ? {
@@ -118,6 +124,50 @@ export function createAuth(
                             google: {
                                 clientId: config.googleOAuth.clientId,
                                 clientSecret: config.googleOAuth.clientSecret,
+                                overrideUserInfoOnSignIn: true,
+                                getUserInfo: async (token) => {
+                                    let profile: Record<string, unknown> | null = null;
+                                    if (token.accessToken) {
+                                        try {
+                                            const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+                                                headers: { Authorization: `Bearer ${token.accessToken}` },
+                                            });
+                                            if (res.ok) {
+                                                profile = (await res.json()) as Record<string, unknown>;
+                                            }
+                                        } catch (err) {
+                                            console.error("Failed to fetch Google userinfo:", err);
+                                        }
+                                    }
+                                    if (!profile && token.idToken) {
+                                        try {
+                                            const payloadPart = token.idToken.split(".")[1];
+                                            if (payloadPart) {
+                                                profile = JSON.parse(
+                                                    Buffer.from(payloadPart, "base64url").toString("utf8"),
+                                                ) as Record<string, unknown>;
+                                            }
+                                        } catch (err) {
+                                            console.error("Failed to decode Google idToken:", err);
+                                        }
+                                    }
+                                    if (!profile) return null;
+                                    const dto = mapGoogleProfileToDto(profile);
+                                    const seed =
+                                        dto.email ??
+                                        dto.name ??
+                                        crypto.randomUUID();
+                                    return {
+                                        user: {
+                                            id: dto.providerAccountId,
+                                            name: dto.name ?? undefined,
+                                            email: dto.email ?? undefined,
+                                            image: resolveInitialAvatar(dto, seed),
+                                            emailVerified: Boolean(profile.email_verified ?? true),
+                                        },
+                                        data: profile,
+                                    };
+                                },
                                 mapProfileToUser: (profile) => {
                                     const dto = mapGoogleProfileToDto(profile);
                                     const seed =
@@ -176,7 +226,7 @@ export function createAuth(
                     },
                     after: async (user) => {
                         if (!tripRepository || !loadSampleTripTemplate) return;
-                        await provisionSampleTripForUser(
+                        void provisionSampleTripForUser(
                             tripRepository,
                             {
                                 id: user.id,
@@ -184,7 +234,13 @@ export function createAuth(
                                 image: user.image ?? null,
                             },
                             loadSampleTripTemplate,
-                        );
+                        ).catch((err) => {
+                            console.error(
+                                "[provision-sample-trip] failed for user",
+                                user.id,
+                                err,
+                            );
+                        });
                     },
                 },
                 update: {
@@ -210,7 +266,15 @@ export function createAuth(
                     after: async (user, ctx) => {
                         if (!options.profileProjection) return;
                         const fields = profileFieldsFromBody(ctx?.body);
-                        if (!fields) return;
+                        if (!fields) {
+                            if (user.image && !user.image.startsWith("data:")) {
+                                await options.profileProjection.synchronize(user.id, {
+                                    image: user.image,
+                                    ...(user.name ? { name: user.name } : {}),
+                                });
+                            }
+                            return;
+                        }
                         await options.profileProjection.synchronize(user.id, {
                             ...(fields.name ? { name: user.name } : {}),
                             ...(fields.image ? { image: user.image ?? null } : {}),

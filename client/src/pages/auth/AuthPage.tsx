@@ -21,9 +21,9 @@ export function AuthPage() {
         </button>
         <LanguageSwitch />
       </header>
-      <main className="flex flex-1 items-center justify-center px-6 pb-16">
+      <main className="flex flex-1 items-center justify-center px-4 sm:px-6 pb-16">
         <div className="w-full max-w-sm">
-          <Card className="wf-enter p-6">
+          <Card className="wf-enter p-5 sm:p-6">
             <AuthForm />
           </Card>
           <p className="mt-4 text-center text-xs text-pretty text-muted-foreground">

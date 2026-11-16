@@ -12,7 +12,7 @@ export function mapGoogleProfileToDto(profile: unknown): OAuthProfileDto {
     providerAccountId: stringOrNull(p.sub) ?? "unknown",
     email: stringOrNull(p.email),
     name: stringOrNull(p.name),
-    image: stringOrNull(p.picture),
+    image: stringOrNull(p.picture) ?? stringOrNull(p.avatar_url) ?? stringOrNull(p.avatar),
   };
 }
 

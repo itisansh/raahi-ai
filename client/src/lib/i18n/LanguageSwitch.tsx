@@ -52,4 +52,3 @@ export function LanguageSwitch({ className }: { className?: string }) {
     </Select>
   );
 }
-``

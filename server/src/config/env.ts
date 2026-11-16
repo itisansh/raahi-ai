@@ -128,6 +128,12 @@ export interface RawEnv {
     TRUSTED_ORIGINS?: string;
     GOOGLE_CLIENT_ID?: string;
     GOOGLE_CLIENT_SECRET?: string;
+    GOOGLE_OAUTH_CLIENT_ID?: string;
+    GOOGLE_OAUTH_CLIENT_SECRET?: string;
+    GOOGLE_AUTH_CLIENT_ID?: string;
+    GOOGLE_AUTH_CLIENT_SECRET?: string;
+    GOOGLE_ID?: string;
+    GOOGLE_SECRET?: string;
     /** Transactional email: `console` (default) | `resend`. */
     EMAIL_PROVIDER?: string;
     /** From address for outbound mail. Required for `resend`. */
@@ -191,8 +197,25 @@ export function loadConfig(env: RawEnv): AppConfig {
         env.STORAGE_PUBLIC_URL?.trim() ||
         `${baseUrl.replace(/\/$/, "")}/api/uploads`;
 
-    const googleClientId = env.GOOGLE_CLIENT_ID?.trim();
-    const googleClientSecret = env.GOOGLE_CLIENT_SECRET?.trim();
+    const googleClientId =
+        env.GOOGLE_CLIENT_ID?.trim() ||
+        env.GOOGLE_OAUTH_CLIENT_ID?.trim() ||
+        env.GOOGLE_AUTH_CLIENT_ID?.trim() ||
+        env.GOOGLE_ID?.trim() ||
+        process.env.GOOGLE_CLIENT_ID?.trim() ||
+        process.env.GOOGLE_OAUTH_CLIENT_ID?.trim() ||
+        process.env.GOOGLE_AUTH_CLIENT_ID?.trim() ||
+        process.env.GOOGLE_ID?.trim();
+
+    const googleClientSecret =
+        env.GOOGLE_CLIENT_SECRET?.trim() ||
+        env.GOOGLE_OAUTH_CLIENT_SECRET?.trim() ||
+        env.GOOGLE_AUTH_CLIENT_SECRET?.trim() ||
+        env.GOOGLE_SECRET?.trim() ||
+        process.env.GOOGLE_CLIENT_SECRET?.trim() ||
+        process.env.GOOGLE_OAUTH_CLIENT_SECRET?.trim() ||
+        process.env.GOOGLE_AUTH_CLIENT_SECRET?.trim() ||
+        process.env.GOOGLE_SECRET?.trim();
 
     return {
         travelWeatherProvider: env.TRAVEL_WEATHER_PROVIDER === "open-meteo" ? "open-meteo" : undefined,
