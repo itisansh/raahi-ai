@@ -54,7 +54,7 @@ export const candidateSchema = z.object({
 export type Candidate = z.infer<typeof candidateSchema>;
 
 export class PlanningError extends Error {
-  constructor(public code: "planning_unavailable" | "planning_invalid_output" | "planning_rate_limited") {
+  constructor(public code: "planning_unavailable" | "planning_invalid_output" | "planning_rate_limited" | "planning_primary_rate_limited") {
     super(code);
   }
 }
@@ -76,7 +76,10 @@ export interface PlanningContext {
   canEdit?: boolean;
 }
 
+export type PlanningStage = "understanding" | "drafting" | "checking";
+
 export interface PlanningProgress {
+  onStage?: (stage: PlanningStage) => void;
   onReply: (text: string) => void;
   signal: AbortSignal;
 }

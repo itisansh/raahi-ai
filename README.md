@@ -56,7 +56,7 @@ The committed [.env.example](.env.example) contains placeholders only.
 | `STREET_VIEW_PROVIDER`, `MAPILLARY_ACCESS_TOKEN` | Optional street-view imagery |
 | `STORAGE_BACKEND`, `STORAGE_ROOT` | Local filesystem upload storage |
 | `S3_BUCKET`, `S3_REGION`, `S3_ENDPOINT`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_FORCE_PATH_STYLE` | External private upload storage when `STORAGE_BACKEND=s3` |
-| `WEB_DIST_PATH` | Built web app directory, relative to the API workspace |
+| `WEB_DIST_PATH` | `auto` for the bundled frontend; absolute path for custom builds |
 | `TRUST_PROXY_CIDRS` | Explicit verified proxy ranges; empty ignores forwarded IP headers |
 | `SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE` | Optional server observability |
 | `AI_TELEMETRY_RECORD_CONTENT` | Keep false unless intentionally enabling model-content telemetry |
@@ -154,7 +154,10 @@ It serves the web app and API from one HTTPS origin. Build with
 `bash scripts/build-render.sh`; start with `corepack pnpm --filter @raahi/api start`.
 Use the repository root as service root and Node 24. Existing hosted services
 must point their blueprint/build command at these new paths before redeploying.
-`WEB_DIST_PATH=../client/dist` currently resolves from `server`.
+Set `WEB_DIST_PATH=auto` to resolve `client/dist` independently of the startup
+working directory. Existing Render services must update this environment value
+and the build/start commands in their dashboard; editing the blueprint alone does
+not update a manually configured service. The build checks for `client/dist/index.html`.
 
 Set `BASE_URL` to the exact assigned HTTPS origin without a trailing slash and
 include it in `TRUSTED_ORIGINS`. A changed origin requires a frontend rebuild.
@@ -215,3 +218,24 @@ lockfile; the application does not import them or run Prisma generation.
 Keep README and API.md updated when behavior, configuration or contracts change.
 Dependency licenses and THIRD_PARTY_NOTICES.md remain applicable. Local secrets,
 uploads, assistant configuration, test artifacts and generated output stay ignored.
+
+### Optional model fallback
+
+Keep Gemini in `AI_MODEL` / `AI_BASE_URL` / `AI_API_KEY`. Set
+`OPENROUTER_API_KEY` and optionally `AI_FALLBACK_MODEL` (default `openrouter/free`,
+or a selected `:free` model supporting the required tools and structured output).
+Only lightweight planning-intent extraction opts into fallback. On HTTP 429,
+that operation sends the same request to OpenRouter. Heavy itinerary generation,
+final responses, tool-based agent chat and other model operations stay on the
+configured primary (Gemini); they never silently switch models. It uses fallback until `Retry-After` or `AI_FALLBACK_COOLDOWN_SECONDS`
+(default 60), whichever is longer, then lets one extraction request probe the primary.
+This state is process-local. Non-429 errors and failures after streaming starts
+are not replayed. Fallback also has provider limits; it does not bypass app limits.
+No key means no fallback. Only free model IDs are accepted; the free router's
+model selection varies. Requests handled by fallback send their trip context to
+OpenRouter and its selected provider.
+
+For email 403s, check the response inside Resend's email log. The running server's
+`EMAIL_FROM` must use the exact verified domain/subdomain, and the key must permit
+sending from it. Changing local `.env` does not change Render's environment. A
+send-only key cannot list `/domains`; a 401 on that read is not an email failure.

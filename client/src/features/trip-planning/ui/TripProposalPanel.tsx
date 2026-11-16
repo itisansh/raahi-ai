@@ -1,7 +1,8 @@
 import "./planning-panel.css";
+import { StreamingReply } from "./StreamingReply";
 import { GeoAttribution } from "@/components/ui/geo-attribution";
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpIcon, Volume2Icon, VolumeXIcon, SquareIcon } from "lucide-react";
+import { ArrowUpIcon, Volume2Icon, VolumeXIcon, SquareIcon, SparklesIcon } from "lucide-react";
 import { VoiceInput } from "@/features/voice-input";
 import { useReplySpeech } from "@/features/spoken-summary";
 import { apiFetch, ApiError } from "@/lib/api";
@@ -20,6 +21,7 @@ export function TripProposalPanel({ tripId, onSaved }: { tripId?: string; onSave
   const [turns, setTurns] = useState<Turn[]>([]);
   const [streamedReply, setStreamedReply] = useState("");
   const [pendingRequest, setPendingRequest] = useState("");
+  const [stage, setStage] = useState("understanding");
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [recording, setRecording] = useState(false);
@@ -56,12 +58,14 @@ export function TripProposalPanel({ tripId, onSaved }: { tripId?: string; onSave
     setDraft(submitted);
     const controller = new AbortController();
     active.current = controller;
-    setBusy(true); setError(null); setStreamedReply(""); setPendingRequest(submitted);
+    setBusy(true); setStage("understanding"); setError(null); setStreamedReply(""); setPendingRequest(submitted);
     const timeout = setTimeout(() => controller.abort(), 180_000);
     try {
       const next = await apiFetch<PlanningResult>("/api/planning/preview", {
         method: "POST", body: JSON.stringify({ prompt, ...(tripId ? { tripId } : {}) }), signal: controller.signal,
-      }, text => { if (active.current === controller) setStreamedReply(text); });
+      }, text => { if (active.current === controller) setStreamedReply(text); }, nextStage => {
+        if (active.current === controller && copy.stages[nextStage]) setStage(nextStage);
+      });
       if (active.current !== controller) return;
       setTurns(current => [...current, { id: next.proposalId, request: submitted, result: next }]);
       setDraft("");
@@ -94,10 +98,11 @@ export function TripProposalPanel({ tripId, onSaved }: { tripId?: string; onSave
         </Button>
       </div>
       <div className="scrollbar-overlay min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-4 pb-4 md:px-6" data-planning-scroll>
-      {turns.length === 0 && <div className="raahi-planning-welcome flex min-h-40 flex-col justify-center gap-4 py-6">
-        <p className="text-xl font-semibold tracking-tight">{tripId ? copy.existingGreeting : copy.greeting}</p>
+      {turns.length === 0 && !busy && <div className="raahi-planning-welcome flex min-h-40 flex-col justify-center gap-4 py-6">
+        <span className="raahi-welcome-mark" aria-hidden="true"><SparklesIcon strokeWidth={1.4} /></span>
+        <p className="raahi-welcome-heading text-xl font-semibold tracking-tight">{tripId ? copy.existingGreeting : copy.greeting}</p>
         <p className="max-w-md text-sm leading-relaxed text-muted-foreground">{tripId ? copy.appendHint : copy.greetingHint}</p>
-        <div className="flex flex-wrap gap-2">{copy.starters.map(item => <Button key={item.label} variant="outline" size="lg" disabled={busy || recording} className="raahi-planning-suggestion min-h-11 whitespace-normal text-left" onClick={() => { setDraft(item.prompt); draftRef.current?.focus(); }}>{item.label}</Button>)}</div>
+        <div className="flex flex-wrap gap-2">{(tripId ? copy.existingStarters : copy.starters).map(item => <Button key={item.label} variant="outline" size="lg" disabled={busy || recording} className="raahi-planning-suggestion min-h-11 whitespace-normal text-left" onClick={() => { setDraft(item.prompt); draftRef.current?.focus(); }}>{item.label}</Button>)}</div>
       </div>}
       {turns.length > 0 && <div className="flex flex-col gap-5" aria-label={copy.conversation}>
         {turns.map(turn => <div key={turn.id} className="space-y-4">
@@ -110,8 +115,13 @@ export function TripProposalPanel({ tripId, onSaved }: { tripId?: string; onSave
       </div>}
       {busy && <div className="space-y-3" aria-busy="true">
         <p className="ml-8 whitespace-pre-wrap rounded-2xl bg-muted px-4 py-3 text-sm">{pendingRequest}</p>
-        <p className="text-xs text-muted-foreground" role="status">{copy.streamingDraft}</p>
-        <p className="whitespace-pre-wrap text-sm leading-relaxed">{streamedReply || copy.generating}</p>
+        <div className="raahi-planning-progress" role="status" aria-live="polite">
+          <span className="raahi-progress-spark" aria-hidden="true"><SparklesIcon className="size-4" /></span>
+          <span>{copy.stages[stage] ?? copy.working}</span>
+          <span className="raahi-progress-dots" aria-hidden="true"><i /><i /><i /></span>
+        </div>
+        {streamedReply && <StreamingReply text={streamedReply} />}
+        {streamedReply && <p className="text-xs text-muted-foreground">{copy.streamingDraft}</p>}
       </div>}
       {result && <div className="flex flex-wrap items-center gap-2">
         {speech.state === "loading" || speech.state === "speaking"
@@ -162,13 +172,13 @@ export function TripProposalPanel({ tripId, onSaved }: { tripId?: string; onSave
 
 
         <div className="raahi-planning-composer">
-          <Textarea ref={draftRef} aria-label={copy.request} value={draft} onChange={event => setDraft(event.target.value)}
+          <Textarea ref={draftRef} aria-label={copy.request} value={busy ? "" : draft} onChange={event => setDraft(event.target.value)}
             disabled={busy || saving || recording} maxLength={4000} rows={1} placeholder={copy.askRaahi}
             className="raahi-planning-input max-h-32 resize-none border-0 bg-transparent shadow-none focus:bg-transparent"
             onKeyDown={event => { if (event.key === "Enter" && (event.ctrlKey || event.metaKey) && !event.nativeEvent.isComposing) { event.preventDefault(); void generate(); } }} />
         <VoiceInput compact variant="composer" disabled={busy || saving} agentState={busy ? "thinking" : speech.state === "speaking" ? "speaking" : "idle"}
           onSend={text => { void generate(text); }}
-          statusLabel={busy ? copy.generating : speech.state === "speaking" ? copy.speaking : undefined} onStart={speech.stop} onActivityChange={setRecording} onUse={text => {
+          statusLabel={speech.state === "speaking" ? copy.speaking : undefined} onStart={speech.stop} onActivityChange={setRecording} onUse={text => {
             setDraft(current => current.trim() ? `${current} ${text}` : text);
             draftRef.current?.focus();
           }} />

@@ -23,7 +23,7 @@ services:
       - key: TRUSTED_ORIGINS
         sync: false
       - key: WEB_DIST_PATH
-        value: ../client/dist
+        value: auto
       - key: STORAGE_BACKEND
         value: s3
       - key: STORAGE_ROOT

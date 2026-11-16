@@ -71,7 +71,7 @@ export function VoiceInput({ onUse, onSend, disabled = false, destinationOnly = 
         aria-label={t(state.status === "recording" ? "voice.stop" : "voice.start")}
         aria-pressed={state.status === "recording"}
         onClick={state.status === "recording" ? () => recorder.current?.stop() : start}>
-        {state.status === "recording" ? <SquareIcon aria-hidden className="size-7" /> : agentState === "speaking" ? <AudioLinesIcon aria-hidden className="size-8" /> : <MicIcon aria-hidden className="size-8" />}
+        {state.status === "recording" ? <SquareIcon aria-hidden className="size-7" /> : agentState === "speaking" ? <AudioLinesIcon aria-hidden className="size-8" /> : <MicIcon aria-hidden strokeWidth={1.8} className="size-8" />}
       </button>
       <p role="status" className={compact && !busy && !statusLabel ? "sr-only" : "text-sm text-muted-foreground"}>{(state.status === "connecting" || state.status === "recording" || state.status === "finalizing") ? t(`voice.${state.status}`) : statusLabel ?? t("voice.start")}</p>
       {(busy || agentState === "speaking") && <div className="raahi-voice-wave" aria-hidden="true">{[0, 1, 2, 3, 4].map(index => <span key={index} />)}</div>}

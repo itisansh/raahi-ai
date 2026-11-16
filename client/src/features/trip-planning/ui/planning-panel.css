@@ -22,7 +22,7 @@
 }
 .raahi-planning-panel { position: relative; isolation: isolate; }
 .raahi-planning-welcome { padding-top: 2rem; }
-.raahi-planning-welcome > p:first-child {
+.raahi-planning-welcome > .raahi-welcome-heading {
   background: linear-gradient(100deg, #a9cbff, #e0ceff 55%, #f0b9d8);
   color: transparent;
   background-clip: text;
@@ -104,3 +104,80 @@
 @media (prefers-reduced-motion: reduce) {
   .raahi-planning-panel *, .raahi-planning-panel *::before { animation: none !important; transition: none !important; }
 }
+
+/* Light stays at the sheet edges, keeping the reading surface quiet. */
+.raahi-planning-sheet { position: relative; isolation: isolate; background: #0d0e11; }
+.raahi-planning-sheet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse 55px 70% at 0% 88%, #f3abc3aa, transparent 95%),
+    radial-gradient(ellipse 55px 65% at 100% 65%, #a8cba978, transparent 95%),
+    radial-gradient(ellipse 90% 55px at 70% 100%, #94baffaa, transparent 95%);
+  filter: blur(12px);
+  opacity: .42;
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity 500ms;
+}
+.raahi-planning-sheet:has([data-activity="listening"])::after,
+.raahi-planning-sheet:has([data-activity="speaking"])::after {
+  opacity: .95;
+  animation: raahi-edge-breathe 3.5s ease-in-out infinite alternate;
+}
+.raahi-planning-sheet:has([data-activity="thinking"])::after {
+  opacity: .65;
+  animation: raahi-edge-breathe 5s ease-in-out infinite alternate;
+}
+.raahi-welcome-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: #c4d7ff;
+  border-radius: 50%;
+  background: radial-gradient(circle, #97acfa28, transparent 70%);
+  filter: drop-shadow(0 0 12px #8ca6ff55);
+}
+.raahi-welcome-mark svg { width: 32px; height: 32px; }
+.raahi-planning-composer {
+  background: linear-gradient(165deg, #24252b70, #08090ce8 65%);
+  box-shadow: inset 0 2px 6px #ffffff0c, 0 12px 30px #0005;
+  border-color: #ffffff24;
+  backdrop-filter: blur(24px);
+}
+.raahi-composer-voice > .raahi-voice-orb {
+  border: 1px solid #ffffff1a;
+  background: radial-gradient(circle at 35% 20%, #ffffff14, #ffffff03);
+  color: #e5eaff;
+  transition: background 200ms, box-shadow 200ms;
+}
+.raahi-composer-voice > .raahi-voice-orb[data-state="recording"],
+.raahi-composer-voice > .raahi-voice-orb[data-state="speaking"] {
+  background: radial-gradient(circle at 30% 20%, #adcaff, #4969c4 80%);
+  color: #fff;
+  border-color: #cedaff80;
+  box-shadow: 0 0 18px #819dff66;
+}
+.raahi-planning-progress { display: flex; align-items: center; gap: 9px; color: var(--muted-foreground); font-size: 12px; min-height: 32px; }
+.raahi-progress-spark { color: #a9c8ff; flex-shrink: 0; animation: raahi-spark-breathe 2s ease-in-out infinite alternate; }
+.raahi-progress-dots { display: flex; gap: 3px; }
+.raahi-progress-dots i { width: 3px; height: 3px; border-radius: 50%; background: currentColor; animation: raahi-spark-breathe 900ms ease-in-out infinite alternate; }
+.raahi-progress-dots i:nth-child(2) { animation-delay: 150ms; }
+.raahi-progress-dots i:nth-child(3) { animation-delay: 300ms; }
+.raahi-reply-word { animation: raahi-word-enter 220ms ease-out both; }
+.raahi-reply-cursor { display: inline-block; width: 5px; height: 12px; margin-left: 4px; border-radius: 4px; background: #aecbff; animation: raahi-spark-breathe 800ms ease-in-out infinite alternate; }
+@keyframes raahi-word-enter { from { opacity: 0; filter: blur(2px); } to { opacity: 1; filter: blur(0); } }
+@keyframes raahi-spark-breathe { from { opacity: .4; } to { opacity: 1; } }
+@keyframes raahi-edge-breathe { from { opacity: .55; filter: blur(12px) hue-rotate(-10deg); } to { opacity: .95; filter: blur(16px) hue-rotate(20deg); } }
+@media (max-width: 767px) {
+  .raahi-planning-welcome { padding-top: 1rem; gap: 12px; }
+
+  .raahi-planning-composer { border-radius: 32px; padding-left: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .raahi-planning-sheet::after, .raahi-planning-panel *, .raahi-planning-panel *::before { animation: none !important; transition: none !important; }
+}
+
+.raahi-composer-voice > .raahi-voice-orb:disabled { opacity: .45; }

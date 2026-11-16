@@ -40,6 +40,7 @@ export class PlanningService {
       if (error instanceof PlanningError) throw error;
       throw new PlanningError("planning_unavailable");
     }
+    progress?.onStage?.("understanding");
     const extracted = tripIntentSchema.safeParse(await (progress ? this.model.extract(request.prompt, context, progress) : this.model.extract(request.prompt, context)));
     if (!extracted.success) throw new PlanningError("planning_invalid_output");
     progress?.signal.throwIfAborted();
@@ -52,10 +53,12 @@ export class PlanningService {
       return clarification;
     }
     const budget = rupeesToPaise(intent.budgetRupees!);
+    progress?.onStage?.("drafting");
     const parsed = candidateSchema.safeParse(await (progress ? this.model.propose(intent, context, progress) : this.model.propose(intent, context)));
     if (!parsed.success) throw new PlanningError("planning_invalid_output");
     progress?.signal.throwIfAborted();
     const candidate = parsed.data;
+    progress?.onStage?.("checking");
     if (candidate.days.length !== intent.dayCount || candidate.days.some((day, i) => day.day !== i + 1 || (!context && day.stops.length === 0)) || !candidate.days.some(day => day.stops.length > 0)) {
       throw new PlanningError("planning_invalid_output");
     }

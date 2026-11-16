@@ -26,6 +26,7 @@ export async function apiFetch<T>(
   path: string,
   init?: RequestInit,
   onReply?: (text: string) => void,
+  onStatus?: (stage: string) => void,
 ): Promise<T> {
   const res = await fetch(`${config.baseUrl}${path}`, {
     ...init,
@@ -50,7 +51,8 @@ export async function apiFetch<T>(
         buffer = lines.pop() ?? "";
         for (const line of lines) {
           if (!line.trim()) continue;
-          const event = JSON.parse(line) as { type: string; text?: string; data?: T; code?: string };
+          const event = JSON.parse(line) as { type: string; text?: string; data?: T; code?: string; stage?: string };
+          if (event.type === "status" && typeof event.stage === "string") onStatus?.(event.stage);
           if (event.type === "reply" && typeof event.text === "string") onReply(event.text);
           if (event.type === "error") throw new ApiError(event.code ?? "planning_unavailable", "Planning failed", 503);
           if (event.type === "result" && event.data !== undefined) return event.data;

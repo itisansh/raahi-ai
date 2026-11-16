@@ -446,7 +446,9 @@ Unverified or infeasible sections remain flagged; nothing becomes persisted fact
 Errors: `400` invalid input, `401` unauthenticated, `403` forbidden origin,
 `404` missing or inaccessible trip,
 `413` oversized body, `429` planning rate limit, `502` invalid model output or
-`503` provider unavailable. Failures are sanitized; responses are private/no-store.
+`503` provider unavailable. `planning_primary_rate_limited` means the primary
+model is throttled; heavy planning stays on that model rather than using fallback.
+Failures are sanitized; responses are private/no-store.
 
 In the trip wizard, users review speech in `VoiceInput`, transfer the final text
 to the request field, and explicitly select Generate preview. Editing the request
@@ -720,6 +722,16 @@ that exact text in its stored language. The requested language remains supported
 for older preview snapshots without `reply`; new replies use their original
 language to keep visible and spoken content identical. Client-supplied narration
 is still rejected. See [setup and architecture](README.md).
+
+With `Accept: application/x-ndjson`, planning returns newline-delimited events:
+`status` with stage `understanding`, `drafting`, or `checking`; `reply` with the
+cumulative user-facing draft text; then `result` with the validated payload (or
+`error` with a sanitized code). Status events reflect actual pipeline stages,
+not private model reasoning. The model emits guidance first so the client can
+render new words before structured itinerary generation and place checks finish.
+Draft text is provisional until the final result; cancellation aborts processing.
+OpenRouter fallback is restricted to lightweight intent extraction. Heavy plan
+creation, final guidance and agent tasks use the configured primary model.
 
 ### Mongo finance and proposal history
 

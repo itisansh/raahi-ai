@@ -48,3 +48,12 @@ it.each([false, true])("uses forwarded client IP only through an explicitly trus
     await new Promise<void>(resolve => server.close(() => resolve()));
   }
 });
+
+it("resolves standard frontend paths independently of the launch directory", async () => {
+  const { resolveWebDist } = await import("../src/middleware/static-files");
+  const { fileURLToPath } = await import("node:url");
+  const expected = fileURLToPath(new URL("../../client/dist/", import.meta.url));
+  for (const path of ["auto", "client/dist", "../client/dist"]) expect(resolveWebDist(path)).toBe(expected);
+  expect(resolveWebDist("/tmp/custom-frontend")).toBe("/tmp/custom-frontend");
+  expect(() => nodeWeb("/tmp/raahi-nonexistent-build-test")).toThrow("Run bash scripts/build-render.sh");
+});

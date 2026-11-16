@@ -202,3 +202,11 @@ describe("loadConfig observability", () => {
     });
   });
 });
+
+describe("free OpenRouter fallback config", () => {
+  const env = { ...BASE_ENV, STORAGE_BACKEND: "fs", STORAGE_ROOT: "/tmp/raahi-config-test", AI_MODEL: "gemini-test", AI_API_KEY: "primary-test-key", AI_BASE_URL: "https://generativelanguage.googleapis.com/v1beta/openai/" };
+  it("stays disabled without an OpenRouter key", () => expect(loadConfig(env).ai?.fallback).toBeUndefined());
+  it("enables the free router with a one-minute cooldown", () => expect(loadConfig({ ...env, OPENROUTER_API_KEY: "fallback-test-key" }).ai?.fallback).toEqual({ apiKey: "fallback-test-key", model: "openrouter/free", cooldownMs: 60000 }));
+  it("rejects paid fallback IDs", () => expect(() => loadConfig({ ...env, OPENROUTER_API_KEY: "fallback-test-key", AI_FALLBACK_MODEL: "paid/model" })).toThrow("free"));
+  it("rejects invalid cooldowns", () => expect(() => loadConfig({ ...env, OPENROUTER_API_KEY: "fallback-test-key", AI_FALLBACK_COOLDOWN_SECONDS: "0" })).toThrow("between"));
+});

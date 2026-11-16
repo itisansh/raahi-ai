@@ -75,3 +75,56 @@ it("streams the model guidance before its complete structured proposal", async (
   const call = fetcher.mock.calls[0] as unknown as [string, RequestInit];
   expect(JSON.parse(call[1].body as string).stream).toBe(true);
 });
+
+it("extracts validated intent through OpenRouter after a primary 429", async () => {
+  const requests: Request[] = [];
+  vi.stubGlobal("fetch", vi.fn<typeof fetch>(async (input, init) => {
+    requests.push(new Request(input, init));
+    return requests.length === 1 ? Response.json({ error: { message: "Quota exceeded" } }, { status: 429 }) : completion(JSON.stringify(intent));
+  }));
+  const model = new AiSdkPlanningModel({ ...config, baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/", fallback: { apiKey: "fallback-test-key", model: "openrouter/free", cooldownMs: 60000 } });
+  expect(await model.extract("Use my saved itinerary", { tripId: "trip", revision: 3, title: "My saved trip", intake: { partySize: 5 }, days: [] })).toEqual(intent);
+  expect(requests[1]!.url).toBe("https://openrouter.ai/api/v1/chat/completions");
+  const body = await requests[1]!.json() as { model: string; messages: unknown; response_format: { type: string } };
+  expect(body.model).toBe("openrouter/free");
+  expect(JSON.stringify(body.messages)).toContain("My saved trip");
+  expect(body.response_format.type).toBe("json_schema");
+});
+
+it("keeps heavy proposals on Gemini even while extraction fallback is cooling down", async () => {
+  const requests: Request[] = [];
+  vi.stubGlobal("fetch", vi.fn<typeof fetch>(async (input, init) => {
+    const request = new Request(input, init); requests.push(request);
+    return request.url.includes("openrouter.ai") ? completion(JSON.stringify(intent)) : Response.json({ error: { message: "Quota exceeded" } }, { status: 429 });
+  }));
+  const model = new AiSdkPlanningModel({ ...config, baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/", fallback: { apiKey: "fallback-test-key", model: "openrouter/free", cooldownMs: 60000 } });
+  await model.extract("Five friends", null);
+  await expect(model.propose({ ...intent, budgetBasis: "per_person", currency: "INR", language: "en" }, null)).rejects.toMatchObject({ code: "planning_primary_rate_limited" });
+  expect(requests.map(r => new URL(r.url).hostname)).toEqual(["generativelanguage.googleapis.com", "openrouter.ai", "generativelanguage.googleapis.com"]);
+});
+
+it("emits partial guidance while the provider is still generating the itinerary", async () => {
+  let source!: ReadableStreamDefaultController<Uint8Array>;
+  const stream = new ReadableStream<Uint8Array>({ start(controller) { source = controller; } });
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(stream, { headers: { "Content-Type": "text/event-stream" } })));
+  const emit = (content: string) => source.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ id: "streaming", object: "chat.completion.chunk", created: 1, model: "fixture", choices: [{ index: 0, delta: { content }, finish_reason: null }] })}\n\n`));
+  const reply = vi.fn();
+  const plan = { guidance: { response: "Start at Haridwar, then explore the riverfront.", timing: "Check opening times.", questions: [] }, title: "Haridwar", days: [{ day: 1, city: "Haridwar", stops: [{ name: "Har Ki Pauri", startMinute: 600, durationMinutes: 60 }] }], costs: { transport: null, accommodation: null, food: null, activities: null, buffer: null } };
+  const json = JSON.stringify(plan);
+  const boundary = json.indexOf(", then");
+  const pending = new AiSdkPlanningModel(config).propose({ ...intent, budgetBasis: "per_person", currency: "INR", language: "en" }, null, { onReply: reply, signal: new AbortController().signal });
+  emit(json.slice(0, boundary));
+  await vi.waitFor(() => expect(reply).toHaveBeenCalledWith("Start at Haridwar"));
+  emit(json.slice(boundary));
+  source.enqueue(new TextEncoder().encode("data: [DONE]\n\n")); source.close();
+  await expect(pending).resolves.toEqual(plan);
+  expect(reply).toHaveBeenLastCalledWith(plan.guidance.response);
+});
+
+it("does not switch a rate-limited streaming final reply to OpenRouter", async () => {
+  const fetcher = vi.fn(async () => Response.json({ error: { message: "Quota exceeded" } }, { status: 429 }));
+  vi.stubGlobal("fetch", fetcher);
+  const model = new AiSdkPlanningModel({ ...config, baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/", fallback: { apiKey: "fallback-test-key", model: "openrouter/free", cooldownMs: 60000 } });
+  await expect(model.propose({ ...intent, budgetBasis: "per_person", currency: "INR", language: "en" }, null, { onReply: vi.fn(), signal: new AbortController().signal })).rejects.toMatchObject({ code: "planning_primary_rate_limited" });
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});

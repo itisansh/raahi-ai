@@ -15,6 +15,7 @@ export interface EmailConfig {
 }
 
 export interface AiConfig {
+    fallback?: { apiKey: string; model: string; cooldownMs: number };
     provider: string;
     model: string;
     baseUrl: string | null;
@@ -152,6 +153,9 @@ export interface RawEnv {
     GEO_TIMEOUT_MS?: string;
     GEO_CACHE_TTL_MS?: string;
     GOOGLE_MAPS_API_KEY?: string;
+    OPENROUTER_API_KEY?: string;
+    AI_FALLBACK_MODEL?: string;
+    AI_FALLBACK_COOLDOWN_SECONDS?: string;
     AI_PROVIDER?: string;
     AI_MODEL?: string;
     AI_BASE_URL?: string;
@@ -344,11 +348,24 @@ function parseAiConfig(env: RawEnv): AiConfig | null {
             ? "https://api.minimaxi.com/anthropic/v1"
             : null);
 
+    const fallbackKey = env.OPENROUTER_API_KEY?.trim();
+    const fallbackModel = env.AI_FALLBACK_MODEL?.trim() || "openrouter/free";
+    const cooldownSeconds = parseNumber(env.AI_FALLBACK_COOLDOWN_SECONDS, "AI_FALLBACK_COOLDOWN_SECONDS", 60);
+    if (fallbackKey && fallbackModel !== "openrouter/free" && !fallbackModel.endsWith(":free")) {
+        throw new Error("AI_FALLBACK_MODEL must be openrouter/free or a :free model");
+    }
+    if (fallbackKey && (!Number.isFinite(cooldownSeconds) || cooldownSeconds < 1 || cooldownSeconds > 86400)) {
+        throw new Error("AI_FALLBACK_COOLDOWN_SECONDS must be between 1 and 86400");
+    }
+    if (fallbackKey && (!baseUrl || provider.toLowerCase() === "minimax")) {
+        throw new Error("OpenRouter fallback requires an OpenAI-compatible AI_BASE_URL");
+    }
     return {
         provider,
         model,
         baseUrl,
         apiKey,
+        ...(fallbackKey ? { fallback: { apiKey: fallbackKey, model: fallbackModel, cooldownMs: cooldownSeconds * 1000 } } : {}),
         proactiveThreshold: parseNumber(
             env.AI_PROACTIVE_THRESHOLD,
             "AI_PROACTIVE_THRESHOLD",

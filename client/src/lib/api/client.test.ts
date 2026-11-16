@@ -22,3 +22,11 @@ it.each([
   vi.stubGlobal("fetch", vi.fn(async () => new Response(body, { headers: { "Content-Type": "application/x-ndjson" } })));
   await expect(apiFetch("/api/planning/preview", {}, vi.fn())).rejects.toMatchObject({ code });
 });
+it("reports real processing stages while replies continue streaming", async () => {
+  const status = vi.fn(); const reply = vi.fn();
+  const body = ['{"type":"status","stage":"drafting"}', '{"type":"reply","text":"Explore"}', '{"type":"reply","text":"Explore Haridwar"}', '{"type":"status","stage":"checking"}', '{"type":"result","data":{"ready":true}}', ''].join('\n');
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(body, { headers: { "Content-Type": "application/x-ndjson" } })));
+  await expect(apiFetch("/api/planning/preview", {}, reply, status)).resolves.toEqual({ ready: true });
+  expect(status.mock.calls).toEqual([["drafting"], ["checking"]]);
+  expect(reply.mock.calls).toEqual([["Explore"], ["Explore Haridwar"]]);
+});

@@ -74,9 +74,10 @@ export function createPlanningControllers(container: Container) {
             const send = (event: unknown) => {
               if (!signal.aborted) controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
             };
-            send({ type: "status", stage: "planning" });
+            send({ type: "status", stage: "understanding" });
             void container.planningService.preview(c.get("user")!.id, request, {
               signal, onReply: (text) => send({ type: "reply", text }),
+              onStage: (stage) => send({ type: "status", stage }),
             }).then(result => send({ type: "result", data: result }))
               .catch(error => send({ type: "error", code: error instanceof PlanningError ? error.code : "planning_unavailable" }))
               .finally(() => { if (!signal.aborted) controller.close(); });
@@ -93,8 +94,8 @@ export function createPlanningControllers(container: Container) {
         return ok(c, await container.planningService.preview(c.get("user")!.id, request));
       } catch (error) {
         if (!(error instanceof PlanningError)) throw error;
-        if (error.code === "planning_rate_limited") c.header("Retry-After", "60");
-        return fail(c, error.code, "Trip preview could not be generated. Please retry.", error.code === "planning_rate_limited" ? 429 : error.code === "planning_invalid_output" ? 502 : 503);
+        if (error.code === "planning_rate_limited" || error.code === "planning_primary_rate_limited") c.header("Retry-After", "60");
+        return fail(c, error.code, "Trip preview could not be generated. Please retry.", (error.code === "planning_rate_limited" || error.code === "planning_primary_rate_limited") ? 429 : error.code === "planning_invalid_output" ? 502 : 503);
       }
     },
 

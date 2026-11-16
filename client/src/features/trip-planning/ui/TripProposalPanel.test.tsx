@@ -92,3 +92,14 @@ it("shows live draft text before completion and removes it on cancellation", asy
   await click("Cancel request");
   expect(host.textContent).not.toContain("Exploring Jaipur with relaxed mornings");
 });
+it("shows server stages without invented thinking text", async () => {
+  mocks.fetch.mockImplementation((_path, _init, onReply, onStatus) => {
+    onStatus("checking"); onReply("Explore the riverside"); return new Promise(() => {});
+  });
+  await render(); await type("Haridwar"); await click("Send trip request");
+  expect(host.textContent).toContain("Checking places, routes and costs");
+  expect(host.querySelectorAll('.raahi-reply-word').length).toBe(3);
+  expect(host.textContent).not.toContain("A good trip starts with an idea");
+  await click("Cancel request");
+  expect(host.textContent).not.toContain("Checking places, routes and costs");
+});

@@ -1,3 +1,4 @@
+import { createRateLimitFallbackFetch } from "./rate-limit-fallback";
 import {
   consumeStream,
   convertToModelMessages,
@@ -159,7 +160,9 @@ function resolveMiniMaxAnthropicBaseUrl(baseUrl: string | null): string {
 }
 
 /** Build the LanguageModel for the configured provider. */
-export function createAgentLanguageModel(config: AiConfig): LanguageModel {
+const fallbackTransports = new WeakMap<AiConfig, typeof fetch>();
+
+export function createAgentLanguageModel(config: AiConfig, options: { allowFallback?: boolean } = {}): LanguageModel {
   if (isMiniMaxProvider(config.provider)) {
     // AI SDK community MiniMax provider defaults to Anthropic-compatible
     // `…/anthropic/v1` so thinking streams as distinct reasoning parts.
@@ -171,8 +174,12 @@ export function createAgentLanguageModel(config: AiConfig): LanguageModel {
     return anthropic(config.model);
   }
   if (config.baseUrl) {
+    if (options.allowFallback && config.fallback && !fallbackTransports.has(config)) {
+      fallbackTransports.set(config, createRateLimitFallbackFetch(config.fallback));
+    }
     const provider = createOpenAICompatible({
       name: config.provider,
+      fetch: options.allowFallback ? fallbackTransports.get(config) : undefined,
       baseURL: config.baseUrl,
       apiKey: config.apiKey,
       // Google's compatible API accepts JSON Schema. Without this flag the

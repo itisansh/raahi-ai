@@ -1,4 +1,15 @@
 export const proposalCopy = {
+  stages: {
+    understanding: "Understanding your request…",
+    drafting: "Building your itinerary…",
+    checking: "Checking places, routes and costs…",
+  } as Record<string, string>,
+  working: "Working on your trip",
+  existingStarters: [
+    { label: "Find places nearby", prompt: "Suggest interesting places near the stops in my saved itinerary. Use my existing dates and budget." },
+    { label: "Find local food", prompt: "Suggest local food stops that fit my saved itinerary and budget." },
+    { label: "Make a day more relaxed", prompt: "Look at my saved itinerary and suggest how to make a busy day more relaxed. Explain before making any changes." },
+  ],
   streamingDraft: "Draft reply · checking the itinerary before approval",
   greeting: "A good trip starts with an idea.",
   greetingHint: "Tell me what you have in mind. We can work out the destination, dates and budget together.",
@@ -75,6 +86,7 @@ export const proposalCopy = {
     proposal_expired: "This proposal expired. Send your request again for a fresh plan.",
     planning_unavailable: "The planning provider is unavailable. Your request is still here; try again shortly or use the step-by-step form.",
     planning_invalid_output: "The AI returned an invalid plan. Nothing was saved. Try generating again.",
+    planning_primary_rate_limited: "Gemini is at its limit. Your request is kept here; try again shortly. Final plans stay on Gemini.",
     planning_rate_limited: "Please wait a minute before requesting another preview.",
     unauthenticated: "Sign in again to generate a preview.",
     generic: "The preview could not be generated. Your request is still here; please try again.",

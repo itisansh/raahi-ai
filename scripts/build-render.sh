@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Always build from the repository root, even if invoked from another directory.
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
+
 # BASE_URL is embedded into the frontend bundle at build time (__WETRAVEL_BASE_URL__).
 # Deploying with a localhost value means the browser will call localhost instead of
 # the live service. Fail fast so this is never silently deployed.
@@ -32,3 +35,5 @@ corepack enable
 corepack pnpm install --frozen-lockfile --prod=false
 corepack pnpm --filter @raahi/api exec tsc --project tsconfig.node.json
 corepack pnpm --filter @raahi/web build
+
+node --input-type=module -e 'import { existsSync } from "node:fs"; if (!existsSync("client/dist/index.html")) throw new Error("Frontend build did not produce client/dist/index.html");'
