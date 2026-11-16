@@ -14,15 +14,12 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
-    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm ui:check && pnpm build",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm ui:check && pnpm docs:check && pnpm build",
     "docs:check": "node scripts/docs-check.mjs",
     "ui:check": "node scripts/ui-check.mjs",
-    "db:migrate": "pnpm --filter @raahi/api db:migrate",
-    "db:seed": "pnpm --filter @raahi/api db:seed",
-    "db:reset": "pnpm --filter @raahi/api db:reset",
-    "db:generate": "pnpm --filter @raahi/api db:generate",
-    "db:pull": "pnpm --filter @raahi/api db:pull",
-    "db:studio": "pnpm --filter @raahi/api db:studio"
+    "dev:client": "pnpm --filter @raahi/web dev",
+    "dev:server": "pnpm --filter @raahi/api dev",
+    "start": "pnpm --filter @raahi/api start"
   },
   "devDependencies": {
     "@raahi/observability-contract": "workspace:*",
@@ -32,8 +29,6 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "@prisma/engines",
-      "prisma",
       "esbuild",
       "@swc/core",
       "core-js",

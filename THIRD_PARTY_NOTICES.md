@@ -10,14 +10,12 @@ The Raahi AI name does not imply endorsement by upstream contributors.
 
 The application has been modified for Raahi AI, including India-wide planning,
 voice input and replies, MongoDB persistence, Express transport, provider
-integrations, UI changes and branding. Changes are recorded in Git history and
-BUILD_PROGRESS.md. Original Raahi AI additions are governed by
-[the private-project statement](PROJECT_LICENSE.md); this does not revoke any
-upstream license rights.
+integrations, UI changes and branding. Changes are recorded in Git history.
+Original Raahi AI additions are governed by
+[the private-project statement](README.md#private-project-and-third-party-notices);
+this does not revoke any upstream license rights.
 
-## Dependencies and development resources
+## Dependencies
 
 Third-party packages retain the licenses in their installed package directories.
-`pnpm-lock.yaml` records application dependency versions. `.agents/skills/` and
-`skills-lock.json` record development instructions and their sources. They are
-not application branding and are not bundled into the product.
+`pnpm-lock.yaml` records application dependency versions.

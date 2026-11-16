@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const uiDir = join(root, "apps/web/src/shared/ui");
+const uiDir = join(root, "client/src/components/ui");
 
 async function walk(dir) {
     const entries = await readdir(dir, { withFileTypes: true });
@@ -42,7 +42,10 @@ function collectStrings(node) {
 
 const errors = [];
 
-if ((await stat(uiDir).catch(() => null))?.isDirectory()) {
+if (!(await stat(uiDir).catch(() => null))?.isDirectory()) {
+    throw new Error(`UI directory missing: ${uiDir}`);
+}
+{
     const files = await walk(uiDir);
     for (const file of files) {
         const content = await readFile(file, "utf8");

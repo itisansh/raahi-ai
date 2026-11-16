@@ -1,0 +1,70 @@
+# Free single-instance demo service. Uploads require external S3-compatible storage.
+services:
+  - type: web
+    name: raahi
+    runtime: node
+    plan: free
+    numInstances: 1
+    autoDeployTrigger: off
+    buildCommand: bash scripts/build-render.sh
+    startCommand: corepack pnpm --filter @raahi/api start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      - key: BASE_URL
+        sync: false
+      - key: TRUSTED_ORIGINS
+        sync: false
+      - key: WEB_DIST_PATH
+        value: ../client/dist
+      - key: STORAGE_BACKEND
+        value: s3
+      - key: STORAGE_ROOT
+        value: uploads
+      - key: EMAIL_PROVIDER
+        value: resend
+      - key: EMAIL_FROM
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_REGION
+        sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_FORCE_PATH_STYLE
+        value: true
+      - key: GEO_PROVIDER
+        value: geoapify
+      - key: GEO_OSM_USER_AGENT
+        sync: false
+      - key: GEOAPIFY_API_KEY
+        sync: false
+      - key: AI_PROVIDER
+        value: openai
+      - key: AI_MODEL
+        sync: false
+      - key: AI_BASE_URL
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_VOICE_ID_EN
+        sync: false
+      - key: ELEVENLABS_VOICE_ID_HI
+        sync: false
+      - key: TRAVEL_WEATHER_PROVIDER
+        value: open-meteo
