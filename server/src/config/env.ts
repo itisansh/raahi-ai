@@ -374,7 +374,7 @@ function parseAiConfig(env: RawEnv): AiConfig | null {
     const fallbackKey = env.OPENROUTER_API_KEY?.trim();
     const fallbackModel = env.AI_FALLBACK_MODEL?.trim() || "openrouter/free";
     const cooldownSeconds = parseNumber(env.AI_FALLBACK_COOLDOWN_SECONDS, "AI_FALLBACK_COOLDOWN_SECONDS", 60);
-    if (fallbackKey && fallbackModel !== "openrouter/free" && !fallbackModel.endsWith(":free")) {
+    if (fallbackKey && fallbackModel !== "openrouter/free" && !fallbackModel.endsWith(":free") && !fallbackModel.includes("free") && !fallbackModel.startsWith("google/gemma")) {
         throw new Error("AI_FALLBACK_MODEL must be openrouter/free or a :free model");
     }
     if (fallbackKey && (!Number.isFinite(cooldownSeconds) || cooldownSeconds < 1 || cooldownSeconds > 86400)) {

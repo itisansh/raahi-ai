@@ -83,7 +83,6 @@ export function AuthForm() {
             emailDelivery: "console" | "email";
         }>("/api/auth/capabilities"),
     });
-    const socialProviders = capabilities.data?.socialProviders ?? ["google"];
     const [mode, setMode] = useState<Mode>("signIn");
     const [step, setStep] = useState<Step>("credentials");
     const [name, setName] = useState("");
@@ -218,6 +217,8 @@ export function AuthForm() {
                     showAuthError(t(`errors.${credentialErrorKey(result.error)}`, { origin: config.baseUrl }));
                     return;
                 }
+                // Explicitly send verification OTP so code arrives on the first run
+                await sendOtp();
             } catch (error) {
                 backToCredentials();
                 showAuthError(t(error instanceof TypeError ? "errors.connection" : "errors.generic", { origin: config.baseUrl }));
@@ -236,8 +237,8 @@ export function AuthForm() {
             });
             if (result.error) {
                 if (isEmailNotVerified(result.error)) {
-                    // sendOnSignIn already triggered an OTP; show the step.
                     enterOtpStep();
+                    await sendOtp();
                     return;
                 }
                 showAuthError(t(`errors.${credentialErrorKey(result.error)}`, { origin: config.baseUrl }));
@@ -808,33 +809,29 @@ export function AuthForm() {
                 {t(`${ns}.submit`)}
             </Button>
 
-            {socialProviders.length > 0 ? (
-                <div className="relative flex items-center gap-3">
-                    <span className="h-px flex-1 bg-border" />
-                    <span className="text-xs text-muted-foreground">
-                        {t("social.divider")}
-                    </span>
-                    <span className="h-px flex-1 bg-border" />
-                </div>
-            ) : null}
+            <div className="relative flex items-center gap-3">
+                <span className="h-px flex-1 bg-border" />
+                <span className="text-xs text-muted-foreground">
+                    {t("social.divider")}
+                </span>
+                <span className="h-px flex-1 bg-border" />
+            </div>
 
-            {socialProviders.includes("google") ? (
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="lg"
-                    disabled={pending}
-                    onClick={() => void signInWithSocial("google")}
-                    className="w-full gap-2"
-                >
-                    {pending ? (
-                        <Spinner className="size-4 animate-spin" />
-                    ) : (
-                        <GoogleIcon className="size-5 shrink-0" />
-                    )}
-                    <span>{t("social.google")}</span>
-                </Button>
-            ) : null}
+            <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                disabled={pending}
+                onClick={() => void signInWithSocial("google")}
+                className="w-full gap-2"
+            >
+                {pending ? (
+                    <Spinner className="size-4 animate-spin" />
+                ) : (
+                    <GoogleIcon className="size-5 shrink-0" />
+                )}
+                <span>{t("social.google")}</span>
+            </Button>
 
 
             <button

@@ -21,7 +21,7 @@ export function createRateLimitFallbackFetch(config: FreeFallbackConfig, request
     const original = new Request(input, init);
     try {
       const response = await request(original.clone());
-      if (response.status !== 429) {
+      if (response.status !== 429 && response.status !== 503) {
         if (response.ok) retryPrimaryAt = 0;
         return response;
       }
@@ -30,6 +30,9 @@ export function createRateLimitFallbackFetch(config: FreeFallbackConfig, request
       const headerDelay = Number.isFinite(seconds) ? seconds * 1000 : retryAfter ? Date.parse(retryAfter) - now() : 0;
       retryPrimaryAt = now() + Math.max(config.cooldownMs, Number.isFinite(headerDelay) ? headerDelay : 0);
       await response.body?.cancel();
+      return fallback(original);
+    } catch (error) {
+      if (init?.signal?.aborted) throw error;
       return fallback(original);
     } finally { if (isProbe) probing = false; }
   };
